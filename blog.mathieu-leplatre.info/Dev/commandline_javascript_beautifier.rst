@@ -1,7 +1,7 @@
 Javascript Beautifier in command-line (and in Geany editor)
 ###########################################################
 
-:date: 2009-09-30 10:20
+:date: 2011-02-01 10:20
 :tags: tips, javascript
 
 Install a Javascript engine (like Mozilla Rhino) ::

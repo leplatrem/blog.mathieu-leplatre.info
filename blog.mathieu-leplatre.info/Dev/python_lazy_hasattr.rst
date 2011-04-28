@@ -1,7 +1,7 @@
 Python lazy hasattr()
 #####################
 
-:date: 2009-09-30 10:20
+:date: 2010-09-30 10:20
 :tags: tips, python
 
 Python `hasattr()` evaluates the specified attribute, which may not be desired ! 
