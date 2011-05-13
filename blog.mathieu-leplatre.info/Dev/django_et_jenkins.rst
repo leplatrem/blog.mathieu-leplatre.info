@@ -38,12 +38,21 @@ Les plugins indispensables :
 Organisation du projet Django
 =============================
 
-* Définition des dépendances globales dans `requirements.txt`
+* Définition des dépendances globales dans `requirements.txt` ::
+
+    Django>=1.3
+    south
+
 * Définition des dépendances liées aux tests dans `requirements-testing.txt` ::
 
     django-jenkins
 
-* Ajout d'un fichier `pylint.rc` pour régler les niveaux d'alerte `PEP-8 <http://www.python.org/dev/peps/pep-0008/>`_
+* Ajout d'un fichier `pylint.rc` pour régler les niveaux d'alerte `PEP-8 <http://www.python.org/dev/peps/pep-0008/>`_ ::
+
+    [MESSAGES CONTROL]
+    disable=E1101,E1103,C0111,I0011,I0012,W0704,W0142,W0212,W0232,W0613,W0702,R0201
+    ...
+    ...
 
 * Modèle de settings de tests dans `project/test_settings.py`
 
@@ -64,7 +73,7 @@ Organisation du projet Django
 Configuration du job Jenkins
 ============================
 
-Les informations de la présentation de Nicolas suffisent.
+Les informations de la présentation de Nicolas suffisent pour démarrer.
 
 J'ai noté cependant qu'il fallait lancer `manage.py` depuis un répertoire parent au projet pour que l'exploration du code source fonctionne.
 
@@ -89,7 +98,7 @@ et celui-ci pour lancer les tests proprements dits :
     #!/bin/bash -ex
     virtualenv --quiet ve
     source ./ve/bin/activate
-    python $WORKSPACE/project/manage.py jenkins mapsapi
+    python $WORKSPACE/project/manage.py jenkins yourapps
     deactivate
 
 
@@ -97,7 +106,7 @@ et celui-ci pour lancer les tests proprements dits :
 Pour un projet SIG
 ==================
 
-Il faut installer certaines librairies SIG sur le serveur. 
+Il faut installer certaines librairies SIG sur le serveur Jenkins.
 
 .. code-block :: bash
 
@@ -131,6 +140,21 @@ avec dans `test_settings.py`
 
     SPATIALITE_SQL=os.path.join('usr', 'local', 'lib', 'init_spatialite-2.3.sql')
 
+Si pysqlite n'a pas été compilé avec les extensions C (Erreur: *The pysqlite library does not support C extension loading.*) il va falloir le recompiler !
+
+.. code-block :: bash
+
+    sudo aptitude install libsqlite3-dev
+    wget http://pysqlite.googlecode.com/files/pysqlite-2.6.3.tar.gz
+    tar -zxvf pysqlite-2.6.3.tar.gz
+    cd pysqlite-2.6.3
+    sed -i s/define=SQLITE_OMIT_LOAD_EXTENSION/#define=SQLITE_OMIT_LOAD_EXTENSION/g setup.cfg
+
+    source ./ve/bin/activate
+    python setup.py install
+
+
+
 
 =====================
 Pour un projet Celery
@@ -151,6 +175,7 @@ Kombu au lieu de RabbitMQ comme gestionnaire de messages
     INSTALLED_APPS += (
         'djkombu',
     )
+    CARROT_BACKEND = "django"
 
 Pour désactiver la parallélisation lors des tests
 
