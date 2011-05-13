@@ -1,3 +1,4 @@
+LOCALE = 'en_US.utf8'
 AUTHOR = "Mathieu Leplatre"
 DISPLAY_PAGES_ON_MENU = True
 SITEURL = "http://blog.mathieu-leplatre.info"
