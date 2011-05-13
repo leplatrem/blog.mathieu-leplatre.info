@@ -5,6 +5,8 @@ Django et Jenkins
 :tags: django, jenkins, continuous integration,
 :lang: fr
 
+*Article original publié chez* `Makina Corpus <http://makina-corpus.org>`_
+
 Lors des `Recontres Django 2011 <http://rencontres.django-fr.org/2011/>`_, `Nicolas Perriault <http://www.akei.com>`_ a présenté les principes de l'`intégration continue <http://fr.wikipedia.org/wiki/Int%C3%A9gration_continue>`_ avec `Django <http://djangoproject.com>`_ et `Jenkins <http://jenkins-ci.org/>`_.
 
 Le diaporama, `disponible en ligne  <http://www.akei.com/presentations/2011-Djangocong/index.html>`_, suffit amplement pour démarrer !

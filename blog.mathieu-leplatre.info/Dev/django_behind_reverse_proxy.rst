@@ -2,6 +2,7 @@ Deploy Django behind a reverse proxy
 ####################################
 
 :tags: tips, deployment, django
+:date: 2011-04-19
 
 By default, Django will assume that your root URL is the root (`/`) of your domain.
 
