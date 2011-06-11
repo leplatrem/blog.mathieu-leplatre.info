@@ -19,6 +19,16 @@ Specialities
 * Project Management
 * Free (freedom) Software & Linux
 
+Favorite Technologies
+=====================
+
+* python
+* Django
+* GIS and Web mapping
+* GTK / Qt
+
+Check out `some of my projects <https://github.com/leplatrem>`_
+
 Interests
 =========
 
