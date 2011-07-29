@@ -11,6 +11,8 @@ Comme ses snippets sont drôles, je ne les change pas !
 Paramètres par défault de l'application
 ---------------------------------------
 
+On a juste un constructeur à ajouter par rapport à ce qu'avait présenté NiKo.
+
 .. code-block :: python
 
     # apps/my_app/__init__.py
@@ -37,7 +39,7 @@ Surcharge dans le projet
 Utilisation !
 -------------
 
-Avec EasyDict, on accède aux settings en toute simplicité !
+EasyDict transforme les clés du `dict` en attributs, on accède aux settings en toute simplicité !
 
 .. code-block :: python
 
