@@ -11,7 +11,7 @@ Comme ses snippets sont drôles, je ne les change pas !
 Paramètres par défault de l'application
 ---------------------------------------
 
-On a juste un constructeur à ajouter par rapport à ce qu'avait présenté NiKo.
+On a juste un constructeur à ajouter par rapport à ce qu'avait présenté NiKo (avec `EasyDict installé <http://pypi.python.org/pypi/easydict/>`_).
 
 .. code-block :: python
 
