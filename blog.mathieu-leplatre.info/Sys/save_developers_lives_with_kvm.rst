@@ -21,8 +21,10 @@ Probably, you also want to upgrade your workstation to the last unstable eye-can
 without compromising your projects dependencies and without reinstalling all this stuff, 
 or you may want to restore the environment you had when you were working on this famous project a year ago.
 
-Your sysadmin uses KVM and you would like to push your local instances on 
-production servers in a blink ?
+You want your colleague to give you a hand, and would like to give him your
+whole project environment and dependencies quickly and effortlessly ?
+Your sysadmin put KVM on servers and you would like to push your local instances on 
+production in a blink ? 
 
 The magic medicine exists, and is freely available :)
 
@@ -31,19 +33,19 @@ At the end, you are promised to enjoy :
 * a GUI to manage your Virtual Machines (VM)
 * a local domain to access your VMs by their name
 * a fully integrated set of machines, accessible from each others
-
+* movable and shareable virtual machines with automatic network configuration
 
 ================
 A Strict Minimum
 ================
 
 KVM is maintained along with the Linux kernel, and is thus fully integrated
-in your system, taking advantage of optimizations available. 
+in your Linux system, taking advantage of optimizations available. 
 
 A strict minimum is to install ``kvm`` and a set of commands to control it : ``libvirt``.
 As a human being, you may want a GUI : ``virt-manager``.
 
-::
+.. code-block :: bash
 
     sudo apt-get install kvm libvirt-bin virt-manager
 
@@ -51,34 +53,39 @@ As a human being, you may want a GUI : ``virt-manager``.
 Managing your Virtual Machines
 ==============================
 
-* Setup your VM network interface as auto DHCP
-* NAT
+In your VM details, make sure networking is set to *NAT*. This will allow
+your VM to access your host network (LAN, Internet, etc.)
 
-Cloning
-* u-dev/00 persistent on debian
+During your VM operating system installation, or after login into it, 
+setup your VM network interface as automatic DHCP.
 
 
 ======================
 A Local Network Domain
 ======================
 
-In order to access your VM by their name, we run a DNS daemon. We chose *bind* ::
+In order to access your VM by their name, we run a DNS daemon on host. We chose *bind* :
+
+.. code-block :: bash
 
     sudo aptitude install bind9
 
-Add a new master zone, for example ``sillywalk.loc`` in the file ``/etc/bind/named.conf.local``::
+Add a new master zone, for example ``sillywalk.loc`` in the file ``/etc/bind/named.conf.local`` : ::
 
     zone "sillywalk.loc" {
         type master;
         file "/etc/bind/db.sillywalk.loc";
     };
 
-Define your DNS entries (Copy an existing file like ``/etc/bind/db.empty``).
+Define your DNS entries :
 
-* Set the name server authority (*SOA*) to ``ns.sillywalk.loc``
+* Set the name server authority (*SOA*) to ``ns.sillywalk.loc`` (*nameserver*)
 * Define a serial number like date+number (``YYYYmmdd##``)
 * Associate ``ns.sillywalk.loc`` to the IP of your KVM virtual network (see above paragraph)
+* Define an alias `gw.sillywalk.loc` to refer to your host as `gw` (*gateway*) instead of `ns`.
 * Define a couple of entries (e.g. ``myvm1``, ``myvm2``)
+
+For *bind*, it would look like this *(started from an existing file like ``/etc/bind/db.empty``)* :
 
 ::
 
@@ -94,9 +101,10 @@ Define your DNS entries (Copy an existing file like ``/etc/bind/db.empty``).
                 2419200     ; Expire
                  604800 )   ; Negative Cache TTL
     ;
-    @   IN  NS  ns.sillywalk.loc.
-    @   IN  A   172.16.23.1
-    ns  IN  A   172.16.23.1
+    @   IN  NS      ns.sillywalk.loc.
+    @   IN  A       172.16.23.1
+    ns  IN  A       172.16.23.1
+    gw  IN  CNAME   ns.sillywalk.loc.
 
     myvm1       IN  A   172.16.23.11
     myvm2       IN  A   172.16.23.12
@@ -121,7 +129,9 @@ Test it !
 =========
 
 Even if your VM are not running, you can at least test the name resolving 
-and the default search domain : ::
+and the default search domain :
+
+.. code-block :: bash
 
     ~$ ping myvm1.sillywalk.loc
     PING myvm1.sillywalk.loc (172.16.23.11) 56(84) bytes of data.
@@ -163,7 +173,7 @@ In the configuration file ``/etc/dhcp/dhcpd.conf``, we specify :
     subnet 172.16.23.0 netmask 255.255.255.0 {
       range 172.16.23.10 172.16.23.100;
       option broadcast-address 172.16.23.255;
-      option routers ns.sillywalk.loc;
+      option routers gw.sillywalk.loc;
     }
     
     # Entries
@@ -182,49 +192,83 @@ In the configuration file ``/etc/dhcp/dhcpd.conf``, we specify :
 Test it !
 =========
 
-* Make sure your VM network is set to DHCP automatic configuration
 * Configure its hostname (e.g. ``myvm1``, ``myvm2``)
-* Reboot it (or restart networking)
-* Check that it caught the right network configuration
+* Make sure your VM network is set to DHCP automatic configuration
 
-For example ::
+.. code-block :: bash
 
     root@myvm1:~# cat /etc/hostname 
     myvm1
-
-::
-
     root@myvm1:~# cat /etc/hosts
     127.0.0.1   localhost
     127.0.1.1   myvm1.sillywalk.loc myvm1
-
-::
-
     root@myvm1:~# cat /etc/network/interfaces
     ...    
     # The primary network interface
     allow-hotplug eth0
     iface eth0 inet dhcp
 
-::
+
+* Reboot it (or restart networking)
+* Check that it caught the right network configuration. For example, on a GNU/Linux VM :
+
+.. code-block :: bash
 
     root@myvm1:~# ifconfig 
     eth0      Link encap:Ethernet  HWaddr 52:54:00:55:d1:80  
               inet addr:172.16.23.11  Bcast:172.16.23.255  Mask:255.255.255.0
               ...
 
-::
+.. code-block :: bash
 
     root@myvm1:~# cat /etc/resolv.conf 
     domain sillywalk.loc
     search sillywalk.loc
     nameserver 172.16.23.1
 
-
 Note
 ====
 
-* at boot, restart it
+While your host is booting, the DHCP daemon usually starts before the KVM service, failing 
+then at accessing the virtual network interface (``virbr1``, ``172.16.23.0``), not yet mounted.
+
+A simple solution is to manually restart your DHCP daemon, once your machine's booted :
+
+.. code-block :: bash
+
+    sudo /etc/init.d/isc-dhcp-server restart
+
+
+=========================
+Checklist to add a new VM
+=========================
+
+* Get its Mac address (with ``virt-manager`` : *Virtual machine details* > *Virtual network interface* > *Mac Address*)
+* Add it to your DHCP configuration (``/etc/dhcp/dhcpd.conf``)
+* Add an IP for this entry in your DNS zone (``/etc/bind/db.sillywalk.loc``) and increment the serial.
+* Restart DHCP service and reload DNS configuration
+
+.. code-block :: bash
+
+    sudo /etc/init.d/isc-dhcp-server restart
+    sudo /etc/init.d/bind9 reload
+
+If you do that all day, you'll quickly find it relevant to write a script...
+
+
+Note on cloning
+=============== 
+
+Cloning your VM with ``virt-manager`` is a piece-of-cake. 
+
+However, during cloning, KVM assigns a new Mac address to the clone. 
+For debian-based virtual machines (+Ubuntu), log you in on the clone, and reinitialize network interfaces names :
+
+.. code-block :: bash
+
+    sudo rm /etc/udev/rules.d/70-persistent-net.rules
+    sudo reboot
+
 
 
 ==========
@@ -235,14 +279,7 @@ Your virtual machines can :
 
 * access your network (LAN, Internet) and your host (at ``ns.sillywalk.loc``)
 * be accessed at ``user@hostname`` (from host or from other VMs)
+* be moved to any host set up likewise (since VM networking is fully automatic)
+* be cloned easily
 
-
-=========================
-Checklist to add a new VM
-=========================
-
-* Get its Mac address (virt-manager : `Device` > `Hardware` > ...)
-* Add it to your DHCP configuration (``/etc/dhcp/dhcpd.conf``)
-* Add an IP for this entry in your DNS zone (``/etc/bind/db.sillywalk.loc``) and increment the serial.
-
-If you do that all day, you'll quickly find it relevant to write a script...
+Read again "`But Why ?`_" and enjoy your new life !
