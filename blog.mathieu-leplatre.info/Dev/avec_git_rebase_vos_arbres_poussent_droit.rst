@@ -47,7 +47,7 @@ Autrement dit, un ``git pull --rebase`` ! Pour le faire par défaut :
 
     git config --global branch.autosetuprebase always
 
-Et ensuite, au cas-où, pour le désactiver ponctuellement, utiliser ``--no-rebase``.
+Et ensuite, au cas-où, pour le désactiver ponctuellement, utiliser ``git pull --no-rebase``.
 
 Maintenant, le tronc, il est tout propre !
 
