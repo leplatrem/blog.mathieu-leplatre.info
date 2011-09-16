@@ -65,6 +65,6 @@ Lors d'un ``git pull``, il faudra résoudre chaque *commit* conflictuel indépen
 Les êtres humains voudront utiliser `meld <http://meld.sourceforge.net/>`_. Il suffit de l'installer, et lors
 d'un conflit, de lancer ``git mergetool``.
 
-Une fois chaque conflit résolu. Terminer l'opération, avec ``git rebase --continue``, et pousser vos prouesses à
+Une fois que tous les conflits sont résolus, terminer l'opération, avec ``git rebase --continue``, et pousser vos prouesses à
 vos amis avec ``git push``.
 
