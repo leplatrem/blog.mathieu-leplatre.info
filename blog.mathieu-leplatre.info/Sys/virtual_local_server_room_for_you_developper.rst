@@ -1,11 +1,11 @@
-How to save developers lives with KVM
-#####################################
+A Virtual Local Server Room for you Developper
+##############################################
 :date: 2011-09-02 09:12
-:tags: kvm, virtualization, howto
+:tags: network, kvm, virtualization, howto
 :author: Mathieu Leplatre (credits: Anthony Prades)
 
 This how-to will help you setting-up a very powerful development environment
-using Linux kernel-based virtualization system : KVM.
+on your workstation, using virtual machines all in a virtual local network.
 
 =========
 But Why ?
@@ -35,12 +35,13 @@ At the end, you are promised to enjoy :
 * a fully integrated set of machines, accessible from each others
 * movable and shareable virtual machines with automatic network configuration
 
+We chose the Linux Kernel-based Virtualization System (KVM), since it is maintained 
+along with the Linux kernel, and is thus fully integrated in the OS. However, this
+how-to is mainly networking oriented and would be useful for any virtualization system.
+
 ================
 A Strict Minimum
-================
-
-KVM is maintained along with the Linux kernel, and is thus fully integrated
-in your Linux system, taking advantage of optimizations available. 
+================ 
 
 A strict minimum is to install ``kvm`` and a set of commands to control it : ``libvirt``.
 As a human being, you may want a GUI : ``virt-manager``.
@@ -50,21 +51,24 @@ As a human being, you may want a GUI : ``virt-manager``.
     sudo apt-get install kvm libvirt-bin virt-manager
 
 
-Managing your Virtual Machines
-==============================
+Virtual Machines Network
+========================
 
-In your VM details, make sure networking is set to *NAT*. This will allow
+Make sure your VM networking is set to *NAT*. This will allow
 your VM to access your host network (LAN, Internet, etc.)
 
 During your VM operating system installation, or after login into it, 
 setup your VM network interface as automatic DHCP.
 
+By default KVM creates a virtual network (``virnet``). Inspect its setup
+using ``ifconfig`` or ``virt-manager`` in *Connection Details* > *Virtual Networks*.
+Your VM and your host are thus accessible within this virtual network (probably ``172.16.23.0``).
 
 ======================
 A Local Network Domain
 ======================
 
-In order to access your VM by their name, we run a DNS daemon on host. We chose *bind* :
+In order to access your VM by their name, we run a DNS daemon on main host. We chose *bind* :
 
 .. code-block :: bash
 
@@ -81,9 +85,9 @@ Define your DNS entries :
 
 * Set the name server authority (*SOA*) to ``ns.sillywalk.loc`` (*nameserver*)
 * Define a serial number like date+number (``YYYYmmdd##``)
-* Associate ``ns.sillywalk.loc`` to the IP of your KVM virtual network (see above paragraph)
-* Define an alias `gw.sillywalk.loc` to refer to your host as `gw` (*gateway*) instead of `ns`.
-* Define a couple of entries (e.g. ``myvm1``, ``myvm2``)
+* Associate ``ns.sillywalk.loc`` to the IP of your KVM virtual network (*see above paragraph*)
+* Define an alias `gw.sillywalk.loc` so that you can refer to your host as `gw` (*gateway*) instead of `ns`.
+* Define a couple of entries for your VM (e.g. ``myvm1``, ``myvm2``)
 
 For *bind*, it would look like this *(started from an existing file like ``/etc/bind/db.empty``)* :
 
@@ -147,8 +151,7 @@ Dynamic Configuration
 =====================
 
 In order to make sure your VM always obtains the same IP adress when it
-boots, we setup a DHCP daemon on host. It will match Mac adresses, assign a
-hostname, that will then be resolved to an IP by the previously installed DNS.
+boots, we setup a DHCP daemon on host. 
 
 We chose *ISC DHCP server* : ::
 
@@ -161,7 +164,7 @@ In the configuration file ``/etc/dhcp/dhcpd.conf``, we specify :
 * the subnet and mask (*matching the KVM virtual network*)
 * an IP range (e.g. from ``172.16.23.10`` to ``172.16.23.100``)
 * the default gateway to be configured on clients (``ns.sillywalk.loc``)
-* ... and two entries for ``myvm1`` and  ``myvm2`` 
+* ... and two entries for ``myvm1`` and  ``myvm2`` with their Mac addresses.
 
 ::
 
@@ -191,9 +194,9 @@ In the configuration file ``/etc/dhcp/dhcpd.conf``, we specify :
 
 Test it !
 =========
+Log you in on the VM.
 
 * Configure its hostname (e.g. ``myvm1``, ``myvm2``)
-* Make sure your VM network is set to DHCP automatic configuration
 
 .. code-block :: bash
 
@@ -202,15 +205,19 @@ Test it !
     root@myvm1:~# cat /etc/hosts
     127.0.0.1   localhost
     127.0.1.1   myvm1.sillywalk.loc myvm1
+
+* Make sure your VM network is set to DHCP automatic configuration
+
+.. code-block :: bash
+
     root@myvm1:~# cat /etc/network/interfaces
     ...    
     # The primary network interface
     allow-hotplug eth0
     iface eth0 inet dhcp
 
-
 * Reboot it (or restart networking)
-* Check that it caught the right network configuration. For example, on a GNU/Linux VM :
+* Check that it caught the right network configuration (IP, domain, and nameserver)
 
 .. code-block :: bash
 
@@ -268,7 +275,6 @@ For debian-based virtual machines (+Ubuntu), log you in on the clone, and reinit
 
     sudo rm /etc/udev/rules.d/70-persistent-net.rules
     sudo reboot
-
 
 
 ==========
