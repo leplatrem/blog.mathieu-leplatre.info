@@ -338,6 +338,9 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
 #contentinfo {padding-bottom: 2em; text-align: right;}
 
 /***** Sections *****/
+.section {
+    margin-bottom: 10px;
+}
 /* Blog */
 .hentry {
 	border-bottom: 1px solid #eee;
