@@ -82,7 +82,7 @@ On peut attaquer l'application avec ``curl`` :
     [{"title": ["Globalia"], "year": ["2004"], "author": "jc.rufin", "_rev": "1-3195...fbc8", "_id": "dec81d...1733c"},
     {"title": ["Red Brazil"], "contest": ["goncourt"], "author": "jc.rufin", "_rev": "1-7b15...a9a2", "_id": "dec81dc...17c0c"}]
 
-N'oubliez pas de colorier les cases à votre guise, sinon ce squelette ne sert à rien, le JSON étant déjà la language maternelle de CouchDB.
+N'oubliez pas de colorier les cases à votre guise, sinon ce squelette ne sert à rien, le JSON étant déjà la langue maternelle de CouchDB.
 
 
 
