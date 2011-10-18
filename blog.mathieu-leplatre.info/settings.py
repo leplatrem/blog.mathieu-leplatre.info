@@ -12,5 +12,8 @@ DISQUS_SITENAME = "mathieuleplatre"
 SOCIAL = (
     ("LinkedIn", "http://www.linkedin.com/in/leplatre"),
     ("Launchpad", "https://code.launchpad.net/~mathieu.leplatre"),
+    ("GitHub", "https://github.com/leplatrem"),
+    ("Google+", "https://plus.google.com/u/0/106965745149150173373"),
     ("Twitter", "http://twitter.com/leplatrem"),
+    ("Identi.ca", "http://identi.ca/leplatrem"),
 )

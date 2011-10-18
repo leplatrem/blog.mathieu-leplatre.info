@@ -311,6 +311,9 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
 		.social a[href*='twitter.com'] {background-image: url('../images/icons/twitter.png');}
 		.social a[href*='linkedin.com'] {background-image: url('../images/icons/linkedin.png');}
 		.social a[href*='launchpad.net'] {background-image: url('../images/icons/launchpad.png');}
+        .social a[href*='identi.ca'] {background-image: url('../images/icons/identica.png');}
+        .social a[href*='plus.google'] {background-image: url('../images/icons/googleplus.png');}
+        .social a[href*='github.com'] {background-image: url('../images/icons/github.png');}
 
 /*
 	About
