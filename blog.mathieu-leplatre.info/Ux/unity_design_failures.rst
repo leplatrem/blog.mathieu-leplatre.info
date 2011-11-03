@@ -1,7 +1,7 @@
 Two major Unity design failures
 ###############################
 
-:tags: ubuntu, unity
+:tags: ubuntu, unity, fail
 :date: 2011-10-15
 
 A great advantage of global menus is the ease of pointing them with the mouse. 
