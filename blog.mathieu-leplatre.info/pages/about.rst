@@ -46,6 +46,8 @@ Education
 
 Publications
 ============
+* `La gestion de versiona avec Git <http://www.slideshare.net/leplatrem/petit-djeuner-git-chez-makina-corpus>`_ (*French*), a quick introduction 
+  to the power of this DVCS, 2011, Toulouse. *(Keywords: Git, Makina Corpus)*
 * `Miro, Internet TV <20080426-miro-flisol2008.odp>`_ (*Spanish*), a presentation of Miro and the democrative aspects of decentralized media distribution, 2008, FLISOL, Buenos Aires. 
   *(Keywords: Democracy, copyleft, colaborative media, decentralized media distribution)*
 * `Somos Libres <http://mmggrr.net/es/index.php/post/2007/08/23/Somos-ibres>`_ (*Spanish*), a presentation about Freedom in the computer world, 2007, Bolivia. 
