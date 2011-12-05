@@ -6,7 +6,7 @@ An equivalent of Django's select_related for ManyToMany and OneToMany relationsh
 :tags: django, performance
 :lang: en
 
-*Article original publié chez* `Makina Corpus <http://www.makina-corpus.org>`_
+*Original post at* `Makina Corpus <http://makina-corpus.org>`_
 
 Using an ORM simplifies and reduces greatly the amount of code to interact with databases. 
 Nevertheless, it can easily hide database design defects or become a source of serious performance issues.
