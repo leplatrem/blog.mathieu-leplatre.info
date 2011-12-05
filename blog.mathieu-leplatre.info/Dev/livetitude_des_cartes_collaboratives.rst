@@ -96,4 +96,4 @@ Contribuer
 Livetitude est une application très simple, à l'état de preuve de concept. Mais
 le code source est très réduit et donc très rapide à prendre en main !
 
-Toutes vos suggestions ou contributions sont les bienvenues !
+Toutes vos `suggestions ou contributions <https://github.com/makinacorpus/livetitude/issues>`_ sont les bienvenues !
