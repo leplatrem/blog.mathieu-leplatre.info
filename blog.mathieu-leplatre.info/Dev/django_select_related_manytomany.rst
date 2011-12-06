@@ -53,7 +53,7 @@ This loop will generate *1 + N* queries :
         for pizza in restaurant.pizzas.all():
             print pizza.name
 
-Whereas this one will generate *2* queries :
+Whereas this one will **only** generate *2* queries :
 
 .. code-block :: python
 
