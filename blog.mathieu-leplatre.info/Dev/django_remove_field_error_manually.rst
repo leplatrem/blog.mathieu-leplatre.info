@@ -1,5 +1,5 @@
-Remove django form field valiation errors manually
-##################################################
+Remove django form field validation errors manually
+###################################################
 
 :date: 2011-12-06 09:00
 :tags: django, tips
