@@ -8,6 +8,8 @@ DEFAULT_PAGINATION = 7
 TWITTER_USERNAME = "leplatrem"
 GITHUB_URL = "https://github.com/leplatrem"
 DISQUS_SITENAME = "mathieuleplatre"
+PIWIK_URL = "mathieu-leplatre.info/piwik"
+PIWIK_SITE_ID = 1
 
 SOCIAL = (
     ("LinkedIn", "http://www.linkedin.com/in/leplatre"),
