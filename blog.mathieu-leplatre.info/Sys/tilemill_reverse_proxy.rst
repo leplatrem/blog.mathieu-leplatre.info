@@ -10,14 +10,14 @@ serve the tiles. We had to change some bits of our server configuration.
 Instead of documenting the new configuration in our internal Wiki,
 I prefered to share here a few technical lines (quite rough though).
 
-Here, we run TileMill inside a `virtual machine </a-virtual-local-server-room-for-you-developper.html>`_ on a server with reverse proxy rules.
+We run TileMill inside a `virtual machine </a-virtual-local-server-room-for-you-developper.html>`_ on a server with reverse proxy rules.
 
 
 Reverse Proxy configuration
 ===========================
 
 Assuming your reach your TileMill virtual machine at ``tilemill.sillywalk.loc``, 
-with tilemill running its two processes (ports ``20008`` for tiles, ``20009`` for the application), 
+with its two processes running (ports ``20008`` for tiles, ``20009`` for the application), 
 your Apache reverse proxy configuration will be : 
 
 .. code-block :: xml
