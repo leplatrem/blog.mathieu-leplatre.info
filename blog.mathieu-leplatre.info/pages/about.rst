@@ -1,6 +1,39 @@
 About
 #####
 
+.. raw:: html
+
+    <script charset="utf-8" src="http://widgets.twimg.com/j/2/widget.js"></script>
+    <div style="float: right;">
+        <script>
+        new TWTR.Widget({
+          version: 2,
+          type: 'profile',
+          rpp: 6,
+          interval: 30000,
+          width: 250,
+          height: 300,
+          theme: {
+            shell: {
+              background: '#333333',
+              color: '#ffffff'
+            },
+            tweets: {
+              background: '#ffffff',
+              color: '#000000',
+              links: '#6809a8'
+            }
+          },
+          features: {
+            scrollbar: false,
+            loop: false,
+            live: false,
+            behavior: 'all'
+          }
+        }).render().setUser('leplatrem').start();
+        </script>
+    </div>
+
 .. image:: images/face.jpg
    :alt: face
    :width: 200 px
@@ -27,7 +60,9 @@ Favorite Technologies
 * GIS and Web mapping
 * GTK / Qt
 
-Check out `some of my projects <https://github.com/leplatrem>`_
+Check out `some of my projects <https://github.com/leplatrem>`_ (*most notably*
+`Subtivals <http://blog.mathieu-leplatre.info/announcing-subtivals-realtime-subtitles-for-film-festivals.html>`_, 
+`landez <http://blog.mathieu-leplatre.info/landez-introducing-new-features-of-our-tiles-toolbox.html>`_)
 
 Interests
 =========
@@ -63,4 +98,4 @@ Publications
 Others
 ======
 * Proud member of the `April association <http://www.april.org/en/presentation-april-association>`_
-
+* Sporadically edit `OpenStreetMap <http://openstreetmap.org>`_, like `my hometown <http://www.openstreetmap.org/?&lat=48.4876684609631&lon=1.39681062864008&zoom=14&layers=M>`_
