@@ -2,7 +2,7 @@ Filesystem Watch with PyQt4
 ###########################
 
 :date: 2009-08-14 13:37
-:tags: Qt, pyqt4, python
+:tags: qt, pyqt4, python
 
 I decided to write a generic program that can watch a folder or some files and run a command when changes occur.
 

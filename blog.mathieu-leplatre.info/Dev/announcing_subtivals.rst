@@ -1,7 +1,7 @@
 Announcing Subtivals, realtime subtitles for film festivals
 ###########################################################
 
-:tags: subtivals, subtitles, accessibility, Qt, c++
+:tags: subtivals, subtitles, accessibility, qt, c++
 :date: 2012-03-17
 
 .. image:: images/subtivals-logo.png
