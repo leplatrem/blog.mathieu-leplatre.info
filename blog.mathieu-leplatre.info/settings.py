@@ -1,4 +1,5 @@
 LOCALE = 'en_US.utf8'
+TIMEZONE = 'Europe/Paris'
 AUTHOR = "Mathieu Leplatre"
 DISPLAY_PAGES_ON_MENU = True
 SITEURL = "http://blog.mathieu-leplatre.info"
