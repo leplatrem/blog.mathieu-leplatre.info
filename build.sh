@@ -4,4 +4,4 @@ source env/bin/activate
 rm -rf output
 pelican -v blog.mathieu-leplatre.info -t pelican-theme -s blog.mathieu-leplatre.info/settings.py -o output
 deactivate
-firefox output/index.html
+gnome-open output/index.html
