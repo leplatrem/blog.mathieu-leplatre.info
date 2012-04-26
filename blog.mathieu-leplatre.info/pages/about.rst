@@ -41,6 +41,7 @@ About
 
 * IT and related technologies Engineer,
 * Working at `Makina Corpus <http://makina-corpus.com>`_, Toulouse, France.
+* ``contact`` @ ``mathieu-leplatre`` . ``info``
 
 Specialities
 ============
@@ -81,6 +82,7 @@ Education
 
 Publications
 ============
+* `Des cartes d'un autre monde <http://www.slideshare.net/makinacorpus/descartes-dun-autre-monde-django>`_ (*French*), on how to easily publish a map with Tilemill and Django, 2012, Montpellier. *(Keywords: Django, TileMill, MBTiles, Makina Corpus)*
 * `Alternatives libres à Google Maps <http://www.slideshare.net/makinacorpus/solutions-alternatives-google-maps-11501753>`_ (*French*), on how to switch from Google Maps to OpenStreetMap using Free Software, 2012, Toulouse. *(Keywords: OpenStreetMap, Leaflet, TileMill, Mapnik, Makina Corpus)*
 * `La gestion de version avec Git <http://www.slideshare.net/leplatrem/petit-djeuner-git-chez-makina-corpus>`_ (*French*), a quick introduction 
   to the power of this DVCS, 2011, Toulouse. *(Keywords: Git, Makina Corpus)*
