@@ -1,3 +1,4 @@
+#!/bin/bash
 virtualenv -q env
 source env/bin/activate
 #pip install -U pelican
