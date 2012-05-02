@@ -3,7 +3,7 @@ Des cartes d'un autre monde, la suite
 
 :tags: django, web, gis, livetitude
 :date: 2012-04-18
-
+:lang: fr
 
 =========================
 Bravo aux organisateurs !
