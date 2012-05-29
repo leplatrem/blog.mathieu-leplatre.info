@@ -29,19 +29,21 @@ and export it as MBTiles !
 `MapBox hosting <http://mapbox.com/>`_ is the prefered solution, but you can still host and
 serve your exported MBTiles file yourself !
 
-To mirror public tiles
-----------------------
-
-Using `landez </landez-introducing-new-features-of-our-tiles-toolbox.html>`_, you
-can gather tiles from a public map hosting service (*OpenStreetMap.org*, *Cloudmade*, *MapBox*...)
-and package them in a ``.mbtiles`` file locally !
-
 To mirror a WMS server
 ----------------------
 
 Again, using `landez </landez-introducing-new-features-of-our-tiles-toolbox.html>`_, you can build a MBTiles
 file from a WMS source (*orthophoto*...), and then serve those layers yourself as tiles (at the speed of light !).
 
+To mirror tiles services
+------------------------
+
+Using `landez </landez-introducing-new-features-of-our-tiles-toolbox.html>`_, you
+can gather tiles from a tiles service, and package them in a ``.mbtiles`` 
+file locally.
+
+If you plan on mirroring public tile services, do not forget to add attributions
+and **make sure it respects the terms of service**. Most services restrict bulk downloads [#]_.
 
 =====================
 Extract files on disk
@@ -99,7 +101,7 @@ With *nginx* :
 Boost with subdomains
 ---------------------
 
-Browsers limit 4 parallel download on the same domain. If you can declare
+Browsers limit parallel downloads on the same domain. If you can declare
 subdomains (*a.yourserver.org*, *b.yourserver.org*, ...), it will speed-up
 tiles download.
 
@@ -124,3 +126,8 @@ Or `Modestmaps <http://modestmaps.com>`_ :
     map.setCenter({lat: 43.60, lon: 1.45}).setZoom(14);
 
 It will also work with interaction layers if you use `Wax <http://mapbox.com/wax/>`_ :)
+
+
+.. [#] MapBox `strictly forbids <http://mapbox.com/tos/>`_ proxying and further distribution of their tiles. 
+       Bulk downloading from OpenStreetMap.org `is strongly discouraged too <http://wiki.openstreetmap.org/wiki/Tile_usage_policy#Bulk_Downloading>`_.
+       And mass downloads `cost money on Cloudmade <http://support.cloudmade.com/answers/offline-maps>`_.
