@@ -59,11 +59,16 @@ Favorite Technologies
 * python
 * Django
 * GIS and Web mapping
-* GTK / Qt
+* Qt
 
 Check out `some of my projects <https://github.com/leplatrem>`_ (*most notably*
 `Subtivals <http://blog.mathieu-leplatre.info/announcing-subtivals-realtime-subtitles-for-film-festivals.html>`_, 
-`landez <http://blog.mathieu-leplatre.info/landez-introducing-new-features-of-our-tiles-toolbox.html>`_)
+`landez <http://blog.mathieu-leplatre.info/landez-introducing-new-features-of-our-tiles-toolbox.html>`_, 
+`and <https://github.com/makinacorpus/django-screamshot>`_ 
+`a <https://github.com/makinacorpus/django-geojson>`_ 
+`few <https://github.com/makinacorpus/django-leaflet>`_ 
+`Django <https://github.com/makinacorpus/django-appypod>`_ 
+`apps <https://github.com/makinacorpus/django-mbtiles>`_)
 
 Interests
 =========
