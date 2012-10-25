@@ -76,7 +76,7 @@ Will output something like ``LOG:  Found (a,b,c)``.
 ::
 
     intersections_on_new := ARRAY[]::float[];
-    FOR pk IN SELECT ST_Line_Locate_Point(NEW.geom, other.geom)
+    FOR pk IN SELECT ST_Line_Locate_Point(NEW.geom, (ST_Dump(ST_Intersection(other.geom, NEW.geom))).geom)
     LOOP
         intersections_on_new := array_append(intersections_on_new, pk);
     END LOOP;
