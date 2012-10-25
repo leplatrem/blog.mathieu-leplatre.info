@@ -62,7 +62,7 @@ You can basically print out values, arrays, functions results, records...
 
     RAISE LOG '% has geom %', NEW.id, ST_AsEWKT(NEW.geom);
 
-Will output something like ``3 has geom SRID=4326;POINT(0 0)``.
+Will output something like ``LOG:  3 has geom SRID=4326;POINT(0 0)``.
 
 ::
 
@@ -71,7 +71,7 @@ Will output something like ``3 has geom SRID=4326;POINT(0 0)``.
         RAISE LOG 'Found %', record;
     END LOOP;
 
-Will output something like ``Found (a,b,c)``.
+Will output something like ``LOG:  Found (a,b,c)``.
 
 ::
 
@@ -82,4 +82,4 @@ Will output something like ``Found (a,b,c)``.
     END LOOP;
     RAISE LOG 'Intersects at %', intersections_on_new;
 
-Will output something like ``Intersects at {0.5,0.3}``.
+Will output something like ``LOG:  Intersects at {0.5,0.3}``.
