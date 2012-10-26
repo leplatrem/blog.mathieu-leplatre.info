@@ -2,7 +2,7 @@ Cheap debugging of PostgreSQL triggers in Django
 ################################################
 
 :date: 2012-10-22 12:25
-:tags: django, postgresql
+:tags: django, postgresql, postgis
 :lang: en
 
 
@@ -83,3 +83,19 @@ Will output something like ``LOG:  Found (a,b,c)``.
     RAISE LOG 'Intersects at %', intersections_on_new;
 
 Will output something like ``LOG:  Intersects at {0.5,0.3}``.
+
+
+=================
+One more thing...
+=================
+
+If you load your triggers source file through Django (like a ``post_migrate`` signal or so),
+and thus with *psycopg2*, you might face that nasty internal quirck :
+
+::
+
+    postgresql_psycopg2/base.py", line 52, in execute
+        return self.cursor.execute(query, args)
+    IndexError: tuple index out of range
+
+This is due to ``%`` characters, that you have to escape, replacing them with ``%%``.
