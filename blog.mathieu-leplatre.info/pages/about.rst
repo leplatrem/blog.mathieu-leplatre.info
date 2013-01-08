@@ -48,7 +48,6 @@ Specialities
 
 * Software Architecture
 * Computer Interaction
-* Systems Integration
 * Web Technologies
 * Project Management
 * Free (freedom) Software & Linux
@@ -56,17 +55,18 @@ Specialities
 Favorite Technologies
 =====================
 
-* python
-* Django
-* GIS and Web mapping
-* Qt
+* python | Javascript
+* Django | Pyramid
+* Cartography | Web mapping
+* Qt | Mobile
 
 Check out `some of my projects <https://github.com/leplatrem>`_ (*most notably*
 `Subtivals <http://blog.mathieu-leplatre.info/announcing-subtivals-realtime-subtitles-for-film-festivals.html>`_, 
+`daybed <https://github.com/spiral-project/daybed>`_, 
 `landez <http://blog.mathieu-leplatre.info/landez-introducing-new-features-of-our-tiles-toolbox.html>`_, 
-`and <https://github.com/makinacorpus/django-screamshot>`_ 
+`and <https://github.com/makinacorpus/django-leaflet>`_ 
 `a <https://github.com/makinacorpus/django-geojson>`_ 
-`few <https://github.com/makinacorpus/django-leaflet>`_ 
+`few <https://github.com/makinacorpus/django-screamshot>`_ 
 `Django <https://github.com/makinacorpus/django-appypod>`_ 
 `apps <https://github.com/makinacorpus/django-mbtiles>`_)
 
@@ -87,6 +87,7 @@ Education
 
 Publications
 ============
+* `Django, Carto, Vecto <http://rencontres.django-fr.org/2012/tolosa/presentations/lightnings/07-django-carto-vecto.pdf>`_ (*French*), lightning talk about vectorial Web mapping with Django, 2012, Toulouse. *(Keywords: Django, GeoJSON, Leaflet, Makina Corpus)*
 * `Des cartes d'un autre monde <http://www.slideshare.net/makinacorpus/descartes-dun-autre-monde-django>`_ (*French*), on how to easily publish a map with Tilemill and Django, 2012, Montpellier. *(Keywords: Django, TileMill, MBTiles, Makina Corpus)*
 * `Alternatives libres à Google Maps <http://www.slideshare.net/makinacorpus/solutions-alternatives-google-maps-11501753>`_ (*French*), on how to switch from Google Maps to OpenStreetMap using Free Software, 2012, Toulouse. *(Keywords: OpenStreetMap, Leaflet, TileMill, Mapnik, Makina Corpus)*
 * `La gestion de version avec Git <http://www.slideshare.net/leplatrem/petit-djeuner-git-chez-makina-corpus>`_ (*French*), a quick introduction 
@@ -98,11 +99,12 @@ Publications
   *(Keywords: Free Software philosophy)*
 * `A Mediation System for Training Management </media/2005.leplatre-mediation-system-for-training-management.pdf>`_, 2005, `EADS CRC <http://www.eads.net>`_. 
   *(Keywords: Semantic Web, Data Alignment)*
-* `Simulation en socio-ethnologie <http://mathieu-leplatre.info/media/2005/leplatre.html>`_, 2005, University of Paris-Sud (*French*).
+* `Simulation en socio-ethnologie </media/2005/leplatre.html>`_, 2005, University of Paris-Sud (*French*).
   *(Keywords: Multi-agents systems)*
 
 
 Others
 ======
-* Proud member of the `April association <http://www.april.org/en/presentation-april-association>`_
+* Proud member of `April <http://www.april.org/en/presentation-april-association>`_
+  and `AFPY <http://www.afpy.org>`_ associations.
 * Sporadically edit `OpenStreetMap <http://openstreetmap.org>`_, like `my hometown <http://www.openstreetmap.org/?&lat=48.4876684609631&lon=1.39681062864008&zoom=14&layers=M>`_
