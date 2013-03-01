@@ -56,7 +56,7 @@ Par exemple pour annuler les trois derniers commits :
 
 .. code-block :: bash
 
-    git revert HEAD~3
+    git revert HEAD~3..HEAD
 
 Ou pour annuler un commit en particulier : 
 
