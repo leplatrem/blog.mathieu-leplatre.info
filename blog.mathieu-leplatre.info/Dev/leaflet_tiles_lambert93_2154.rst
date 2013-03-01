@@ -83,7 +83,7 @@ Assemble in Leaflet :
     });
 
 
-.. image:: images/leaflet-l93.png
+.. image:: /images/leaflet-l93.png
    :align: center
 
 `kokoni <https://github.com/kartena/Proj4Leaflet/issues/8>`_ suggests to use
@@ -102,7 +102,7 @@ an overlay layer to debug tile numbering :
     map.addLayer(canvasTiles);
 
 
-.. image:: images/leaflet-tiles-overlay.png
+.. image:: /images/leaflet-tiles-overlay.png
    :align: center
 
 

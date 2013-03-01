@@ -17,7 +17,7 @@ really made us cheerful and enthusiasts ! We had the proof that Subtivals
 can be used in many contexts, from primary school performances to short-movie 
 festivals, through cinematheques and movie transcribers...
 
-.. image:: images/subtivals-arabic.png
+.. image:: /images/subtivals-arabic.png
    :align: center
 
 Subtivals, a surtitling / captioning / subtitling program
@@ -41,7 +41,7 @@ Its particular strength lies in the control of the projection,
 with a very good cooperation between automatic and manual modes. 
 
 
-.. image:: images/subtivals-1.4dev-crop-win32.png
+.. image:: /images/subtivals-1.4dev-crop-win32.png
    :align: center
 
 
@@ -66,7 +66,7 @@ Among them :
 From now, if you have a video mixer, with chroma-key support, then a separate
 projector is not necessary for inlaying subtitles !
 
-.. image:: images/subtivals-chromakey.png
+.. image:: /images/subtivals-chromakey.png
    :align: center
 
 

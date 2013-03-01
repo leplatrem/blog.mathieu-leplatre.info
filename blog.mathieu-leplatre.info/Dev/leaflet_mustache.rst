@@ -159,4 +159,4 @@ On construit une chaîne avec les fameuses `{{}}` et on fournit un objet pour su
 
 Et voilà !
 
-.. image:: images/leaflet-velo.png
+.. image:: /images/leaflet-velo.png

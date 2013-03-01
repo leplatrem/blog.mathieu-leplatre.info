@@ -52,4 +52,4 @@ A simple demo:
     printout("[error]   ", RED)
     print("in red")
 
-.. image:: images/ansi-color.png
+.. image:: /images/ansi-color.png

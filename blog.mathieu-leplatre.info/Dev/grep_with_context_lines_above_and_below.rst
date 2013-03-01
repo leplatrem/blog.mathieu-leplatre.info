@@ -12,6 +12,6 @@ I was about to write a script to implement exactly what already exists natively 
     grep --line-number --colour=AUTO --before-context 5 --after-context 5 PATTERN FILENAME
 
 
-.. image :: images/grep-lines.png
+.. image :: /images/grep-lines.png
 
 

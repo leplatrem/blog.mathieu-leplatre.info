@@ -115,7 +115,7 @@ Et voilà ! Nous avons notre sélecteur de couches, avec un code html
 tout simple (``div``, ``input``, ``label``), facile à styler en CSS, 
 contrairement au `gros pavé généré par le *LayerSwitcher* d'OpenLayers <http://pastebin.com/LQPBv6tZ>`_.
 
-.. image:: images/polymaps-switcher.png
+.. image:: /images/polymaps-switcher.png
 
 
 Pour accéder au code complet et l'améliorer : "`Fork me on GitHub <https://github.com/makinacorpus/polymaps-extensions>`_" ! 

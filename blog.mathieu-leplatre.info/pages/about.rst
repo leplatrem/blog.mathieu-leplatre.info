@@ -34,7 +34,7 @@ About
         </script>
     </div>
 
-.. image:: images/face.jpg
+.. image:: /images/face.jpg
    :alt: face
    :width: 200 px
    :align: right

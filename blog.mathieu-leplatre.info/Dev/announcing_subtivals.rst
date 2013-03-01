@@ -4,7 +4,7 @@ Announcing Subtivals, realtime subtitles for film festivals
 :tags: subtivals, subtitles, accessibility, qt, c++
 :date: 2012-03-17
 
-.. image:: images/subtivals-logo.png
+.. image:: /images/subtivals-logo.png
 
 That's how it started...
 ========================
@@ -18,7 +18,7 @@ of improving and facilitating the projection of subtitles during film festivals.
 His activity consists in superimposing subtitles or projecting them on a 
 separate display below the screen.
 
-.. image:: images/subtivals-superimposed.png
+.. image:: /images/subtivals-superimposed.png
    :align: center
 
 In this way, subtitling dissociates from the movie reel, unlike DVDs for example. 
@@ -29,7 +29,7 @@ Since there was no suitable Open Source tools to fulfill these precise needs,
 `Arnaud <http://gedial.com>`_ and I gave him a hand. We developed `Subtivals <https://github.com/traxtech/subtivals>`_,
 a Free Software with simplicity and usuability for the technical operator in mind.
 
-.. image:: images/subtivals-screenshot.png
+.. image:: /images/subtivals-screenshot.png
    :align: center
 
 

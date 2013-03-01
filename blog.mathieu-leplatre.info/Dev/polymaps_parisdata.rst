@@ -139,7 +139,7 @@ De même nous mettons leur "Emplacement" en tooltip (``svg:title``, Firefox 4, C
                                 }));
 
 
-.. image:: images/parisdata-polymaps.jpg
+.. image:: /images/parisdata-polymaps.jpg
 
 `Accéder à la page de démonstration <http://www.makina-corpus.org/demos/mle/parisdata-polymaps/>`_
 

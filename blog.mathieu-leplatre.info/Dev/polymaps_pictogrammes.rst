@@ -47,8 +47,8 @@ Nous utilisons ici la variable ``n$``, qui provient du miniscript ``nns.js`` liv
     }
 
 
-.. image:: images/polymaps-pictogrammes.jpg
+.. image:: /images/polymaps-pictogrammes.jpg
 
 *© City of Paris, ODBL, CloudMade, OpenStreetMap contributors, CCBYSA* 
 
-Ici, nous avons utilisé des pictogrammes SVG, mais le même code fonctionne avec des images PNG ou JPG...
+Ici, nous avons utilisé des pictogrammes SVG, mais le même code fonctionne avec des /images PNG ou JPG...

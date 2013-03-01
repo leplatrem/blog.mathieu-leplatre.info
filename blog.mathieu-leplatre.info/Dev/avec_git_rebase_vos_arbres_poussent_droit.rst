@@ -14,7 +14,7 @@ Par défaut, un ``git pull`` est équivalent à ``git fetch`` et ``git merge``.
 Les ``merge``, c'est bien pour les branches, mais pour le tronc, c'est pénible : ça pollue l'historique et
 ça zig-zag sévère !
 
-.. image:: images/git-merge-mess.png
+.. image:: /images/git-merge-mess.png
    :align: center
 
 
@@ -51,7 +51,7 @@ Et ensuite, au cas-où, pour le désactiver ponctuellement, utiliser ``git pull 
 
 Maintenant, le tronc, il est tout propre !
 
-.. image:: images/git-merge-clean.png
+.. image:: /images/git-merge-clean.png
    :align: center
 
 

@@ -46,7 +46,7 @@ dont vous pouvez vous servir, *pour une utilisation en bon père de famille* :)
 Les marqueurs peuvent contenir du texte ou de l'HTML, et aucune donnée de localisation des visiteurs n'est stockée.
 
 
-.. image:: images/livetitude-poc.png
+.. image:: /images/livetitude-poc.png
 
 
 Comment publier vos données existantes ?

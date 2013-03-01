@@ -17,7 +17,7 @@ From TileMill to Landez
 Use Tilemill to design your map, and export the `Mapnik <http://mapnik.org>`_ XML stylesheet :
 
 
-.. image:: images/tilemill-export-stylesheet.png
+.. image:: /images/tilemill-export-stylesheet.png
 
 
 Then simply use *landez* with ``stylefile`` argument :

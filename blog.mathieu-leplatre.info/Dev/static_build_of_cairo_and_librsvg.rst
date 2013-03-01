@@ -4,7 +4,7 @@ Static build of Cairo and librsvg
 :date: 2008-07-01 11:25
 :tags: cairo, svg, C
 
-.. image:: images/unicode.png
+.. image:: /images/unicode.png
 
 
 Why ?

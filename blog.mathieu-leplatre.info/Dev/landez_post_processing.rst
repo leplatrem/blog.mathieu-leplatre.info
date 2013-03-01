@@ -17,7 +17,7 @@ Grayscale conversion
 
 Not the funniest one of course, but quite handy to highlight map content !
 
-.. image:: images/landez-grayscale.jpg
+.. image:: /images/landez-grayscale.jpg
 
 
 .. code-block :: python
@@ -36,8 +36,8 @@ If the tiles you overlay are mainly white, they might make your background layer
 Therefore, adding a filter replacing white by transparent will nicely blend your
 top layer without lightening the global result :
 
-.. image:: images/landez-overlay.jpg
-.. image:: images/landez-blend.jpg
+.. image:: /images/landez-overlay.jpg
+.. image:: /images/landez-blend.jpg
 
 .. code-block :: python
 

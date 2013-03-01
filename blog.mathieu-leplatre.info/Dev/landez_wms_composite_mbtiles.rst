@@ -20,7 +20,7 @@ Simple WMS support
 ------------------
 
 With landez, you can store your WMS layers into MBTiles files ! It will
-request the WMS images and save them into tiles on disk ! You can then
+request the WMS /images and save them into tiles on disk ! You can then
 enjoy the power of MBTiles files : transport, speed, ...
 
 .. code-block :: python
@@ -64,7 +64,7 @@ for compositing satellite image with street maps :
     mb.run()
 
 
-Arrange tiles into single images
+Arrange tiles into single /images
 --------------------------------
 
 This feature can be very useful for printing tiled maps or have a quick overview

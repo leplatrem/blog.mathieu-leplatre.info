@@ -21,7 +21,7 @@ Window buttons dead edges
 The user can not throw his mouse to the top-left corner to reach the close button,
 since the edges are not clickable.
 
-.. image:: images/unity-deadzone.png
+.. image:: /images/unity-deadzone.png
 
 `A bug was registered on Launchpad <https://bugs.launchpad.net/ubuntu/+source/unity/+bug/874980>`_ a couple of minutes before I wrote this
 post. 
@@ -30,7 +30,7 @@ post.
 Menus not always shown
 ======================
 
-.. image:: images/unity-menu-hidden.gif
+.. image:: /images/unity-menu-hidden.gif
 
 The problem is `being discussed on Launchpad <https://bugs.launchpad.net/ubuntu/+source/unity/+bug/701294>`_.
 

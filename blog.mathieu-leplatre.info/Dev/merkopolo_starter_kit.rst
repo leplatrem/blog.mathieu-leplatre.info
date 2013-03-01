@@ -22,7 +22,7 @@ skeleton to handle dependencies and inclusion of base components.
 
 Here is what you immediately get once compiled :
 
-.. image:: images/merkopolo-preview.png
+.. image:: /images/merkopolo-preview.png
 
 Now you can start coding serious stuff on top, with the Merkaartor components stack : 
 
