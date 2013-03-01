@@ -65,7 +65,7 @@ for compositing satellite image with street maps :
 
 
 Arrange tiles into single /images
---------------------------------
+---------------------------------
 
 This feature can be very useful for printing tiled maps or have a quick overview
 of your compositing results !
