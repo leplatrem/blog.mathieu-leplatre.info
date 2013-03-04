@@ -11,7 +11,7 @@ this website is currently tracking you. Sad news, but there are indeed 3 widgets
 
 The `Do-Not-Track <http://www.mozilla.org/en-US/dnt/>`_ initiative consists in 
 avoiding user tracking, using an HTTP header, sent by the browser. 
-It is a voluntary process, and we should honour when we can ! [#]_.
+It is a voluntary process, and we should honour it when we can ! [#]_.
 
 Here is a quick way of respecting privacy in your Django websites. 
 
