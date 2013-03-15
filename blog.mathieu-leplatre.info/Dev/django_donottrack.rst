@@ -72,4 +72,8 @@ depends on this header.
 Add those to your ``TEMPLATE_CONTEXT_PROCESSORS`` and ``MIDDLEWARE_CLASSES`` settings and you're done.
 
 
+**Update** : There are reusable apps doing just that if you prefer : `django-dnt <https://github.com/mozilla/django-dnt>`_,
+`django-donottrack <https://github.com/benspaulding/django-donottrack/>`_.
+
+
 .. [#] I wonder how I could do that with a static blog. Using headers-based rewrite condition ?
