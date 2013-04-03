@@ -16,10 +16,14 @@ During the festival, Subtivals will not simply be used for captioning, it will b
 key tool for the `projection of two movies specifically <http://www.cinelatino.com.fr/contenu/accessibilite-pour-les-sourds-2013>`_,
 for which some very rich deaf-specific subtitles have been prepared ! 
 
+As the same time, we are receiving very positive feedback from users in Turkey,
+Poland, Greece... thank you all !
+
+
 Now a Mac OS X demo
 ===================
 
-In addition to the Windows demo version, `mallox <http://twitter.com/mallox>`_
+In addition to the `Windows demo version <http://mathieu-leplatre.info/media/subtivals/subtivals-setup-1.4.1-demo.exe>`_, `mallox <http://twitter.com/mallox>`_
 packaged a `Mac OS X automatic installer <http://mathieu-leplatre.info/media/subtivals/subtivals-setup-1.4.0-demo.dmg>`_.
 
 .. image:: /images/subtivals-1.4-macos.png
@@ -32,6 +36,7 @@ What’s new in 1.5
 We mainly reworked the subtitle positioning system, in order to support
 linespacing control, absolute and relative positions, using ``PlayResX`` and ``PlayResY``.
 
+See `Changelog for more info... <https://github.com/traxtech/subtivals/blob/master/debian/changelog>`_
 
 Get it !
 ========
@@ -51,6 +56,3 @@ installed it, it will be updated automatically. Otherwise, it's just simple as :
 
 Regarding Mac OS and Windows, we still follow `Bruno’s approach <http://gcompris.net/-Download->`_ : 
 we sell the installers on proprietary operating systems, in order to promote GNU/Linux.
-
-But from now on, we also distribute a demo version ! `Download it 
-here <http://mathieu-leplatre.info/media/subtivals/subtivals-setup-1.4.1-demo.exe>`_ !
