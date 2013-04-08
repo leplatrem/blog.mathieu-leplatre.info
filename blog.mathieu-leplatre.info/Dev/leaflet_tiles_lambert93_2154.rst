@@ -46,8 +46,8 @@ Your layer characterics :
     // Your source tile layer extent, expressed in local projection
     var bbox = [700000, 6325197, 1060000, 6617738];
     
-    // Maximum resolution in meters per pixel (max area size / tile size).
-    var maxResolution = 1142.7383;
+    // Maximum resolution in meters per pixel (largest area side / tile size).
+    var maxResolution = 1406.25;
     
     // Scale for each level
     var scale = function(zoom) {
