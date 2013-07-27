@@ -25,7 +25,7 @@ Tiles into 100 pixels squares and **converts to SQL**:
 
 .. code-block :: bash
 
-    raster2pgsql -c -C -I -M -t 100x100 output.sql mnt
+    raster2pgsql -c -C -I -M -t 100x100 output.bin mnt > output.sql
 
 **Load SQL** into database:
 
