@@ -60,7 +60,7 @@ We will convert coordinates `from degres minutes seconds to decimal degrees <htt
 
 .. code-block :: python
 
-    def dms2latlng(value):
+    def dms2dec(value):
         """
         Degres Minutes Seconds to Decimal degres
         """
@@ -86,8 +86,8 @@ Then, we create an instance of our model for each entry in the CSV :
 
     reader = csv.DictReader(open(csv_file, 'rb'), delimiter="\t")
     for line in reader:
-        lng = dms2latlng(line.pop('Longitude'))
-        lat = dms2latlng(line.pop('Latitude'))
+        lng = dms2dec(line.pop('Longitude'))
+        lat = dms2dec(line.pop('Latitude'))
         wmoid = int(line.pop('StationId'))
         name = line.pop('StationName').title()
 
