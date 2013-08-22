@@ -6,7 +6,7 @@ GeoDjango maps with Leaflet
 
 
 A short introduction to web mapping with Django, using two very simple
-applications: `django-leafet <https://github.com/makinacorpus/django-leaflet>`_ and `django-geojson <https://github.com/makinacorpus/django-geojson>`_, by `Makina Corpus <http://makinacorpus.com>`_.
+applications: `django-leaflet <https://github.com/makinacorpus/django-leaflet>`_ and `django-geojson <https://github.com/makinacorpus/django-geojson>`_, by `Makina Corpus <http://makinacorpus.com>`_.
 
 We will build a map with all major Weather stations of the world.
 
