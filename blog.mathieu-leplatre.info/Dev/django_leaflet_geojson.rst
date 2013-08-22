@@ -8,7 +8,7 @@ GeoDjango maps with Leaflet
 A short introduction to web mapping with Django, using two very simple
 applications: `django-leaflet <https://github.com/makinacorpus/django-leaflet>`_ and `django-geojson <https://github.com/makinacorpus/django-geojson>`_, by `Makina Corpus <http://makinacorpus.com>`_.
 
-We will build a map with all major Weather stations of the world.
+We will build a map with all major weather stations of the world.
 
 
 ================
@@ -72,7 +72,7 @@ We will convert coordinates `from degres minutes seconds to decimal degrees <htt
         return dec
 
 
-Then, we create an instance of our model for each entry in the CSV :
+And create an instance of our model for each entry in the CSV :
 
 .. code-block :: python
 
@@ -160,7 +160,7 @@ We now want to place markers for each weather station. For this, we use
     )
 
 
-We will load this data in Ajax, and add it as map layer, in the initialization function left empty in the above snippet :
+We load this data in Ajax, and add it as map layer, in the initialization function left empty in the above snippet :
 
 
 .. code-block :: javascript
