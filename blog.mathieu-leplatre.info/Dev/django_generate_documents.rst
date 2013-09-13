@@ -163,9 +163,10 @@ If your documents do not require login, a simple and stupid template tag can do 
 
 
     @register.simple_tag
-    def convert_url(request, sourceurl, format='application/pdf'):
+    def convert_url(request, sourceurl, *args, **kwargs):
+        format = kwargs.pop('format', 'application/pdf')
         try:
-            sourceurl = reverse(sourceurl)
+            sourceurl = reverse(sourceurl, *args, **kwargs)
         except NoReverseMatch:
             pass
         fullurl = request.build_absolute_uri(sourceurl)
