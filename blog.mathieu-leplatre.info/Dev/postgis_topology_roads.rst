@@ -146,6 +146,19 @@ Or obtain your lovable Shapefile in return :
 
     ogr2ogr -f "ESRI Shapefile" ROAD_CLEAN.SHP PG:"host=${host} user=${user} dbname=${db} password=${password}" -sql "SELECT topo_geom::geometry FROM roads"
 
+If, like `Amit <http://gis.stackexchange.com/questions/71270/split-line-at-intersection-and-attach-attributes/>`_  you want to split the lines at
+intersections and assign original attributes, just join ``roads_topo.edge_data`` and on the ``roads`` table :
+
+
+.. code-block :: sql
+
+    SELECT r.lib_off, r.ogc_fid, e.geom
+    FROM roads_topo.edge e,
+         roads_topo.relation rel,
+         roads r
+    WHERE e.edge_id = rel.element_id
+      AND rel.topogeo_id = (r.topo_geom).id
+
 
 ================
 Going further...
