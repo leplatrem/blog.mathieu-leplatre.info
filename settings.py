@@ -26,3 +26,6 @@ SOCIAL = (
     ("Twitter", "http://twitter.com/leplatrem"),
     ("Identi.ca", "http://identi.ca/leplatrem"),
 )
+
+STATIC_PATHS = ['images', 'extra/CNAME']
+EXTRA_PATH_METADATA = {'extra/CNAME': {'path': 'CNAME'},}
