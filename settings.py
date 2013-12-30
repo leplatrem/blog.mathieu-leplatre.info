@@ -1,11 +1,17 @@
-LOCALE = 'en_US.utf8'
-TIMEZONE = 'Europe/Paris'
 AUTHOR = "Mathieu Leplatre"
-DISPLAY_PAGES_ON_MENU = True
 SITEURL = "http://blog.mathieu-leplatre.info"
 SITENAME = "Mathieu Leplatre"
+LOCALE = 'en_US.utf8'
+TIMEZONE = 'Europe/Paris'
+
+DISPLAY_PAGES_ON_MENU = True
 WITH_PAGINATION = True
 DEFAULT_PAGINATION = 7
+FEED_ALL_ATOM = 'feeds/all.atom.xml'
+CATEGORY_FEED_ATOM = 'feeds/%s.atom.xml'
+RELATIVE_URLS = False
+DELETE_OUTPUT_DIRECTORY = True
+
 TWITTER_USERNAME = "leplatrem"
 GITHUB_URL = "https://github.com/leplatrem"
 DISQUS_SITENAME = "mathieuleplatre"
