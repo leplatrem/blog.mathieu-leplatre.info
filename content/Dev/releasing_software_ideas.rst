@@ -20,7 +20,7 @@ Having the ambition to implement all ideas that come into our floroushing minds 
 A more reasonnable attitude would be to stay focused and share the ideas left over! Hence this post...
 
 
-.. image :: images/overbooking.jpg
+.. image :: /images/overbooking.jpg
     :alt: Overbooking, by Xavi Puigg
 
 
@@ -67,7 +67,7 @@ to share some ideas and concepts that crossed my mind.
 
 But when I read at Jeff Knupp that there were, on Earth, `« people who can't think of a good project idea » <http://www.jeffknupp.com/blog/2014/01/28/need-a-project-idea-scratch-your-own-itch/>`_, I thought it was a serious waste to keep them for me!
 
-.. image :: images/share_ideas.jpg
+.. image :: /images/share_ideas.jpg
     :alt: Share your ideas, by nan palmero
 
 The following ideas were collected on my notepad along the previous months. Some of them are
@@ -147,5 +147,5 @@ Meanwhile, they'll disappear from my notebook and its underlying *todo list*,
 they won't haunt me anymore, I will be at peace.
 
 
-.. image :: images/kid_schedule.jpg
+.. image :: /images/kid_schedule.jpg
     :alt: Kid schedulem by Carissa GoodNCrazy
