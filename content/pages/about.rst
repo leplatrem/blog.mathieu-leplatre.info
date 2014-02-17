@@ -43,15 +43,6 @@ About
 * Working at `Makina Corpus <http://makina-corpus.com>`_, Toulouse, France.
 * ``contact`` @ ``mathieu-leplatre`` . ``info``
 
-Specialities
-============
-
-* Software Architecture
-* Computer Interaction
-* Web Technologies
-* Project Management
-* Free (freedom) Software & Linux
-
 Favorite Technologies
 =====================
 
@@ -63,32 +54,21 @@ Favorite Technologies
 Check out `some of my projects <https://github.com/leplatrem>`_, *most notably* :
 
 * `Subtivals <http://blog.mathieu-leplatre.info/announcing-subtivals-realtime-subtitles-for-film-festivals.html>`_ (*Qt/C++*) ;
-* `some Leaflet plugins <http://leafletjs.com/plugins.html>`_ (*Javascript*);
 * `daybed <https://github.com/spiral-project/daybed>`_, 
   `landez <http://blog.mathieu-leplatre.info/landez-introducing-new-features-of-our-tiles-toolbox.html>`_ (*Python*) ; 
+* `some Leaflet plugins <http://leafletjs.com/plugins.html>`_ (*Javascript*);
 * `and <https://github.com/makinacorpus/django-leaflet>`_ 
   `a <https://github.com/makinacorpus/django-geojson>`_ 
   `few <https://github.com/makinacorpus/django-screamshot>`_ 
   `Django <https://github.com/makinacorpus/django-appypod>`_ 
   `apps <https://github.com/makinacorpus/django-mbtiles>`_ (*Django*)
 
-Interests
-=========
+Talks and Publications
+======================
 
-* Technologies as human and social tools
-* Free Culture and copyleft
-* Independant and decentralized Media
-* Nature, Hiking, Travel & Photography
-
-
-Education
-=========
-* `Master's degree <http://en.wikipedia.org/Master's_degree#France>`_ in Computer Science (DEA d'informatique), `University of Paris-Sud <http://en.wikipedia.org/University_of_Paris-Sud>`_.
-* `Software Engineer <http://en.wikipedia.org/Software_engineering>`_ graduated from `Polytech Paris-Sud <http://en.wikipedia.org/Polytech Paris-Sud>`_, formerly FiiFO.
-
-
-Publications
-============
+* `Tester une application carto avec Mocha <http://lanyrd.com/2013/francejs/scrhfz/>`_ (*French*), lightning
+  talk at `FranceJS <http://lanyrd.com/2013/francejs/>`_
+* `Alternatives libres à Google Maps (v2) <http://makina-corpus.com/blog/metier/2013/les-alternatives-libres-a-google-maps>`_, conference at `Capitole du Libre <http://2013.capitoledulibre.org>`_
 * `Django, Carto, Vecto <http://rencontres.django-fr.org/2012/tolosa/presentations/lightnings/07-django-carto-vecto.pdf>`_ (*French*), lightning talk about vectorial Web mapping with Django, 2012, Toulouse. *(Keywords: Django, GeoJSON, Leaflet, Makina Corpus)*
 * `Des cartes d'un autre monde <http://www.slideshare.net/makinacorpus/descartes-dun-autre-monde-django>`_ (*French*), on how to easily publish a map with Tilemill and Django, 2012, Montpellier. *(Keywords: Django, TileMill, MBTiles, Makina Corpus)*
 * `Alternatives libres à Google Maps <http://www.slideshare.net/makinacorpus/solutions-alternatives-google-maps-11501753>`_ (*French*), on how to switch from Google Maps to OpenStreetMap using Free Software, 2012, Toulouse. *(Keywords: OpenStreetMap, Leaflet, TileMill, Mapnik, Makina Corpus)*
@@ -103,6 +83,29 @@ Publications
   *(Keywords: Semantic Web, Data Alignment)*
 * `Simulation en socio-ethnologie </media/2005/leplatre.html>`_, 2005, University of Paris-Sud (*French*).
   *(Keywords: Multi-agents systems)*
+
+Specialities
+============
+
+* Software Architecture
+* Computer Interaction
+* Web Technologies
+* Project Management
+* Free (freedom) Software & Linux
+
+Interests
+=========
+
+* Technologies as human and social tools
+* Free Culture and copyleft
+* Independant and decentralized Media
+* Nature, Hiking, Travel & Photography
+
+Education
+=========
+* `Master's degree <http://en.wikipedia.org/Master's_degree#France>`_ in Computer Science (DEA d'informatique), `University of Paris-Sud <http://en.wikipedia.org/University_of_Paris-Sud>`_.
+* `Software Engineer <http://en.wikipedia.org/Software_engineering>`_ graduated from `Polytech Paris-Sud <http://en.wikipedia.org/Polytech Paris-Sud>`_, formerly FiiFO.
+
 
 
 Others
