@@ -85,13 +85,13 @@ are easy to implement, others aren't at all.
 * A tool to compute dates of planet alignments ;
 * A simple, pop-up-less, map bounding box and coordinates converter tool ;
 * A tool to find the best place to meet for a group of friends at different locations,
-  so that each of them has the same (walking|driving|flight) distance ;
+  so that each of them has the same (walking|driving|flight) distance [#]_ ;
 * A self-hosted application to manage wishlists, with ability to
-  secretly mark stuff as picked or organize shared budget ;
+  secretly mark stuff as picked or organize shared budget [#]_ ;
 * :strike:`An equivalent of Pelican for photos galleries` `Sigal, by Saimon <http://sigal.saimon.org/>`_ !
   It takes a folder with pictures, and generates a static page with `galleria.js <http://galleria.io/>`_ ;
-* Manual activities search by "ingredient" : I have some clips, a plastic bottle and
-  a match box, tell me what I can build with for my kids ;
+* :strike:`Manual activities search by "ingredient"` `instructables.com <http://instructables.com>`_ [#]_ :
+  I have some clips, a plastic bottle and a match box, tell me what I can build with that for my kids ;
 * A directory of pictures of food factories buildings ;
 * A collaborative interactive timeline with maps to visualize movement, spread, empires... ;
 
@@ -143,6 +143,7 @@ Many things can happen now :
 * You will implement an idea and share the code ;
 * You will start a company, raise money and build an empire (*I wouldn't have anyway*) ;
 * You will sue me for `your new puppy to have ruined your life <http://lanyrd.com/2012/dotjs/scbgdz/>`_ :)
+* **Update**: You will propose `more ideas <https://twitter.com/daks_/status/435893872514695168>`_ on twitter :)
 
 Meanwhile, they'll disappear from my notebook and its underlying *todo list*,
 they won't haunt me anymore, I will be at peace.
@@ -150,3 +151,9 @@ they won't haunt me anymore, I will be at peace.
 
 .. image :: /images/kid_schedule.jpg
     :alt: Kid schedulem by Carissa GoodNCrazy
+
+.. [#] Not the UI of the year but http://www.mezzoman.com looks like a candidate
+
+.. [#] For example, like http://mygiftslist.be
+
+.. [#] Merci `Simon <https://twitter.com/simongeorges/status/435807135302053889>`_
