@@ -5,6 +5,7 @@ Releasing software ideas
 :tags: daybed, subtivals, opensource
 :lang: en
 
+.. role:: strike
 
 A couple of weeks ago, I had a very interesting reading :
 `What if someone steals your idea ? <http://danielsolisblog.blogspot.fr/2013/07/what-if-someone-steals-your-idea.html>`_ (translated into French `by Framasoft <http://www.framablog.org/index.php/post/2013/08/29/voler-votre-idee>`_).
@@ -87,8 +88,8 @@ are easy to implement, others aren't at all.
   so that each of them has the same (walking|driving|flight) distance ;
 * A self-hosted application to manage wishlists, with ability to
   secretly mark stuff as picked or organize shared budget ;
-* An equivalent of Pelican for photos galleries. It takes a folder with pictures,
-  and generates a static page with `galleria.js <http://galleria.io/>`_ ;
+* :strike:`An equivalent of Pelican for photos galleries` `Sigal, by Saimon <http://sigal.saimon.org/>`_ !
+  It takes a folder with pictures, and generates a static page with `galleria.js <http://galleria.io/>`_ ;
 * Manual activities search by "ingredient" : I have some clips, a plastic bottle and
   a match box, tell me what I can build with for my kids ;
 * A directory of pictures of food factories buildings ;
