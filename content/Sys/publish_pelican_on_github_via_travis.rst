@@ -84,8 +84,10 @@ folder and pushes quietly with force via HTTPS using the token variable.
     github: publish
     ifeq ($(TRAVIS_PULL_REQUEST), false)
       ghp-import -n $(OUTPUTDIR)
-      git push -fq https://${GH_TOKEN}@github.com/$(TRAVIS_REPO_SLUG).git gh-pages > /dev/null
+      @git push -fq https://${GH_TOKEN}@github.com/$(TRAVIS_REPO_SLUG).git gh-pages > /dev/null
     endif
+
+Use leading ``@`` to remove command from output, thanks `Ryan Peck <https://github.com/leplatrem/blog.mathieu-leplatre.info/issues/1>`_!
 
 
 Custom domain
