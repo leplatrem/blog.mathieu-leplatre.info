@@ -87,7 +87,7 @@ It uses *ghp-import* to build the branch from the output folder and pushes quiet
 
 Use leading ``@`` to remove command from output, thanks `Ryan Peck <https://github.com/leplatrem/blog.mathieu-leplatre.info/issues/1>`_!
 
-Also disable pull request builds in Travis to prevent the blog being updated by a pull request.
+Also disable pull request builds in Travis to prevent the blog being updated by a pull request (thanks `Andrew Aitken <https://github.com/leplatrem/blog.mathieu-leplatre.info/pull/2>`_ !).
 
 .. image:: /images/travis-pull-request.png
 
