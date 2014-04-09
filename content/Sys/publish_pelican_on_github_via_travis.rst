@@ -75,19 +75,21 @@ Push on Github pages
 
 I modified the ``Makefile`` provided in Pelican.
 
-It uses `Travis environment variables <http://about.travis-ci.org/docs/user/ci-environment/>`_
-to prevent pull-requests to update the blog, *ghp-import* to build the branch from the output
-folder and pushes quietly with force via HTTPS using the token variable.
+It uses *ghp-import* to build the branch from the output folder and pushes quietly with force via HTTPS using the token variable.
 
 .. code-block :: make
 
     github: publish
-    ifeq ($(TRAVIS_PULL_REQUEST), false)
+    
       ghp-import -n $(OUTPUTDIR)
       @git push -fq https://${GH_TOKEN}@github.com/$(TRAVIS_REPO_SLUG).git gh-pages > /dev/null
-    endif
+
 
 Use leading ``@`` to remove command from output, thanks `Ryan Peck <https://github.com/leplatrem/blog.mathieu-leplatre.info/issues/1>`_!
+
+Also disable pull request builds in Travis to prevent the blog being updated by a pull request.
+
+.. image:: /images/travis-pull-request.png
 
 
 Custom domain
