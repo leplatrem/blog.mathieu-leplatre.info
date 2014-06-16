@@ -98,7 +98,7 @@ Using the ORM, it gives us :
 
 I wonder how it behaves with zillions of records though ;)
 
-One more thing: until recently, there `was a bug <https://code.djangoproject.com/ticket/14930>`_ with calling ``values_list()``
+One more thing: before Django 1.6, there `was a bug <https://code.djangoproject.com/ticket/14930>`_ with calling ``values_list()``
 on a queryset ordered by an extra column. Use this :
 
 .. code-block :: python
