@@ -57,14 +57,14 @@ Prepare repository
 
 On your server, create two folders : the repository and deployed app.
 
-.. code-block::bash
+.. code-block :: bash
 
     mkdir -p /var/git/yourapp.git
     mkdir -p /var/www/yourapp
 
 The Git repository will serve as a remote for our code.
 
-.. code-block::bash
+.. code-block :: bash
 
     cd /var/git/yourapp.git
     git init --bare .
