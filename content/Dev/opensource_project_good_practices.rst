@@ -41,6 +41,7 @@ Source code
   decided to make in the documentation
 * Be a professional coder, by following `Uncle Bob recommendations`_
 * Use a translation system, like *gettext*, and keep English as the default language
+* Enable collaborative translation of your app with Transifex_
 * Provide simple commands to install or run tests (in a *Makefile* for example)
 * Test your project features (*functional tests*)
 * Make sure the tests self-describe your project specifications
@@ -49,6 +50,7 @@ Source code
 .. _PEP8: https://flake8.readthedocs.org
 .. _JSLint: http://www.jslint.com
 .. _Uncle Bob recommendations: http://www.amazon.com/The-Clean-Coder-Professional-Programmers/dp/0137081073
+.. _Transifex: https://www.transifex.com 
 
 
 Releases
