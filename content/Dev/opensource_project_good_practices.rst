@@ -58,6 +58,7 @@ Releases
 
 * Use semantic versionning (*main version, features change, bug fixes*)
 * Keep a list of changes by version (*Changelog*)
+* Follow some workflow for your changelog (Include it in docs, update it in the merge commit of pull-requests, `read more recommendations`_...)
 * Create a tag for each release (``vX.Y.Z``)
 * Create a branch for each version (`recommended workflow`_)
 * Publish your release (*backup copy*) in a repository (PyPi_, NPM_)
@@ -66,6 +67,7 @@ Releases
 * Communicate about new versions (*tweet*, OpenHub_, Freecode_, ...)
 
 .. _recommended workflow: http://fle.github.io/an-efficient-git-workflow-for-midlong-term-projects.html
+.. _read more recommendations: http://tech.novapost.fr/changelog-howto-en.html
 .. _PyPi: https://pypi.python.org
 .. _NPM: https://www.npmjs.org
 .. _Zest releaser: http://zestreleaser.readthedocs.org
