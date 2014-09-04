@@ -115,7 +115,7 @@ Github
 ======
 
 * Use Github
-* Use Github issues (*as much as you can, for everything except user support*)
+* Use Github issues (*as much as you can, for everything*)
 * Even if you are alone, use Github issues as a TODO list
 * Create some standard labels (*help-needed*, *docs*, *duplicate* ...)
 * Use the fantastic checklists_ feature in issues and pull-requests descriptions
