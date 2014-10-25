@@ -86,9 +86,9 @@ Talks
 Publications
 ============
 
-* `A Mediation System for Training Management </media/2005.leplatre-mediation-system-for-training-management.pdf>`_, 2005, `EADS CRC <http://www.eads.net>`_. 
+* `A Mediation System for Training Management <http://mathieu-leplatre.info/media/2005.leplatre-mediation-system-for-training-management.pdf>`_, 2005, `EADS CRC <http://www.eads.net>`_. 
   *(Keywords: Semantic Web, Data Alignment)*
-* `Simulation en socio-ethnologie </media/2005/leplatre.html>`_, 2005, University of Paris-Sud (*French*).
+* `Simulation en socio-ethnologie <http://mathieu-leplatre.info/media/2005/leplatre.html>`_, 2005, University of Paris-Sud (*French*).
   *(Keywords: Multi-agents systems)*
 
 

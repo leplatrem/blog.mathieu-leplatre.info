@@ -27,5 +27,5 @@ SOCIAL = (
     ("Identi.ca", "http://identi.ca/leplatrem"),
 )
 
-STATIC_PATHS = ['images', 'media', 'extra/CNAME']
+STATIC_PATHS = ['images', 'extra/CNAME']
 EXTRA_PATH_METADATA = {'extra/CNAME': {'path': 'CNAME'},}
