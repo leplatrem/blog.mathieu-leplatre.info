@@ -74,6 +74,9 @@ We obtain one elevation value per point on your line.
     SELECT ST_MakeLine(geom) FROM points3d;
 
 
+**Note** by Daniel Gerber: if the line goes outside your DEM, use a left join (``FROM points2d LEFT OUTER JOIN elevation ON ST_Intersects(...)``) and set default value to 0.0 with ``coalesce(ST_Value(..), 0.0)``.
+
+
 With DEM resolution
 -------------------
 
