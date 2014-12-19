@@ -5,33 +5,7 @@ About
 
     <script charset="utf-8" src="http://widgets.twimg.com/j/2/widget.js"></script>
     <div style="float: right;">
-        <script>
-        new TWTR.Widget({
-          version: 2,
-          type: 'profile',
-          rpp: 6,
-          interval: 30000,
-          width: 250,
-          height: 300,
-          theme: {
-            shell: {
-              background: '#333333',
-              color: '#ffffff'
-            },
-            tweets: {
-              background: '#ffffff',
-              color: '#000000',
-              links: '#6809a8'
-            }
-          },
-          features: {
-            scrollbar: false,
-            loop: false,
-            live: false,
-            behavior: 'all'
-          }
-        }).render().setUser('leplatrem').start();
-        </script>
+        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
     </div>
 
 .. image:: /images/face.jpg
@@ -39,7 +13,7 @@ About
    :width: 200 px
    :align: right
 
-* Lead developer at `Makina Corpus <http://makina-corpus.com>`_, Toulouse, France
+* `Mozilla Cloud Services <https://wiki.mozilla.org/CloudServices>`_ team, Barcelona, Spain
 * Mainly involved in Web and GIS Open Source projects
 * ``contact`` @ ``mathieu-leplatre`` . ``info``
 
