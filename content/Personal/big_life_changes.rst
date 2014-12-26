@@ -9,10 +9,10 @@ asked a lot of questions recently, and thought the answers might be worth a post
 
 First of all, **thank you very much all of you** for the massive amount of
 `positive <https://twitter.com/leplatrem/status/542993732367556608>`_ `feedback <https://www.linkedin.com/pulse/activities/mathieu-leplatre%2B0_1DkGqDxItMdaF_sJjg5h8J?trk=mp-reader-h>`_
-for my new position! Being taken on in the Cloud Services team at Mozilla is definitely very exciting!
+regarding my new position! Being taken on in the Cloud Services team at Mozilla is definitely very exciting!
 
 But that is not the only upcoming change: we moved from Toulouse to Barcelona!
-Combining several big life changes in a very short period is indeed stimulating, but
+Combining several big life changes in a very short period can be stimulating, but
 it's undoubtedly anxiety producing!
 
 
@@ -50,7 +50,7 @@ I could really take advantage of the freedom we had within the teams. The atmosp
 was geeky and acquisition of knowledge was permanent! Being professional, about
 code quality, method, approach and taste for sharing, all comes from there.
 
-It was hence hard to leave and tear that apart, since I certainly could have worked remotely from Barcelona, especially because `the main product <http://geotrek.fr>`_ I was working on is
+It was hence hard to leave and tear that apart, since I certainly could have worked remotely from Barcelona. On top of that, `the main product <http://geotrek.fr>`_ I was working on is
 truely becoming a reference.
 
 But the opportunity to join Mozilla represents a true aknowledgement and progression
@@ -127,15 +127,15 @@ What will do in the Cloud services team ?
 
 The team is in charge of various Open Source applications and libraries.
 
-We basically build Web APIs that are used by the Mozilla products. For the most famous:
+We basically build Web APIs that are used within Mozilla products. For the most famous:
 
 * Sync
 * Firefox Accounts
 * Location service
 * Marketplace
-* and `many others ... <https://wiki.mozilla.org/CloudServices>`_ !
+* ... `and more <https://wiki.mozilla.org/CloudServices>`_ !
 
-Personnaly, I will participate at the maintenance of Firefox Hello servers,
+Personnaly, I will participate at the maintenance of Firefox Hello services,
 and start some new projects in regards to remote data storage, like bringing cloud features
 to the `reader mode <https://support.mozilla.org/en-US/kb/how-to-use-reader-mode>`_.
 
@@ -151,12 +151,11 @@ Netscape; the Mozilla Foundation, a non-profit organization founded
 in 2003, and the Mozilla Corporation, a subsidiary founded in 2005, that handles
 the goals of the former.
 
-Basically, I am an employee of the Mozilla Corporation, which `earns money from the search feature in Firefox <https://www.mozilla.org/en-US/foundation/annualreport/2013/faq/>`_, and other
-specific partnerships, like `for Hello or for Firefox OS <https://blog.mozilla.org/blog/2014/10/16/mozilla-and-telefonica-partner-to-simplify-voice-and-video-calls-on-the-web/>`_.
+Basically, I am an employee of the Mozilla Corporation, which `earns money from the search feature in Firefox <https://www.mozilla.org/en-US/foundation/annualreport/2013/faq/>`_, thinly
+augmented with donations and grants.
 
 The key is how the money is spent, and this is what makes the Mozilla Corporation **unique**.
-Just read the `Mozilla Manifesto <https://www.mozilla.org/en-US/mission/>`_: there is no other company in the
-world focused on building the Web as a universal resource for humanity!
+Just read the `Mozilla Manifesto <https://www.mozilla.org/en-US/mission/>`_: there is no other company in the world whose aim is to maintain the Web as a universal resource for the whole humanity!
 
 
 Will you still use Chromium ?
