@@ -56,7 +56,7 @@ encrypt it :
 
 ::
 
-    sudo apt-get install ruby1.9.1-dev build-essentials
+    sudo apt-get install ruby1.9.1-dev build-essential
     sudo gem install travis
 
     travis encrypt GH_TOKEN=your_token
