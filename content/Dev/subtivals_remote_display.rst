@@ -20,6 +20,7 @@ film libraries.
 
 .. image :: images/subtivals-remote-cinema.png
     :align: center
+    :width: 500
 
 Another common use-case is live captionning, where subtitles are projected on
 a small screen below the scene. It allows to add captioning to concerts, theater,
@@ -28,6 +29,7 @@ and most people were using Poweroint slides before discovering Subtivals.
 
 .. image :: images/subtivals-remote-opera.png
     :align: center
+    :width: 500
 
 
 Use-case
@@ -41,6 +43,7 @@ it can be hard to obtain sharp subtitles on a screen, even with a powerful longt
 
 .. image :: images/subtivals-remote-stadium.png
     :align: center
+    :width: 300
 
 Also, when the venue is very big, such as operas, subtitles have to be projected
 with a very big text size for the spectators seated in the last rows. And
@@ -48,6 +51,7 @@ those in the front raws won't read easily either.
 
 .. image :: images/subtivals-remote-theater.png
     :align: center
+    :width: 300
 
 Having remote display of subtitles for these situations makes sense. Subtitles
 should be shown synchronously on various screens.
@@ -63,17 +67,20 @@ We can imagine:
 
 .. image :: images/subtivals-remote-backseat.png
     :align: center
+    :width: 300
 
 * Showing subtitles on the spectator mobile or tablet;
 
 .. image :: imagesi/subtivals-remote-tablet.png
     :align: center
+    :width: 300
 
 * Adding small screens (or tablets) on the backseat, like it is already done in
   some operas;
 
 .. image :: images/subtivals-remote-backseat.jpg
     :align: center
+    :width: 300
 
 
 Technology
@@ -119,6 +126,7 @@ We deploy a central server that is used by default in the application.
 
 .. image :: images/subtivals-remote-server.png
     :align: center
+    :width: 400
 
 **Pros**
 
@@ -136,7 +144,7 @@ We deploy a central server that is used by default in the application.
   several simultaneous projections in the world;
 * Some minimal cryptography has to be introduced to prevent attackers from
   sending messages to the audience;
-* It implies some stressful responsabilities for events happening all over the
+* It implies some stressful responsabilities 24/7 for events happening all over the
   globe;
 
 
@@ -148,6 +156,7 @@ be setup in case Internet is not available.
 
 .. image :: images/subtivals-remote-localwifi.png
     :align: center
+    :width: 400
 
 **Pros**
 
@@ -173,6 +182,7 @@ a server, pushing subtitles itself to the audience.
 
 .. image :: images/subtivals-remote-localserver.png
     :align: center
+    :width: 400
 
 **Pros**
 
