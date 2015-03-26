@@ -114,7 +114,7 @@ It looks already fun and promising :)
 
 .. raw:: html
 
-    <video src="images/subtivals-remote.webm" width="80%">
+    <video src="images/subtivals-remote.webm" width="80%" controls>
         <p>Your browser does not support the video element </p>
     </video>
 
