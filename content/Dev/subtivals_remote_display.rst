@@ -114,7 +114,7 @@ It looks already fun and promising :)
 
 .. raw:: html
 
-    <video src="images/subtivals-remote.webm" width="80%" controls>
+    <video src="images/subtivals-remote.webm" width="500" controls>
         <p>Your browser does not support the video element </p>
     </video>
 
@@ -126,7 +126,7 @@ We deploy a central server that is used by default in the application.
 
 .. image :: images/subtivals-remote-server.png
     :align: center
-    :width: 400
+    :width: 500
 
 **Pros**
 
@@ -154,9 +154,9 @@ Strategy #2: local server
 A variant of the first one, a server is deployed locally. A local wifi can
 be setup in case Internet is not available.
 
-.. image :: images/subtivals-remote-localwifi.png
+.. image :: images/subtivals-remote-localserver.png
     :align: center
-    :width: 400
+    :width: 500
 
 **Pros**
 
@@ -180,9 +180,9 @@ Strategy #3: Subtivals as server
 We get rid of the local Web server, and the Subtivals software itself acts as
 a server, pushing subtitles itself to the audience.
 
-.. image :: images/subtivals-remote-localserver.png
+.. image :: images/subtivals-remote-localwifi.png
     :align: center
-    :width: 400
+    :width: 500
 
 **Pros**
 
