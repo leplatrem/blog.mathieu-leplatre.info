@@ -18,7 +18,7 @@ any movie, especially when the physical copy (35mm or DCP) does not carry them.
 That's why most of Subtivals users are international film festivals, cultural centers or
 film libraries.
 
-.. image :: images/subtivals-remote-cinema.png
+.. image :: /images/subtivals-remote-cinema.png
     :align: center
     :width: 500
 
@@ -27,7 +27,7 @@ a small screen below the scene. It allows to add captioning to concerts, theater
 operas, conference talks, live shows... Surprisingly there was no tool for that,
 and most people were using Poweroint slides before discovering Subtivals.
 
-.. image :: images/subtivals-remote-opera.png
+.. image :: /images/subtivals-remote-opera.png
     :align: center
     :width: 500
 
@@ -41,7 +41,7 @@ and ~5000 Lumens for the colors used in hard of hearing captioning).
 When the scene is very large or the atmosphere very bright, such as open air events,
 it can be hard to obtain sharp subtitles on a screen, even with a powerful longthrow projector.
 
-.. image :: images/subtivals-remote-stadium.png
+.. image :: /images/subtivals-remote-stadium.png
     :align: center
     :width: 300
 
@@ -49,7 +49,7 @@ Also, when the venue is very big, such as operas, subtitles have to be projected
 with a very big text size for the spectators seated in the last rows. And
 those in the front raws won't read easily either.
 
-.. image :: images/subtivals-remote-theater.png
+.. image :: /images/subtivals-remote-theater.png
     :align: center
     :width: 300
 
@@ -65,20 +65,20 @@ We can imagine:
 * Adding several small LCD screens in the venue (like every 20 meters) instead of
   one big projected image;
 
-.. image :: images/subtivals-remote-backseat.png
+.. image :: /images/subtivals-remote-backseat.png
     :align: center
     :width: 300
 
 * Showing subtitles on the spectator mobile or tablet;
 
-.. image :: imagesi/subtivals-remote-tablet.png
+.. image :: /images/subtivals-remote-tablet.png
     :align: center
     :width: 300
 
 * Adding small screens (or tablets) on the backseat, like it is already done in
   some operas;
 
-.. image :: images/subtivals-remote-backseat.jpg
+.. image :: /images/subtivals-remote-backseat.jpg
     :align: center
     :width: 300
 
@@ -124,7 +124,7 @@ Strategy #1: Global
 
 We deploy a central server that is used by default in the application.
 
-.. image :: images/subtivals-remote-server.png
+.. image :: /images/subtivals-remote-server.png
     :align: center
     :width: 500
 
@@ -154,7 +154,7 @@ Strategy #2: local server
 A variant of the first one, a server is deployed locally. A local wifi can
 be setup in case Internet is not available.
 
-.. image :: images/subtivals-remote-localserver.png
+.. image :: /images/subtivals-remote-localserver.png
     :align: center
     :width: 500
 
@@ -180,7 +180,7 @@ Strategy #3: Subtivals as server
 We get rid of the local Web server, and the Subtivals software itself acts as
 a server, pushing subtitles itself to the audience.
 
-.. image :: images/subtivals-remote-localwifi.png
+.. image :: /images/subtivals-remote-localwifi.png
     :align: center
     :width: 500
 
