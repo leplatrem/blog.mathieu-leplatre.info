@@ -34,12 +34,13 @@ Check out `some of my projects <https://github.com/leplatrem>`_, *most notably* 
 * `landez <http://blog.mathieu-leplatre.info/landez-introducing-new-features-of-our-tiles-toolbox.html>`_ (*Python*),
   `some Leaflet plugins <http://leafletjs.com/plugins.html>`_ (*Javascript*) and
   `some <https://github.com/makinacorpus/django-screamshot>`_
-  `Django <https://github.com/makinacorpus/django-appypod>`_ 
-  `apps <https://github.com/makinacorpus/django-mbtiles>`_ (*Django*)
+  `Django <https://github.com/makinacorpus/django-appypod>`_
+  `apps <https://github.com/makinacorpus/django-mbtiles>`_.
 
 Talks
 =====
 
+* *Daybed spatial backend as a service !*, (*English*), at `FOSDEM 2015 <https://fosdem.org/2015/schedule/event/daybed/>`_
 * *Publier vos données sur le Web*, (*French*), at `Forum TIC de l'ATEN <http://forum-tic.espaces-naturels.fr/edition/2014>`_
 * `Team up Django and Web mapping <http://lanyrd.com/2014/djangocon/sczqpx/>`_, at `DjangoCon Europe <http://2014.djangocon.eu>`_
 * `Tester une application carto avec Mocha <http://lanyrd.com/2013/francejs/scrhfz/>`_ (*French*), lightning
@@ -48,19 +49,19 @@ Talks
 * `Django, Carto, Vecto <http://rencontres.django-fr.org/2012/tolosa/presentations/lightnings/07-django-carto-vecto.pdf>`_ (*French*), lightning talk about vectorial Web mapping with Django, 2012, Toulouse. *(Keywords: Django, GeoJSON, Leaflet, Makina Corpus)*
 * `Des cartes d'un autre monde <http://www.slideshare.net/makinacorpus/descartes-dun-autre-monde-django>`_ (*French*), on how to easily publish a map with Tilemill and Django, 2012, Montpellier. *(Keywords: Django, TileMill, MBTiles, Makina Corpus)*
 * `Alternatives libres à Google Maps <http://www.slideshare.net/makinacorpus/solutions-alternatives-google-maps-11501753>`_ (*French*), on how to switch from Google Maps to OpenStreetMap using Free Software, 2012, Toulouse. *(Keywords: OpenStreetMap, Leaflet, TileMill, Mapnik, Makina Corpus)*
-* `La gestion de version avec Git <http://www.slideshare.net/leplatrem/petit-djeuner-git-chez-makina-corpus>`_ (*French*), a quick introduction 
+* `La gestion de version avec Git <http://www.slideshare.net/leplatrem/petit-djeuner-git-chez-makina-corpus>`_ (*French*), a quick introduction
   to the power of this DVCS, 2011, Toulouse. *(Keywords: Git, Makina Corpus)*
 * `La puissance des logiciels libres de cartographie <http://www.lamelee.com/autres-manifestations/openday-23-juin-2011-2.html#sig>`_ (*French*), a panorama of Open Source GIS software, 2011, Toulouse. *(Keywords: FOSS, GIS, Makina Corpus)*
-* `Miro, Internet TV <20080426-miro-flisol2008.odp>`_ (*Spanish*), a presentation of Miro and the democrative aspects of decentralized media distribution, 2008, FLISOL, Buenos Aires. 
+* `Miro, Internet TV <20080426-miro-flisol2008.odp>`_ (*Spanish*), a presentation of Miro and the democrative aspects of decentralized media distribution, 2008, FLISOL, Buenos Aires.
   *(Keywords: Democracy, copyleft, colaborative media, decentralized media distribution)*
-* `Somos Libres <http://mmggrr.net/es/index.php/post/2007/08/23/Somos-ibres>`_ (*Spanish*), a presentation about Freedom in the computer world, 2007, Bolivia. 
+* `Somos Libres <http://mmggrr.net/es/index.php/post/2007/08/23/Somos-ibres>`_ (*Spanish*), a presentation about Freedom in the computer world, 2007, Bolivia.
   *(Keywords: Free Software philosophy)*
 
 
 Publications
 ============
 
-* `A Mediation System for Training Management <http://mathieu-leplatre.info/media/2005.leplatre-mediation-system-for-training-management.pdf>`_, 2005, `EADS CRC <http://www.eads.net>`_. 
+* `A Mediation System for Training Management <http://mathieu-leplatre.info/media/2005.leplatre-mediation-system-for-training-management.pdf>`_, 2005, `EADS CRC <http://www.eads.net>`_.
   *(Keywords: Semantic Web, Data Alignment)*
 * `Simulation en socio-ethnologie <http://mathieu-leplatre.info/media/2005/leplatre.html>`_, 2005, University of Paris-Sud (*French*).
   *(Keywords: Multi-agents systems)*
