@@ -117,9 +117,9 @@ Reporting
 
 Now that we have explicited the specs, we will want to read them properly.
 
-One of things I like in JavaScript is `Mocha <http://mochajs.org>`_, appart
-from the nice API and the very rich feature set, is the default test reporter.
-It is colourful and it structurally invites you to write tests as specs.
+One of things I like in JavaScript is `Mocha <http://mochajs.org>`_. Appart
+from the nice API and the very rich feature set, its default test reporter is
+great, tt is colourful and structurally invites you to write tests as specs.
 
 .. image:: /images/tests-specs-mocha.png
     :align: center
@@ -142,14 +142,13 @@ It will produce the following output:
     :align: center
 
 
-I takes the tests suites and extract the names as readable strings:
+It takes the tests suites and extract the names as readable strings:
 
 * ``tests/core/test_game.py`` → ``CORE GAME``
 * ``class InitializationTest(TestCase)`` → ``Initialization``
 * ``def test_played_status_is_true_if_score_is_set`` → ``Played status is true if score is set``
 
-It also mesures the execution time of the tests and pops up when a test is too
-long.
+It also mesures the execution time of each test in order highlight the slow ones.
 
 To conclude, this reporter has a pretty modest objective: remind you that **the tests
 you write should be read as specifications** [#]_!
