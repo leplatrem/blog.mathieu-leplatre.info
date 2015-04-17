@@ -32,8 +32,6 @@ the quality of the application code.
 
 The most frequent pattern is that all tests are implemented in the same test case [#]_:
 
-.. [#] See `a good example <https://github.com/makinacorpus/Geotrek/blob/v0.33.4/geotrek/trekking/tests/test_models.py#L71-L99>`_ that I wrote in the past
-
 .. code-block:: python
 
     class GameTest(unittest.TestCase):
@@ -70,8 +68,6 @@ After all, it makes sense, you add some code for a reason! The tests are not onl
 here to prevent regressions, but also to explicit the expected behaviour of the application!
 
 I believe that many projects would take great benefits if following this approach [#]_.
-
-.. [#] For example, `see this code <https://github.com/mozilla-services/cliquet/blob/1.7.0/cliquet/tests/resource/test_record.py>`_ I wrote later on.
 
 
 .. code-block:: python
@@ -149,18 +145,15 @@ It will produce the following output:
 I takes the tests suites and extract the names as readable strings:
 
 * ``tests/core/test_game.py`` → ``CORE GAME``
-* ``class InitializationTest(TestCase)`` → ``    Initialization``
+* ``class InitializationTest(TestCase)`` → ``Initialization``
 * ``def test_played_status_is_true_if_score_is_set`` → ``Played status is true if score is set``
 
 It also mesures the execution time of the tests and pops up when a test is too
 long.
 
-To conclude, this reporter has a pretty modest objective: remind you that the tests
-you write should be read as specifications [#]_!
+To conclude, this reporter has a pretty modest objective: remind you that **the tests
+you write should be read as specifications** [#]_!
 
-.. [#] To be honest, I haven't worked much with `pytest <http://pytest.org>`_
-       (*I probably should*), and I don't know its eco-system: there might
-       something similar...
 
 Special thanks!
 ===============
@@ -169,3 +162,12 @@ I'm very grateful to `Antoine <http://antoine.cezar.fr/>`_ and
 `Alex <http://alexmarandon.com/>`_ that showed me the light on
 this. Since they might not be conscious of the influence they had on me,
 I jump on the occasion to thank them loudly :)
+
+
+.. [#] See `a good example <https://github.com/makinacorpus/Geotrek/blob/v0.33.4/geotrek/trekking/tests/test_models.py#L71-L99>`_ that I wrote in the past
+
+.. [#] For example, `see this code <https://github.com/mozilla-services/cliquet/blob/1.7.0/cliquet/tests/resource/test_record.py>`_ I wrote later on.
+
+.. [#] To be honest, I haven't worked much with `pytest <http://pytest.org>`_
+       (*I probably should*), and I don't know its eco-system: there might
+       something similar...
