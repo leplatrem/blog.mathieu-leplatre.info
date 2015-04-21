@@ -16,6 +16,7 @@ About
 * `Mozilla Cloud Services <https://wiki.mozilla.org/CloudServices>`_ team, Barcelona, Spain
 * Mainly involved in Web and GIS Open Source projects
 * ``contact`` @ ``mathieu-leplatre`` . ``info``
+* ``@leplatrem``
 
 Favorite Technologies
 =====================
