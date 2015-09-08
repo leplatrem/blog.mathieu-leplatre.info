@@ -3,10 +3,11 @@ About
 
 .. raw:: html
 
-    <script charset="utf-8" src="http://widgets.twimg.com/j/2/widget.js"></script>
     <div style="float: right;">
-        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+       <a class="twitter-timeline"  href="https://twitter.com/leplatrem" data-widget-id="641345584553701376">Tweets by @leplatrem</a>
+       <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
     </div>
+
 
 .. image:: /images/face.jpg
    :alt: face
@@ -15,8 +16,8 @@ About
 
 * `Mozilla Cloud Services <https://wiki.mozilla.org/CloudServices>`_ team, Barcelona, Spain
 * Mainly involved in Web and GIS Open Source projects
-* ``contact`` @ ``mathieu-leplatre`` . ``info``
-* ``@leplatrem``
+* Email ``contact`` @ ``mathieu-leplatre`` . ``info``
+* Twitter ``@leplatrem``
 
 Favorite Technologies
 =====================
@@ -29,7 +30,7 @@ Favorite Technologies
 
 Check out `some of my projects <https://github.com/leplatrem>`_, *most notably* :
 
-* **Daybed**, a generic storage and validation Web API, providing “database-as-a-service”. (Pyramid, CouchDB, REST) http://daybed.rtfd.org ;
+* **Kinto**, a generic JSON storage Web API, providing “database-as-a-service”. (Pyramid, PostgreSQL) http://kinto.readthedocs.org ;
 * **Subtivals**, a tool to project subtitles in movie festivals, used worldwide and mostly dedicated to captions for the hard of hearing community. (C++, Qt, packaged for Ubuntu, Mac OS and Windows) http://subtivals.org ;
 * `django-leaflet <https://github.com/makinacorpus/django-leaflet>`_ and `django-geojson <https://github.com/makinacorpus/django-geojson>`_, both focused on simplifying Web mapping for Django developers ;
 * `landez <http://blog.mathieu-leplatre.info/landez-introducing-new-features-of-our-tiles-toolbox.html>`_ (*Python*),
@@ -41,6 +42,7 @@ Check out `some of my projects <https://github.com/leplatrem>`_, *most notably* 
 Talks
 =====
 
+* *Cliquet*, a toolkit to build (micro)services (*English*) `at PyBCN <http://mozilla-services.github.io/cliquet/talks/2015.07.pybcn/>`_
 * *Daybed spatial backend as a service !*, (*English*), at `FOSDEM 2015 <https://fosdem.org/2015/schedule/event/daybed/>`_
 * *Publier vos données sur le Web*, (*French*), at `Forum TIC de l'ATEN <http://forum-tic.espaces-naturels.fr/edition/2014>`_
 * `Team up Django and Web mapping <http://lanyrd.com/2014/djangocon/sczqpx/>`_, at `DjangoCon Europe <http://2014.djangocon.eu>`_
