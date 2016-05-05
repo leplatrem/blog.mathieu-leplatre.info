@@ -1,7 +1,7 @@
 Django : Do not forget Do Not Track
 ###################################
 
-:tags: django, mozilla, privacy
+:tags: django, mozilla, privacy, tips
 :date: 2013-03-01
 
 
@@ -9,11 +9,11 @@ If you (fooly) Sail© on the Web® without `Ghostery™ <http://www.ghostery.com
 this website is currently tracking you. Sad news, but there are indeed 3 widgets
 (Disqus, Piwik and Twitter on the About page) that may collect data about your presence here.
 
-The `Do-Not-Track <http://www.mozilla.org/en-US/dnt/>`_ initiative consists in 
-avoiding user tracking, using an HTTP header, sent by the browser. 
+The `Do-Not-Track <http://www.mozilla.org/en-US/dnt/>`_ initiative consists in
+avoiding user tracking, using an HTTP header, sent by the browser.
 It is a voluntary process, and we should honour it when we can ! [#]_.
 
-Here is a quick way of respecting privacy in your Django websites. 
+Here is a quick way of respecting privacy in your Django websites.
 
 We use a context processor to spread the word accross all templates.
 
@@ -54,7 +54,7 @@ You can then disable spying widgets and tools, such as Google Analytics...
     </ul>
 
 
-We now need a middleware to add vary headers (for cache control), since content 
+We now need a middleware to add vary headers (for cache control), since content
 depends on this header.
 
 .. code-block :: python

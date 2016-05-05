@@ -1,7 +1,7 @@
 Good practices for Open Source projects
 #######################################
 
-:tags: opensource, github, git
+:tags: opensource, github, git, methodology
 :date: 2014-08-19
 
 
@@ -50,7 +50,7 @@ Source code
 .. _PEP8: https://flake8.readthedocs.org
 .. _JSLint: http://www.jslint.com
 .. _Uncle Bob recommendations: http://www.amazon.com/The-Clean-Coder-Professional-Programmers/dp/0137081073
-.. _Transifex: https://www.transifex.com 
+.. _Transifex: https://www.transifex.com
 
 
 Releases

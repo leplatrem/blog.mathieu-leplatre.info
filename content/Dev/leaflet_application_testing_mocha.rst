@@ -96,7 +96,7 @@ Make it run in the browser too
 
 So far we do not rely too much on Leaflet :) But in a real application test, we will quickly need a ``L.Map`` instance, along with a DOM most probably.
 
-By turning on the *Mocha* HTML runner, we can indeed run tests from a web browser. But since the console remains one of our goals, we add `mocha-phantomjs <https://github.com/metaskills/mocha-phantomjs/#readme>`_ in the scene ! 
+By turning on the *Mocha* HTML runner, we can indeed run tests from a web browser. But since the console remains one of our goals, we add `mocha-phantomjs <https://github.com/metaskills/mocha-phantomjs/#readme>`_ in the scene !
 
 Install ``phantomjs`` and add it to the ``PATH`` (the Ubuntu package does that for you). Then modify your ``package.json`` to add ``mocha-phantomjs`` as a *devDependency*. Re-run ``npm install`` to fetch it.
 

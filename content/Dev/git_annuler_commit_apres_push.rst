@@ -2,14 +2,14 @@ Git : annuler proprement un commit après un push
 ################################################
 
 :date: 2011-11-03 14:15
-:tags: git, tips
+:tags: git, tips, methodology
 :lang: fr
 
 ====================
 Ce qu'il faut éviter
 ====================
 
-Pour annuler des commits, il existe la commande ``git reset``. 
+Pour annuler des commits, il existe la commande ``git reset``.
 
 .. code-block :: bash
 
@@ -41,9 +41,9 @@ Mais il y a beaucoup mieux !
 Ce qu'il faut faire
 ===================
 
-Annuler un commit, c'est finalement appliquer l'inverse de son **diff** ! 
+Annuler un commit, c'est finalement appliquer l'inverse de son **diff** !
 
-On peut rediriger le diff des commits à annuler vers la commande ``patch --reverse`` :) 
+On peut rediriger le diff des commits à annuler vers la commande ``patch --reverse`` :)
 
 .. code-block :: bash
 
@@ -52,13 +52,13 @@ On peut rediriger le diff des commits à annuler vers la commande ``patch --reve
 
 Pour faire plus simple, il y a ``git revert`` !
 
-Par exemple pour annuler les trois derniers commits : 
+Par exemple pour annuler les trois derniers commits :
 
 .. code-block :: bash
 
     git revert HEAD~3..HEAD
 
-Ou pour annuler un commit en particulier : 
+Ou pour annuler un commit en particulier :
 
 .. code-block :: bash
 

@@ -36,7 +36,7 @@ on veut ça :
 ::
 
                                  A---B---C master
-                                /        
+                                /
                D---E---F---G---H origin/master
 
 

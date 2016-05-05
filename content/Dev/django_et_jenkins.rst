@@ -2,7 +2,7 @@ Django et Jenkins
 #################
 
 :date: 2011-04-28 17:25
-:tags: django, jenkins, continuous integration,
+:tags: django, jenkins, continuous integration, tips
 :lang: fr
 
 *Article original publié chez* `Makina Corpus <http://makina-corpus.org>`_
@@ -63,11 +63,11 @@ Organisation du projet Django
     from default_settings import *
     DEBUG = True
     TEMPLATE_DEBUG = DEBUG
-    
+
     INSTALLED_APPS += (
         'django_jenkins',
     )
-    
+
     PYLINT_RCFILE = os.path.join(PROJECT_ROOT_PATH, '..', 'conf', 'pylint.rc')
 
 
@@ -120,9 +120,9 @@ Spatialite au lieu de PostGIS comme base de tests
 =================================================
 .. code-block :: bash
 
-    sudo aptitude install python-sqlite libspatialite2 sqlite3 
+    sudo aptitude install python-sqlite libspatialite2 sqlite3
 
-Script d'initialisation 
+Script d'initialisation
 
 .. code-block :: bash
 
