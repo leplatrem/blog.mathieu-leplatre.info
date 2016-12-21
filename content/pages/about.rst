@@ -42,7 +42,11 @@ Check out `some of my projects <https://github.com/leplatrem>`_, *most notably* 
 Talks
 =====
 
-* *Cliquet*, a toolkit to build (micro)services (*English*) `at PyBCN <http://mozilla-services.github.io/cliquet/talks/2015.07.pybcn/>`_
+* Podcast (*English*) `episode 86 – Kinto with Alexis Metaireau and Mathieu Leplatre <https://www.podcastinit.com/episode-86-kinto-with-alexis-metaireau-and-mathieu-leplatre/>`_
+* *Don't build silos*, `at Launch&Learn Betahaus <https://leplatrem.github.io/kinto-slides/2016.11.betahaus/>`_
+* *Secure passwords without headache*, `at Betahaus <https://bl.ocks.org/leplatrem/raw/b1f23563a3028c66276ddf48705fac84/>`_
+* *Kinto*, a minimalist JSON storage service (*English*) `at PyBCN July 16 <http://kinto.github.io/kinto-slides/2016.07.pybcn/>`_
+* *Cliquet*, a toolkit to build (micro)services (*English*) `at PyBCN July 15 <http://mozilla-services.github.io/cliquet/talks/2015.07.pybcn/>`_
 * *Daybed spatial backend as a service !*, (*English*), at `FOSDEM 2015 <https://fosdem.org/2015/schedule/event/daybed/>`_
 * *Publier vos données sur le Web*, (*French*), at `Forum TIC de l'ATEN <http://forum-tic.espaces-naturels.fr/edition/2014>`_
 * `Team up Django and Web mapping <http://lanyrd.com/2014/djangocon/sczqpx/>`_, at `DjangoCon Europe <http://2014.djangocon.eu>`_
