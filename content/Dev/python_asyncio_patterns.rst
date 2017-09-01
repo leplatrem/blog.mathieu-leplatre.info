@@ -7,12 +7,56 @@ Some Python 3 asyncio snippets
 
 Until recently, I had never taken the chance to get my hands dirty with `asyncio <https://docs.python.org/3/library/asyncio.html#module-asyncio>`_. But now that our production stacks run Python 3.6, there is no false excuse.
 
-I had done a lot of JavaScript before — with promises and ``async``/``await`` syntax — but still, diving into the `many primitives of asyncio <http://lucumr.pocoo.org/2016/10/30/i-dont-understand-asyncio/>`_ was far from immediate. Task versus future? Concurrent futures?
+I had done a lot of JavaScript before — with promises and ``async``/``await`` syntax — but still, diving into the `many primitives of asyncio <http://lucumr.pocoo.org/2016/10/30/i-dont-understand-asyncio/>`_ was far from immediate. Task versus future? Wrapped coroutine? Concurrent futures?
 
 This article gathers some notes and snippets I wish I had up my sleeve before starting.
 
+If you see something that bugs you, please use the comments!
+
 .. image:: /images/async_juggling.jpg
     :align: center
+
+About the concepts
+==================
+
+A **coroutine** is basically an async function. But hey, it is also used to describe the object returned an by async function when you don't ``await`` it.
+
+.. code-block:: python
+
+    >>> async def poll(n):
+    ...     return n
+    ...
+    >>> poll(1)
+    <coroutine object poll at 0x7f0e37cfbe08>
+
+Unlike promises in JavaScript, calling a coroutine does not start its code running. You have to schedule it manually, or simply ``await`` it.
+
+You can only use the ``await`` keyword from an async function. And there will always be a blocking call to ``loop.run_until_complete()`` somewhere in the code.
+
+.. code-block:: python
+
+    >>> async def main():
+    ...     result = await poll(1)
+    ...     print(result)
+    ...
+    >>> loop = asyncio.get_event_loop()
+    >>> loop.run_until_complete(main())
+    1
+
+A **future** is basically like a JavaScript promise. It «wraps» a coroutine and its execution is scheduled in the event loop. A **task** is just a subclass of a future, but you never instanciate them yourself. The API and its documentation are sometimes confusing about their distinction, so I just considered them synonyms so far.
+
+.. code-block:: python
+
+    >>> asyncio.ensure_future(poll(1))
+    <Task pending coro=<poll() running at <stdin>:1>>
+
+The future/task object can be passed around. It has a state, a result and a potential exception. And you can await it:
+
+.. code-block:: python
+
+    future = asyncio.ensure_future(poll(1))
+    result = await future
+
 
 Run coroutines in parallel
 ==========================
@@ -28,6 +72,14 @@ Run coroutines in parallel
     results = await asyncio.gather(*futures)
     for (i, result) in zip(inputs, results):
         print(i, result)
+
+As a human — and non-native English speaker — I would have excepted the ``asyncio.wait()`` function to do that, but it doesn't. It returns two lists of futures. And careful, the signature is not the same (a list of futures versus futures in ``*args``).
+
+.. code-block:: python
+
+    futures = [long_task(i) for i in inputs]
+    done, pending = await asyncio.wait(futures)
+    results = [future.result() for future in done]
 
 
 Run blocking code in parallel
