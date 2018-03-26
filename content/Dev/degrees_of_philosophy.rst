@@ -118,7 +118,7 @@ Now let's repeat that for a hundred random pages, cache already visited links an
     print(float(sum(results)) / len(results), min(results), max(results))
 
 
-I can now tell you that if you keep clicking on the **first link** of a random article you'll reach the *Philosophy* page with 13.45 steps in average. We could also have run a `few workers in parallel <filename}../Dev/python_asyncio_patterns.rst>`_.
+I can now tell you that if you keep clicking on the **first link** of a random article you'll reach the *Philosophy* page with 13.45 steps in average. We could also have run a `few workers in parallel <{filename}../Dev/python_asyncio_patterns.rst>`_.
 
 Pretty useful huh!?
 
