@@ -45,6 +45,7 @@ Something like `#mw-content-text a`?
 But that sometimes picks the summary section on the right side. Be more hackish and precise:
 
 ::
+
     #mw-content-text > .mw-parser-output > p > a[href^='/wiki'],
     #mw-content-text > .mw-parser-output > ul > li > a[href^='/wiki']
 
