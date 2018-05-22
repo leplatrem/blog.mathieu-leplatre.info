@@ -73,7 +73,7 @@ Run coroutines in parallel
     for (i, result) in zip(inputs, results):
         print(i, result)
 
-As a human — and non-native English speaker — I would have excepted the ``asyncio.wait()`` function to run futures in parallel and return their results, but it doesn't exactly do that. It returns two lists of futures and you have to unwrap its value with ``result()``. And careful, the signature is not the same (a list of futures versus futures in ``*args``).
+As a human™ I would have excepted the ``asyncio.wait()`` function to run futures in parallel and return their results, but it doesn't exactly do that. It returns two lists of futures and you have to unwrap its value with ``result()``. And careful, the signature is not the same (a list of futures versus futures in ``*args``).
 
 .. code-block:: python
 
