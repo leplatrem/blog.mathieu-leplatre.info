@@ -43,7 +43,7 @@ You can only use the ``await`` keyword from an async function. And there will al
     >>> loop.run_until_complete(main())
     1
 
-A **future** is basically like a JavaScript promise. It «wraps» a coroutine and its execution is scheduled in the event loop. A **task** is just a subclass of a future, but you never instanciate them yourself. The API and its documentation are sometimes confusing about their distinction, so I just considered them synonyms so far.
+A **future** is basically like a JavaScript promise — a placeholder for an initially unknown value. A **task** wraps a coroutine and its execution is scheduled in the event loop, and provides the future's interface. But you never instanciate it yourself. The API and documentation about futures and tasks are sometimes confusing about their distinction, so I just considered them synonyms so far.
 
 .. code-block:: python
 
@@ -73,7 +73,7 @@ Run coroutines in parallel
     for (i, result) in zip(inputs, results):
         print(i, result)
 
-As a human — and non-native English speaker — I would have excepted the ``asyncio.wait()`` function to do that, but it doesn't. It returns two lists of futures. And careful, the signature is not the same (a list of futures versus futures in ``*args``).
+As a human™ I would have excepted the ``asyncio.wait()`` function to run futures in parallel and return their results, but it doesn't exactly do that. It returns two lists of futures and you have to unwrap its value with ``result()``. And careful, the signature is not the same (a list of futures versus futures in ``*args``).
 
 .. code-block:: python
 
