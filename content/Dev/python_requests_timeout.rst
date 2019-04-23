@@ -185,5 +185,10 @@ And setup the toxics in your tests setup:
                 client.fetch_user_info()
 
 
-.. image:: /images/quiet-monkey.gif
+.. figure:: /images/quiet-monkey.gif
    :align: center
+
+See also:
+
+* Peter's `Best practice with retries with requests <https://www.peterbe.com/plog/best-practice-with-retries-with-requests>`_
+* In `requests 3 <https://github.com/kennethreitz/requests3#feature-support>`_ timeouts are required
