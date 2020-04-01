@@ -21,7 +21,7 @@ Probably because of my age, I'm familiar with ``make``. It's quite universal and
 
 I was used to Virtualenv, Pip, and requirements files. Common practice consists in having `a folder with a requirements file by environment <https://github.com/mozilla-services/poucave/tree/v1.19.0/requirements>`_, and a constraints file for reproducible builds. We also setup `Dependabot <https://app.dependabot.com/>`_ on the repo to make sure our dependencies are kept up to date.
 
-Now the cool kids use Pipenv or Poetry! Even if Poetry seemed to stand out, the debate was still virulent when the project was started, especially with regards to production installs and Docker integration. Therefore I didn't make any decision and remained conservative. I'd be happy to reconsider that choice.
+Now the cool kids use Pipenv or Poetry! Even if Poetry seemed to stand out, the debate was still virulent when the project was started, especially with regards to production installs and Docker integration. Therefore I didn't make any decision and remained conservative. I'd be happy to `reconsider that choice <https://github.com/mozilla-services/poucave/issues/400>`_.
 
 ::
 
