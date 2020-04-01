@@ -1,5 +1,5 @@
 AUTHOR = "Mathieu Leplatre"
-SITEURL = "http://blog.mathieu-leplatre.info"
+SITEURL = "https://blog.mathieu-leplatre.info"
 SITENAME = "Mathieu Leplatre"
 LOCALE = 'en_US.utf8'
 TIMEZONE = 'Europe/Paris'
