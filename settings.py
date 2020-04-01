@@ -19,10 +19,10 @@ PIWIK_URL = "mathieu-leplatre.info/piwik"
 PIWIK_SITE_ID = 1
 
 SOCIAL = (
-    ("LinkedIn", "http://www.linkedin.com/in/leplatre"),
+    ("LinkedIn", "https://www.linkedin.com/in/leplatre"),
     ("Launchpad", "https://code.launchpad.net/~mathieu.leplatre"),
     ("GitHub", "https://github.com/leplatrem"),
-    ("Twitter", "http://twitter.com/leplatrem"),
+    ("Twitter", "https://twitter.com/leplatrem"),
 )
 
 STATIC_PATHS = ['images', 'extra/CNAME']
