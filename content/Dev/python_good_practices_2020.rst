@@ -195,14 +195,14 @@ The `parametrize feature <https://docs.pytest.org/en/latest/example/parametrize.
     def test_increment(n, expected):
        assert n + 1 == expected
 
-As usual, I like to have make the CI fail when code coverage isn't 100%. So ``pytest-cov`` comes to the rescue:
+As usual, I like to have make the CI fail when code coverage isn't 100%. So `pytest-cov <https://github.com/pytest-dev/pytest-cov>`_ comes to the rescue:
 
 .. code-block:: make
 
     tests: $(INSTALL_STAMP)
         PYTHONPATH=. .venv/bin/pytest tests --cov-report term-missing --cov-fail-under 100 --cov $(SOURCE)
 
-Among the handy pytest extensions, I'd mention:
+Among the handy pytest extensions, I would mention:
 
 - `pytest-mock <https://github.com/pytest-dev/pytest-mock/>`_ that provides ``unittest.mock.patch`` as a ``mocker`` fixture
 - `pytest-benchmark <https://github.com/ionelmc/pytest-benchmark/>`_ that provides a benchmark fixture to measure execution performance
@@ -348,7 +348,7 @@ And we use the `backoff <https://github.com/litl/backoff/>`_ library to manage r
             async with session.get(url, **kwargs) as response:
                 return await response.json()
 
-In order to mock HTTP requests and responses in this setup, we use the ``aiohttp_client`` fixture from `pytest-aiohttp <https://github.com/aio-libs/pytest-aiohttp/>`_ for application part, and `aioresponses <https://github.com/pnuckowski/aioresponses/>`_ for the responses part:
+In order to mock HTTP requests and responses in this setup, we use the ``aiohttp_client`` fixture from `pytest-aiohttp <https://github.com/aio-libs/pytest-aiohttp/>`_ for the application part, and `aioresponses <https://github.com/pnuckowski/aioresponses/>`_ for the responses part:
 
 .. code-block:: python
 
