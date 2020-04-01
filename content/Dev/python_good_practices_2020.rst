@@ -348,7 +348,7 @@ And we use the `backoff <https://github.com/litl/backoff/>`_ library to manage r
             async with session.get(url, **kwargs) as response:
                 return await response.json()
 
-In order to mock HTTP responses in this setup, we use the ``aiohttp_client`` fixture from `pytest-aiohttp <https://github.com/aio-libs/pytest-aiohttp/>`_, and `aioresponses <https://github.com/pnuckowski/aioresponses/>`_ to mock HTTP requests:
+In order to mock HTTP requests and responses in this setup, we use the ``aiohttp_client`` fixture from `pytest-aiohttp <https://github.com/aio-libs/pytest-aiohttp/>`_ for application part, and `aioresponses <https://github.com/pnuckowski/aioresponses/>`_ for the responses part:
 
 .. code-block:: python
 
@@ -395,3 +395,5 @@ Conclusion
 I hope you found this article interesting! And most importantly, that you'll have the opportunity to leverage all these tools in your projects :)
 
 If you think something in this article is utterly wrong, please shout out!
+
+Thanks `Areski <https://github.com/areski>`_ and `Ethan <https://github.com/glasserc>`_ for your early feedback!
