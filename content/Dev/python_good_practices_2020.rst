@@ -7,19 +7,19 @@ Python good practices in early 2020
 
 A great part of my job at Mozilla consists in maintaining the ecosystem of `Firefox Remote Settings <https://remote-settings.readthedocs.io>`_, which is already a few years old.
 
-But recently I had the chance to spin off a new Python project (`Poucave <https://github.com/mozilla-services/poucave/>`_), and that was a good opportunity to look at recent trends that I missed :) This article goes through some of the choices we made, knowing that almost everything is obviously debatable. By the way, depending on the vigour of the Python community, please note that the information may not age well and could be outdated when you read it :)
+But recently I had the chance to spin up a new Python project (`Poucave <https://github.com/mozilla-services/poucave/>`_), and that was a good opportunity to look at recent trends that I missed :) This article goes through some of the choices we made, knowing that almost everything is obviously debatable. By the way, depending on the vigour of the Python community, please note that the information may not age well and could be outdated when you read it :)
 
 
 Environment
 -----------
 
-Since we publish the app as a Docker container, we don't have to support multiple Python environments (eg. with `tox <https://tox.readthedocs.io>`_). Nevertheless contributors may want to use `Pyenv <https://github.com/pyenv/pyenv>`_ to overcome the limitations of their operating system.  
+Since we publish the app as a Docker container, we don't have to support multiple Python environments (eg. with `tox <https://tox.readthedocs.io>`_). On the other hand, contributors may want to use `Pyenv <https://github.com/pyenv/pyenv>`_ to overcome the limitations of their operating system.  
 
 I like to keep tooling minimalist, and I can't explain why, but I also enjoy limiting the list of configuration files in the project root folder. 
 
 Probably because of my age, I'm familiar with ``make``. It's quite universal and popular. And using a single `Makefile <https://github.com/mozilla-services/poucave/blob/master/Makefile>`_ with the appropriate dependencies between targets, we can create the environment and run the application or the tests, by running only one make command.
 
-I was used to Virtualenv, Pip, and requirements files. Common practice consists in having a folder with a requirements file by environment, and a constraints file for reproducible builds. We also setup `Dependabot <https://app.dependabot.com/>`_ on the repo to make sure our dependencies are kept up to date.
+I was used to Virtualenv, Pip, and requirements files. Common practice consists in having `a folder with a requirements file by environment <https://github.com/mozilla-services/poucave/tree/v1.19.0/requirements>`_, and a constraints file for reproducible builds. We also setup `Dependabot <https://app.dependabot.com/>`_ on the repo to make sure our dependencies are kept up to date.
 
 Now the cool kids use Pipenv or Poetry! Even if Poetry seemed to stand out, the debate was still virulent when the project was started, especially with regards to production installs and Docker integration. Therefore I didn't make any decision and remained conservative. I'd be happy to reconsider that choice.
 
@@ -149,7 +149,7 @@ Note that there are complementary linting tools out there:
 Tests
 -----
 
-There's almost no debate about `pytest <https://pytest.readthedocs.io>`_ nowadays. To me, the most appealing feature is the `fixtures decorator <https://docs.pytest.org/en/latest/fixture.html>`_, to maintain your tests `DRY <https://en.wikipedia.org/wiki/Don%27t_repeat_yourself>`_. It allows to obtain dependency injection, object factories, connection setup, config changes...
+There's almost no debate about `pytest <https://pytest.readthedocs.io>`_ nowadays. To me, the most appealing feature is the `fixtures decorator <https://docs.pytest.org/en/latest/fixture.html>`_, to keep your tests `DRY <https://en.wikipedia.org/wiki/Don%27t_repeat_yourself>`_. It enables you to use dependency injection, object factories, connection setup, config changes...
 
 .. code-block:: python
 
@@ -224,7 +224,7 @@ In order to execute the package directly from the command-line (eg. ``python pou
 
 The most appreciated libraries for advanced CLI parameters seem to be `Click <https://click.palletsprojects.com>`_ (declarative) and `Fire <https://github.com/google/python-fire>`_ (automatic).
 
-For the Docker container, at Mozilla we follow our `Dockerflow conventions <https://github.com/mozilla-services/Dockerflow>`_. This helps our OPs team to treat all containers the same way, regardless of the implementation language etc.
+For the Docker container, at Mozilla we follow our `Dockerflow conventions <https://github.com/mozilla-services/Dockerflow>`_. This helps our operations team to treat all containers the same way, regardless of the implementation language etc.
 
 A good take away for any application deployment is to manage configuration through environment variables (recommended in `12factor <https://12factor.net/config>`_ too).
 
