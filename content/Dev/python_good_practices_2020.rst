@@ -92,6 +92,10 @@ The CircleCI configuration file is as simple as:
               name: Test
               command: make tests
 
+You can also see how, using an `ENTRYPOINT <https://github.com/mozilla-services/poucave/blob/9a102272071ade6ce1b7200707c0fbadc72a5cc1/Dockerfile#L34>`_, we can `execute the tests from within the container <https://github.com/mozilla-services/poucave/blob/9a102272071ade6ce1b7200707c0fbadc72a5cc1/.circleci/config.yml#L34-L40>`_ on Circle CI.
+
+We also have a setup that `publishes our Docker container to https://hub.docker.com <https://github.com/mozilla-services/poucave/blob/9a102272071ade6ce1b7200707c0fbadc72a5cc1/.circleci/config.yml#L48-L67>`_ automatically.
+
 
 Code quality
 ------------
