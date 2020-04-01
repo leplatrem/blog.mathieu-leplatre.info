@@ -5,21 +5,23 @@ Python good practices in early 2020
 :date: 2020-04-01
 
 
-I had the chance to spin off a new Python project recently, and that was a good opportunity to look at recent trends :) This article goes through some of the choices we made, knowing that almost everything is obviously debatable.
+A great part of my job at Mozilla consists in maintaining the ecosystem of `Firefox Remote Settings <https://remote-settings.readthedocs.io>`_, which is already a few years old.
+
+But recently I had the chance to spin off a new Python project (`Poucave <https://github.com/mozilla-services/poucave/>`_), and that was a good opportunity to look at recent trends that I missed :) This article goes through some of the choices we made, knowing that almost everything is obviously debatable. By the way, depending on the vigour of the Python community, please note that the information may not age well and could be outdated when you read it :)
 
 
 Environment
 -----------
 
-Since we publish the app as a Docker container, we don't have to support multiple Python environments (eg. with `tox <https://tox.readthedocs.io>`_). Even if contributors may want to use `Pyenv <https://github.com/pyenv/pyenv>`_ to overcome the limitations of their operating system.  
+Since we publish the app as a Docker container, we don't have to support multiple Python environments (eg. with `tox <https://tox.readthedocs.io>`_). Nevertheless contributors may want to use `Pyenv <https://github.com/pyenv/pyenv>`_ to overcome the limitations of their operating system.  
 
-I like to keep tooling minimalist, and I can't explain why, but I enjoy keeping the list of configuration files in the project root folder. 
+I like to keep tooling minimalist, and I can't explain why, but I also enjoy limiting the list of configuration files in the project root folder. 
 
-I'm familiar with ``make``, and it's quite universal and popular. So using a single ``Makefile`` with the appropriate dependencies between targets, we can create the environment and run the application or the tests by running one make command.
+Probably because of my age, I'm familiar with ``make``. It's quite universal and popular. And using a single `Makefile <https://github.com/mozilla-services/poucave/blob/master/Makefile>`_ with the appropriate dependencies between targets, we can create the environment and run the application or the tests, by running only one make command.
 
-I was used to Virtualenv, Pip, and requirements files. Common practice consists in having a folder with a requirements file by environment, and a constraint file for reproducible builds. We also setup `Dependabot <https://app.dependabot.com/>`_ to make sure our dependencies are kept up to date in the repo.
+I was used to Virtualenv, Pip, and requirements files. Common practice consists in having a folder with a requirements file by environment, and a constraints file for reproducible builds. We also setup `Dependabot <https://app.dependabot.com/>`_ on the repo to make sure our dependencies are kept up to date.
 
-Now there is Pipenv or Poetry! Even if Poetry seemed to stand out, the debate was still virulent when the project was started, especially with regards to production installs and Docker integration. Therefore I didn't make any decision and remained conservative. 
+Now the cool kids use Pipenv or Poetry! Even if Poetry seemed to stand out, the debate was still virulent when the project was started, especially with regards to production installs and Docker integration. Therefore I didn't make any decision and remained conservative. I'd be happy to reconsider that choice.
 
 ::
 
@@ -47,7 +49,7 @@ Now there is Pipenv or Poetry! Even if Poetry seemed to stand out, the debate wa
     ...
     ...
 
-The Makefile looks like this. When running ``make serve``, the virtualenv is created if missing, and latest dependencies are installed only if outdated...
+The ``Makefile`` would look like this:
 
 .. code-block:: make
 
@@ -68,6 +70,7 @@ The Makefile looks like this. When running ``make serve``, the virtualenv is cre
     serve: $(INSTALL_STAMP):
         PYTHONPATH=. $(PYTHON) $(SOURCE)
 
+When running ``make serve``, the virtualenv is created if missing, and the latest dependencies are installed only if outdated...
 
 The CircleCI configuration file is as simple as:
 
@@ -103,9 +106,9 @@ The working combination in one ``Makefile`` target is:
         $(VENV)/bin/isort --line-width=88 --lines-after-imports=2 -rc $(SOURCE) --virtual-env=$(VENV)
         $(VENV)/bin/black $(SOURCE)
 
-Again, to avoid having an extra configuration file for *isort* we'll use CLI arguments :)
+Again, to avoid having an extra configuration file for *isort* we used CLI arguments :)
 
-We'll want to verify linting on our CI, so we have this ``lint`` target, that also runs `flake8 <https://pypi.org/project/flake8/>`_ to detect unused imports or variables, and run `mypy <http://mypy-lang.org/>`_ for type checking.
+Since we want to verify code linting on the CI, we also have this ``lint`` target, that additionnally runs `flake8 <https://pypi.org/project/flake8/>`_ to detect unused imports or variables, and runs `mypy <http://mypy-lang.org/>`_ for type checking.
 
 .. code-block:: make
 
@@ -115,7 +118,7 @@ We'll want to verify linting on our CI, so we have this ``lint`` target, that al
         $(VENV)/bin/flake8 $(SOURCE) --ignore=W503,E501
         $(VENV)/bin/mypy $(SOURCE) --ignore-missing-imports
 
-By the way, using type checking is pretty straightforward and enjoyable :)
+By the way, using type checking in your Python project is now pretty straightforward and enjoyable :)
 
 .. code-block:: python
 
@@ -124,7 +127,7 @@ By the way, using type checking is pretty straightforward and enjoyable :)
     def process(params: Optional[Dict[str, Any]] = None) -> List[str]:
         return params.keys() if params else []
 
-Some plugins to garantee the quality of your contributions exist for your favorite editor. And a commit-hook can also do the job:
+Some plugins to guarantee the quality of your contributions exist for your favorite editor. And a commit-hook can also do the job:
 
 .. code-block:: bash
 
@@ -132,7 +135,7 @@ Some plugins to garantee the quality of your contributions exist for your favori
 
 Check out `pre-commit <https://pre-commit.com>`_ or Rehan's `therapist <https://github.com/rehandalal/therapist>`_ for advanced commit hooks.
 
-Note that there are more linting tools out there:
+Note that there are complementary linting tools out there:
 
 - `flake8-docstrings <https://pypi.org/project/flake8-docstrings/>`_ or `darglint <https://github.com/terrencepreilly/darglint>`_ to validate your docstrings
 - `wemake-python-styleguide <https://github.com/wemake-services/wemake-python-styleguide#what-we-are-about>`_ for a very strict Python linter
@@ -142,7 +145,7 @@ Note that there are more linting tools out there:
 Tests
 -----
 
-There's almost no debate about `pytest <https://pytest.readthedocs.io>`_. To me, the most appealing feature is the `fixtures decorator <https://docs.pytest.org/en/latest/fixture.html>`_, to maintain your tests `DRY <https://en.wikipedia.org/wiki/Don%27t_repeat_yourself>`_. It allows to obtain dependency injection, object factories, connection setup, config changes...
+There's almost no debate about `pytest <https://pytest.readthedocs.io>`_ nowadays. To me, the most appealing feature is the `fixtures decorator <https://docs.pytest.org/en/latest/fixture.html>`_, to maintain your tests `DRY <https://en.wikipedia.org/wiki/Don%27t_repeat_yourself>`_. It allows to obtain dependency injection, object factories, connection setup, config changes...
 
 .. code-block:: python
 
@@ -177,18 +180,18 @@ The `parametrize feature <https://docs.pytest.org/en/latest/example/parametrize.
 .. code-block:: python
 
     @pytest.mark.parametrize(
-       ('n', 'expected'), [
+       ("n", "expected"), [
            (1, 2),
            (2, 3),
            pytest.mark.xfail((3, 2)),
            pytest.mark.xfail(reason="some bug")((1, 0)),
-           pytest.mark.skipif('sys.version_info >= (3,0)')((10, 11)),
+           pytest.mark.skipif("sys.version_info >= (3,0)")((10, 11)),
        ]
     )
     def test_increment(n, expected):
        assert n + 1 == expected
 
-As usual, I like to have CI fail when code coverage isn't 100%. So ``pytest-cov`` comes to the rescue:
+As usual, I like to have make the CI fail when code coverage isn't 100%. So ``pytest-cov`` comes to the rescue:
 
 .. code-block:: make
 
@@ -211,9 +214,9 @@ In order to execute the package directly from the command-line (eg. ``python pou
 
 The most appreciated libraries for advanced CLI parameters seem to be `Click <https://click.palletsprojects.com>`_ (declarative) and `Fire <https://github.com/google/python-fire>`_ (automatic).
 
-For the Docker container, we follow our `Dockerflow conventions <https://github.com/mozilla-services/Dockerflow>`_. This helps our OPs team to treat all containers the same way, regardless of implementation language etc.
+For the Docker container, at Mozilla we follow our `Dockerflow conventions <https://github.com/mozilla-services/Dockerflow>`_. This helps our OPs team to treat all containers the same way, regardless of the implementation language etc.
 
-A good take away for any application is to manage configuration through environment variables.
+A good take away for any application deployment is to manage configuration through environment variables (recommended in `12factor <https://12factor.net/config>`_ too).
 
 We centralize all configuration values in a dedicated module ``config.py``, that reads variables from env.
 
@@ -250,7 +253,7 @@ During tests, config values are changed using ``mock``:
 
     from unittest import mock
 
-    def test_diagram_path(monkeypatch):
+    def test_diagram_path():
         with mock.patch.object(config, "DEFAULT_TTL", "some.svg"):
             main()
         ...
@@ -271,7 +274,8 @@ If you want to allow reading configuration from a file (``.env`` or ``.ini``), o
 
     from decouple import config
 
-    DEBUG = config('DEBUG', default=False, cast=bool)
+    DEBUG = config("DEBUG", default=False, cast=bool)
+    HEADERS = config("HEADERS", default="{}", cast=lambda v: json.loads(v))
 
 
 A Web app
@@ -279,7 +283,9 @@ A Web app
 
 The project consisted in a minimalist API. There are plenty of candidates, but I wanted something ultra simple and leveraging ``async``/``await``.
 
-`Sanic <https://github.com/huge-success/sanic>`_ and `FastAPI <https://fastapi.tiangolo.com>`_ seemed to stand out, but since my project needed an async HTTP client, I decided to go with `aiohttp <https://docs.aiohttp.org/en/stable/web.html>`_ which provides both server and client stuff. `httpx <https://www.python-httpx.org>`_ used in *Sanic* could have been a good choice too.
+`Sanic <https://github.com/huge-success/sanic>`_ and `FastAPI <https://fastapi.tiangolo.com>`_ seemed to stand out, but since my project needed an async HTTP client too, I decided to go with `aiohttp <https://docs.aiohttp.org/en/stable/web.html>`_ which provides both server and client stuff. `httpx <https://www.python-httpx.org>`_ used in *Sanic* could have been a good choice too.
+
+The server code looks familiar:
 
 .. code-block:: python
 
@@ -293,14 +299,14 @@ The project consisted in a minimalist API. There are plenty of candidates, but I
         return web.json_response(body)
 
     def init_app(argv):
-        app = web.Application(
+        app = web.Application()
         app.add_routes(routes)
         return app
 
     def main(argv):
         web.run_app(init_app(argv))
 
-To centralize the HTTP client calls within the app, we have this wrapper:
+And to centralize the HTTP client parameters within the app, we have this wrapper:
 
 .. code-block:: python
 
@@ -312,11 +318,11 @@ To centralize the HTTP client calls within the app, we have this wrapper:
     @asynccontextmanager
     async def ClientSession() -> AsyncGenerator[aiohttp.ClientSession, None]:
         timeout = aiohttp.ClientTimeout(total=config.REQUESTS_TIMEOUT_SECONDS)
-        headers = {"User-Agent": "poucave", **config.DEFAULT_REQUEST_HEADERS}
+        headers = {"User-Agent": "poucave", **config.DEFAULT_REQUESTS_HEADERS}
         async with aiohttp.ClientSession(headers=headers, timeout=timeout) as session:
             yield session
 
-And use the `backoff <https://github.com/litl/backoff/>`_ library to manage retries:
+And we use the `backoff <https://github.com/litl/backoff/>`_ library to manage retries:
 
 .. code-block:: python
 
@@ -332,7 +338,7 @@ And use the `backoff <https://github.com/litl/backoff/>`_ library to manage retr
             async with session.get(url, **kwargs) as response:
                 return await response.json()
 
-In order to mock HTTP responses in this setup, we use the ``aiohttp_client`` fixture from `pytest-aiohttp <https://github.com/aio-libs/pytest-aiohttp/>`_ and `aioresponses <https://github.com/pnuckowski/aioresponses/>`_ to mock HTTP requests:
+In order to mock HTTP responses in this setup, we use the ``aiohttp_client`` fixture from `pytest-aiohttp <https://github.com/aio-libs/pytest-aiohttp/>`_, and `aioresponses <https://github.com/pnuckowski/aioresponses/>`_ to mock HTTP requests:
 
 .. code-block:: python
 
@@ -347,15 +353,17 @@ In order to mock HTTP responses in this setup, we use the ``aiohttp_client`` fix
         with aioresponses(passthrough=[test_server]) as m:
             yield m
 
-    def test_api_root_url(cli):
-        data = cli.get("/")
+    async def test_api_root_url(cli):
+        data = await cli.get("/")
 
         assert data["app"] == "poucave"
 
-    def test_api_fetches_info_from_source(cli, mock_aioresponses):
+    async def test_api_fetches_info_from_source(cli, mock_aioresponses):
         mock_aioresponses.get(config.SOURCE_URI, json={"success": True})
 
-        cli.get("/check-source")
+        data = await cli.get("/check-source")
+
+        assert data["success"]
 
 
 Misc
@@ -369,3 +377,6 @@ Some libraries and tools worth checking out:
 - `Pypeln <https://github.com/cgarciae/pypeln>`_ for concurrent async pipelines
 - `towncrier <https://github.com/hawkowl/towncrier>`_ to automate CHANGELOG entries
 - `uvicorn <https://www.uvicorn.org>`_ for a performant ASGI server
+
+
+I hope you found this article interesting! If you think something in this article is utterly wrong, please shout out!
