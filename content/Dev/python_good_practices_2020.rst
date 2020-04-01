@@ -64,7 +64,7 @@ The ``Makefile`` would look like this:
         $(PIP_INSTALL) -Ur requirements/default.txt -c requirements/constraints.txt
         touch $(INSTALL_STAMP)
 
-    $(PYTHON):    
+    $(PYTHON):
         virtualenv --python=python3 $(VENV)
 
     serve: $(INSTALL_STAMP):
@@ -201,6 +201,12 @@ As usual, I like to have make the CI fail when code coverage isn't 100%. So ``py
 
     tests: $(INSTALL_STAMP)
         PYTHONPATH=. .venv/bin/pytest tests --cov-report term-missing --cov-fail-under 100 --cov $(SOURCE)
+
+Among the handy pytest extensions, I'd mention:
+
+- `pytest-mock <https://github.com/pytest-dev/pytest-mock/>`_ that provides ``unittest.mock.patch`` as a ``mocker`` fixture
+- `pytest-benchmark <https://github.com/ionelmc/pytest-benchmark/>`_ that provides a benchmark fixture to measure execution performance
+- `pytest-watch <https://github.com/joeyespo/pytest-watch>`_ for TDD
 
 
 Executing and configuring
