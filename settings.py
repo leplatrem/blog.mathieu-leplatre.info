@@ -12,7 +12,6 @@ CATEGORY_FEED_ATOM = 'feeds/%s.atom.xml'
 RELATIVE_URLS = False
 DELETE_OUTPUT_DIRECTORY = True
 
-TWITTER_USERNAME = "leplatrem"
 GITHUB_URL = "https://github.com/leplatrem"
 DISQUS_SITENAME = "mathieuleplatre"
 PIWIK_URL = "mathieu-leplatre.info/piwik"
