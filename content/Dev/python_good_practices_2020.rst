@@ -72,6 +72,9 @@ The ``Makefile`` would look like this:
 
 When running ``make serve``, the virtualenv is created if missing, and the latest dependencies are installed only if outdated...
 
+**update** As you can see we don't even bother «activating» the virtualenv. Therefore we don't really need tools like `virtualenvwrapper <https://virtualenvwrapper.readthedocs.io>`_ to switch between environments. That being said, I really enjoy having the `Oh My Zsh plugin for it <https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/virtualenvwrapper>`_ that automatically activates a related virtualenv when I jump in a folder that contains a ``.venv`` folder :) Thanks `Florian <https://twitter.com/Exirel/status/1245677611138899970> `_ for the feedback ;)
+
+
 The CircleCI configuration file is as simple as:
 
 .. code-block:: yaml
