@@ -391,6 +391,7 @@ Some libraries and tools worth checking out:
 - `towncrier <https://github.com/hawkowl/towncrier>`_ to automate CHANGELOG entries
 - `uvicorn <https://www.uvicorn.org>`_ for a performant ASGI server
 
+**update**: Disclaimer: I haven't used all of them. I just saw them in several projects :)
 
 Conclusion
 ----------
