@@ -18,7 +18,7 @@ The ``canonical_json`` `crate <https://crates.io/crates/canonical_json>`_ implem
    use canonical_json::ser::to_string;
 
    fn main() {
-     println!("{}", to_string(&json!("we ❤ Rust")));
+       println!("{}", to_string(&json!("we ❤ Rust")));
    }
    // "we \u2665 Rust"
 
@@ -39,60 +39,60 @@ Python is just a language, and has several implementations, Jython in Java, Pypy
 
 The Rust code must be compiled as a shared library (``.so`` file), Python must `load it <https://docs.python.org/3/library/ctypes.html#loading-shared-libraries>`_ and then call the exported symbol (``canonical_json::ser::to_string()``).
 
-Since one side handles Python objects (eg. ``dict``) and the other side expects a Rust data type (eg. ``json!()``), the whole challenge here will be to translate Python values in memory and pass them to Rust. Fortunately, in this modest use-case, we don't have to handle mutability or complex lifetimes, and the serializer just gives back a string in return. However, unlike most documented use-cases, the passed data is not «structured»: the input data can be any Python serializable object, and the destination in Rust is not a domain specific custom type, but the generic ``serde_json::json::Value``.
+Since one side handles Python objects (eg. ``dict``) and the other side expects a Rust data type (cf. ``json!()``), the whole challenge here will be to translate Python values in memory and pass them to Rust. Fortunately, in this modest use-case, we don't have to handle mutability or complex lifetimes, and the serializer just gives back a string in return. However, unlike most documented use-cases, the passed data is not «structured»: the input data can be any Python serializable object, and the destination in Rust is not a domain specific custom type, but the generic ``serde_json::json::Value``.
 
 Using `PyO3 <https://github.com/PyO3/PyO3>`_, it is quite straightforward to start. The main principle consists in starting a library crate, that imports both ``pyo3`` and ``canonical_json`` dependencies. The Rust function will be exposed in the Python module using a high-level macros:
 
 .. code-block:: rust
 
-	#[pymodule]
-	fn canonicaljson(_py: Python, m: &PyModule) -> PyResult<()> {
-	    m.add("__version__", env!("CARGO_PKG_VERSION"))?;
+    #[pymodule]
+    fn canonicaljson(_py: Python, m: &PyModule) -> PyResult<()> {
+        m.add("__version__", env!("CARGO_PKG_VERSION"))?;
 
-	    m.add_wrapped(wrap_pyfunction!(dumps))?;
+        m.add_wrapped(wrap_pyfunction!(dumps))?;
 
-	    Ok(())
-	}
+        Ok(())
+    }
 
-	#[pyfunction]
-	pub fn dumps(py: Python, obj: PyObject) -> PyResult<PyObject> {
-		// Convert the Python object to a Serde value
-	    let value = python_to_serde(py, &obj)?;
-	    // Call Canonical JSON serializer
-	    match to_string(&v) {
-	        Ok(s) => Ok(s.to_object(py)),
-	        Err(e) => Err(PyErr::new::<PyTypeError, _>(format!("{:?}", e))),
-	    }
-	}
+    #[pyfunction]
+    pub fn dumps(py: Python, obj: PyObject) -> PyResult<PyObject> {
+        // Convert the Python object to a Serde value
+        let value = python_to_serde(py, &obj)?;
+        // Call Canonical JSON serializer
+        match to_string(&v) {
+            Ok(s) => Ok(s.to_object(py)),
+            Err(e) => Err(PyErr::new::<PyTypeError, _>(format!("{:?}", e))),
+        }
+    }
 
-	fn python_to_serde(py: Python, obj: &PyObject) -> Result<serde_json::Value, PyCanonicalJSONError> {
-	    // ... See full implementation
-	    // https://github.com/mozilla-services/python-canonicaljson-rs/blob/62599b24/src/lib.rs#L87-L167
-	}
+    fn python_to_serde(py: Python, obj: &PyObject) -> Result<serde_json::Value, PyCanonicalJSONError> {
+        // ... See full implementation
+        // https://github.com/mozilla-services/python-canonicaljson-rs/blob/62599b24/src/lib.rs#L87-L167
+    }
 
 
 Using `maturin <https://github.com/PyO3/maturin>`_, the above library crate can be built and published as a wheel on Pypi. Wheels save consumers from compiling the Rust part when installing the Python package, and Maturin takes care of packaging metadata etc.
 
 .. code-block:: toml
 
-	# pyproject.toml
+    # pyproject.toml
 
-	[build-system]
-	requires = ["maturin"]
-	build-backend = "maturin"
+    [build-system]
+    requires = ["maturin"]
+    build-backend = "maturin"
 
-	[package.metadata.maturin]
-	classifier = [
-    	"Intended Audience :: Developers",
-    	"Programming Language :: Python",
-    	"Programming Language :: Rust",
+    [package.metadata.maturin]
+    classifier = [
+        "Intended Audience :: Developers",
+        "Programming Language :: Python",
+        "Programming Language :: Rust",
     ]
 
 ``maturin build`` and ``maturin publish`` just worked as expected.
 
 .. note::
-	
-	To be honest I haven't battle tested the multiplatform part extensively since my dev box and our servers run Linux.
+    
+    To be honest I haven't battle tested the multiplatform part extensively since my dev box and our servers run Linux.
 
 
 JavaScript & WebAssembly
@@ -104,9 +104,9 @@ In the browser, a WebAssembly module is loaded as a Web page resource, and can b
 
 .. code-block:: javascript
 
-	const canonicaljson = await import("./node_modules/canonicaljson-wasm/canonicaljson_wasm.js");
+    const canonicaljson = await import("./node_modules/canonicaljson-wasm/canonicaljson_wasm.js");
 
-	const str = canonicaljson.stringify({"héo": 42});
+    const str = canonicaljson.stringify({"héo": 42});
 
 To achieve this, instead of compiling Rust to binary code that can only be executed by a specific operating system or processor, we will compile it to this universal binary format, using ``wasm-bindgen``.
 
@@ -116,19 +116,19 @@ In our example, the main code of the wrapping crate can look like this:
 
 .. code-block:: rust
 
-	use wasm_bindgen::prelude::*;
-	use canonical_json::ser::to_string as cj_to_string;
+    use wasm_bindgen::prelude::*;
+    use canonical_json::ser::to_string as cj_to_string;
 
-	fn err_to_str(x: impl std::fmt::Display) -> JsValue {
-	    JsValue::from_str(&x.to_string())
-	}
+    fn err_to_str(x: impl std::fmt::Display) -> JsValue {
+        JsValue::from_str(&x.to_string())
+    }
 
-	#[wasm_bindgen]
-	pub fn stringify(val: &JsValue) -> JsValue {
-	    let serde_value = val.into_serde().map_err(err_to_str).unwrap();
+    #[wasm_bindgen]
+    pub fn stringify(val: &JsValue) -> JsValue {
+        let serde_value = val.into_serde().map_err(err_to_str).unwrap();
 
-	    JsValue::from_str(&cj_to_string(&serde_value).unwrap())
-	}
+        JsValue::from_str(&cj_to_string(&serde_value).unwrap())
+    }
 
 We build this crate using `wasm-pack <https://github.com/rustwasm/wasm-pack>`_. It will generate the expected ``.js`` module.
 
