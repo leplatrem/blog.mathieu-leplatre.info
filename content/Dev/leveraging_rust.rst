@@ -71,6 +71,9 @@ Using `PyO3 <https://github.com/PyO3/PyO3>`_, it is quite straightforward to sta
     }
 
 
+In order to convert a generic ``PyObject`` into the generic ``serde_json::Value``, we will first try to `extract <https://docs.rs/pyo3/0.11.1/pyo3/conversion/trait.FromPyObject.html#tymethod.extract>`_ the Rust equivalents of Python basic types (``String``, ``bool``, ``u64``, ...) from this Python object reference, and simply `instantiate Serde values <https://docs.serde.rs/serde_json/value/fn.to_value.html>`_. For other types, we try to `cast the reference <https://docs.rs/pyo3/0.11.1/pyo3/struct.PyObject.html#method.cast_as>`_ to Python object types (``PyDict``, ``PyList``, ``PyTuple``, ...) in order to recursively convert them. The code was mostly inspired `by Matthias Endler's hyperjson <https://github.com/mre/hyperjson/>`_. See `full implementation <https://github.com/mozilla-services/python-canonicaljson-rs/blob/62599b24/src/lib.rs#L87-L167>`_.
+
+
 Using `maturin <https://github.com/PyO3/maturin>`_, the above library crate can be built and published as a wheel on Pypi. Wheels save consumers from compiling the Rust part when installing the Python package, and Maturin takes care of packaging metadata etc.
 
 .. code-block:: toml
