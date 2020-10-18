@@ -132,81 +132,83 @@ header {
 header a {
   text-decoration: none;
 }
-/* line 121, ../../compass/src/main.scss */
-header a#page-title {
-  font-weight: bold;
-}
-/* line 125, ../../compass/src/main.scss */
+/* line 124, ../../compass/src/main.scss */
 header h1 {
+  font-weight: bold;
   margin-bottom: 30px;
   line-height: 1.2em;
 }
 
 /* line 131, ../../compass/src/main.scss */
+dt {
+  font-weight: bold;
+}
+
+/* line 135, ../../compass/src/main.scss */
 #links {
   font-size: 0.8em;
 }
-/* line 134, ../../compass/src/main.scss */
+/* line 138, ../../compass/src/main.scss */
 #links li {
   display: inline-block;
   margin-left: 15px;
 }
-/* line 139, ../../compass/src/main.scss */
+/* line 143, ../../compass/src/main.scss */
 #links a {
   color: #F7882F;
   text-decoration-color: #F7882F;
   text-decoration-thickness: unset;
 }
-/* line 143, ../../compass/src/main.scss */
+/* line 147, ../../compass/src/main.scss */
 #links a:hover {
   color: #F7882F;
 }
 
-/* line 149, ../../compass/src/main.scss */
+/* line 153, ../../compass/src/main.scss */
 #article-list {
   margin-top: 100px;
 }
-/* line 151, ../../compass/src/main.scss */
+/* line 155, ../../compass/src/main.scss */
 #article-list ol li {
   line-height: 1.2em;
   list-style-type: none;
   padding-bottom: 10px;
 }
 
-/* line 158, ../../compass/src/main.scss */
+/* line 162, ../../compass/src/main.scss */
 .note {
   background: #efefef;
   margin: 1em 0;
 }
-/* line 161, ../../compass/src/main.scss */
+/* line 165, ../../compass/src/main.scss */
 .note p {
   display: inline;
 }
-/* line 163, ../../compass/src/main.scss */
+/* line 167, ../../compass/src/main.scss */
 .note p.first {
   font-weight: bold;
 }
-/* line 165, ../../compass/src/main.scss */
+/* line 169, ../../compass/src/main.scss */
 .note p.first:after {
   content: ' : ';
 }
 
-/* line 172, ../../compass/src/main.scss */
+/* line 176, ../../compass/src/main.scss */
 footer {
   color: #2d2d2d;
   font-size: 13px;
   letter-spacing: 4px;
   margin-left: 20px;
 }
-/* line 177, ../../compass/src/main.scss */
+/* line 181, ../../compass/src/main.scss */
 footer li {
   display: inline;
 }
-/* line 180, ../../compass/src/main.scss */
+/* line 184, ../../compass/src/main.scss */
 footer p {
   text-align: right;
 }
-/* line 183, ../../compass/src/main.scss */
+/* line 187, ../../compass/src/main.scss */
 footer a {
   text-decoration-thickness: unset;
 }

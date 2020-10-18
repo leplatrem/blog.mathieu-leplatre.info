@@ -118,14 +118,18 @@ pre {
 header {
     padding-bottom: 20px;
     a {
-        &#page-title { font-weight: bold; }
         text-decoration: none;
     }
     
     h1 {
+		font-weight: bold;
 		margin-bottom: 30px;
 		line-height: 1.2em;
     }
+}
+
+dt {
+	font-weight: bold;
 }
 
 #links {
