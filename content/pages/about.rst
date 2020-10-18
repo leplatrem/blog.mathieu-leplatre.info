@@ -1,32 +1,89 @@
 About
 #####
 
-.. raw:: html
-
-    <div style="float: right;">
-       <a class="twitter-timeline"  href="https://twitter.com/leplatrem" data-widget-id="641345584553701376">Tweets by @leplatrem</a>
-       <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-    </div>
-
-
 .. image:: /images/face.jpg
    :alt: face
    :width: 200 px
    :align: right
 
-* `Mozilla Cloud Services <https://wiki.mozilla.org/CloudServices>`_ team, Barcelona, Spain
-* Mainly involved in Web and GIS Open Source projects
-* Email ``mathieu`` @ ``leplat`` . ``re``
-* Twitter ``@leplatrem``
+
+Bonjour!
+========
+
+My name is Mathieu Leplatre, and this website is mostly about my profession: developer.
+I'm employed by the `Mozilla Corporation <https://en.wikipedia.org/wiki/Mozilla_Corporation>`_ since December 2014, and currently located in Barcelona, Spain.
+
+You can contact me by email (``mathieu`` @ ``leplat`` . ``re``). If
+you are a recruiter, please take some time to read about my values below
+before reaching out.
+
+
+Values & Interests
+==================
+
+Simplicity
+  I find elegance in `simple and plain solutions <https://en.wikipedia.org/wiki/KISS_principle>`_.
+  Minimalism and frugality in the domain of technology is something attractive to me.
+  And being simple also connects with being clear, transparent, and honest.
+
+Decentralization
+  I value a world where horizontal cooperation is stronger than centrally
+  made decisions. Even if it looks less organized and less efficient.
+  The `centralization of the Web <https://redecentralize.org>`_ around a few companies makes me sad.
+
+Free Culture
+  I strongly support the `copyleft movement <https://en.wikipedia.org/wiki/Free-culture_movement>`_, and the idea of freedom to
+  use, study, and share content. I have been lucky to be able to publish
+  all my work under Open Source licences since 2010.
+
+Healthy Technology
+  I am a big fan of `humane technology <https://www.humanetech.com>`_, and
+  want to partixcipate in the fight against advertisement, addiction, and 
+  commercialism in general.
+
+Ecology
+  I need my profesional environment to be as consistent as possible with
+  the complex ecosystem of my values. This includes a variety of notions like
+  sustainibility, the respect of the environment, education, critical thinking, 
+  work–life balance, humanism...
+
 
 Favorite Technologies
 =====================
 
-* Python | Django | Pyramid
-* JavaScript | HTML5
-* PostGIS | Leaflet
-* Qt | C++
-* PostgreSQL | NoSQL
+I have had the chance to work with a variety of technologies, in very
+different contexts. This usually gives me some perspective to pick the relevant one.
+
+Python
+  I first used to work a lot with Django, then Pyramid, but along the years I came to
+  enjoy more minimalist approaches like `aiohttp <https://docs.aiohttp.org>`_ for
+  micro-services. I mainly use Python for my tiny daily hacks.
+
+Rust
+  I enjoy the expressivity, performance, and versatility of Rust. Shiping the same code base
+  on the server, in the browser, or on mobile is just fantastic.
+
+PostgreSQL
+  It is robust, performant, and powerful, but also simple to reason about.
+  And most of the time, we don't need any specific database engine, especially
+  with features like JSON(B) fields.
+
+Frontend
+  Although I'm familiar with React and most of the moving parts around it (eg. redux, sagas, jest),
+  I find the core ideas behind Svelte and Elm more relevant. TypeScript helps.
+  CSS is fine, but not on Mondays.
+
+Qt
+  The Qt framework allows me to build applications with nice GUIs that run everywhere.
+  Using C++ is fun, in this context.
+
+Linux
+  I have been a daily Linux user since Ubuntu came out, and comfortable with
+  running systems in production (Docker, monitoring, reverse proxies, load balancers, ...)
+
+
+Projects
+========
 
 Check out `some of my projects <https://github.com/leplatrem>`_, *most notably* :
 
@@ -38,6 +95,7 @@ Check out `some of my projects <https://github.com/leplatrem>`_, *most notably* 
   `some <https://github.com/makinacorpus/django-screamshot>`_
   `Django <https://github.com/makinacorpus/django-appypod>`_
   `apps <https://github.com/makinacorpus/django-mbtiles>`_.
+
 
 Talks
 =====
@@ -74,34 +132,7 @@ Publications
   *(Keywords: Multi-agents systems)*
 
 
-Specialities
-============
-
-* Web Technologies
-* Cartography | Web mapping
-* Software Architecture
-* Computer Interaction Design
-* Project Management
-* Free Software & GNU/Linux
-
-
-Interests
-=========
-
-* Technologies as human and social tools
-* Free Culture and copyleft
-* Independant and decentralized Media
-* Nature, Hiking, Travel & Photography
-
-
 Education
 =========
 * `Master's degree <http://en.wikipedia.org/Master's_degree#France>`_ in Computer Science (DEA d'informatique), `University of Paris-Sud <http://en.wikipedia.org/University_of_Paris-Sud>`_.
 * `Software Engineer <http://en.wikipedia.org/Software_engineering>`_ graduated from `Polytech Paris-Sud <http://en.wikipedia.org/Polytech Paris-Sud>`_, formerly FiiFO.
-
-
-Others
-======
-* Proud member of `April <http://www.april.org/en/presentation-april-association>`_
-  and `AFPY <http://www.afpy.org>`_ associations.
-* Sporadically edit `OpenStreetMap <http://openstreetmap.org>`_, like `my hometown <http://www.openstreetmap.org/?&lat=48.4876684609631&lon=1.39681062864008&zoom=14&layers=M>`_
