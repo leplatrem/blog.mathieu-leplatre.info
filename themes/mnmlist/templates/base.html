@@ -23,12 +23,9 @@
 
 <body>
 		<section id="links">
-			<a href="{{ SITEURL }}" id="site-title">{{ SITENAME }} {% if SITESUBTITLE %} <strong>{{ SITESUBTITLE }}</strong>{% endif %}</a>
+			<li><a href="{{ SITEURL }}" id="site-title">Home</a></li>
 			{% for page in pages %}
 				<li><a href="{{ SITEURL }}/{{ page.url }}">{{ page.title }}</a>{% if not loop.last %} ::{% endif %}</li>
-			{% endfor %}
-			{% for category, articles in categories %}
-				<li><a href="{{ SITEURL }}/{{ category.url }}">{{ category }}</a></li>
 			{% endfor %}
 		</section>
 		{% include 'github.html' %}
@@ -36,14 +33,8 @@
         {% endblock %}
 
         <footer>
-            <nav>
-                <ul>
-                {% if tags|length > 1 %}
-                    <li>:: <a href="{{ SITEURL }}/tags.html">Tags</a></li>
-                {% endif %}
-                :: <li id="theme-credit"><a href="http://mathieu.agopian.info/mnmlist/theme.html">Thème mnmlist</a></li>
-                </ul>
-            </nav>
+            <p>© Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a></p>
+			<p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
         </footer>
 
 {% include 'analytics.html' %}
