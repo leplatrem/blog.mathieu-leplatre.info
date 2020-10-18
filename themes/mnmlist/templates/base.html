@@ -23,7 +23,7 @@
 
 <body>
 		<section id="links">
-			<li><a href="{{ SITEURL }}" id="site-title">Home</a></li>
+			<li><a href="{{ SITEURL }}/" id="site-title">Home</a></li>
 			{% for page in pages %}
 				<li><a href="{{ SITEURL }}/{{ page.url }}">{{ page.title }}</a>{% if not loop.last %} ::{% endif %}</li>
 			{% endfor %}
@@ -36,9 +36,5 @@
             <p>© Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a></p>
 			<p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
         </footer>
-
-{% include 'analytics.html' %}
-{% include 'piwik.html' %}
-{% include 'disqus_script.html' %}
 </body>
 </html>

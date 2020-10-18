@@ -15,5 +15,6 @@
       {% endfor %}
 	  - Posted in the <a href="{{ SITEURL }}/{{ article.category.url }}">{{ article.category }}</a> category
 	{% endif %}
+	{% include 'comments.html' %}
 </article>
 {% endblock %}

@@ -36,6 +36,6 @@ EXTRA_PATH_METADATA = {'extra/CNAME': {'path': 'CNAME'},}
 
 DEFAULT_PAGINATION = 10
 
-RELATIVE_URLS = True
-
 THEME = 'themes/mnmlist'
+
+RELATIVE_URLS = True
