@@ -2,3 +2,5 @@
 *.tar.gz
 /env/
 /output/
+__pycache__
+.sass-cache/
