@@ -1,40 +1,27 @@
 {% extends "base.html" %}
-{% block content_title %}{% endblock %}
-{% block content %}        
+{% block content %}
+<h1>{% block pagetitle %}{% endblock %}</h1>
 {% if articles %}
-    {% for article in articles %}        
-        {# First item #}
-        {% if loop.first %}
-            <header>
-                <h1><a href="{{ SITEURL }}/{{ article.url }}" id="page-title">{{ article.title }}</a></h1>
+    {% for article in articles %}
+        {% if loop.index <= DEFAULT_PAGINATION %}
+            <section class="section index">
                 {% if not HIDE_DATE %}
-                <time datetime="{{ article.date.isoformat() }}">{{ article.locale_date }}</time>{% endif %}
-            </header>
-
-            <article>
-                {{ article.content }}
-                {% if article.tags %}
-				  {% for tag in article.tags %}
-					<a href="{{ SITEURL }}/{{ tag.url }}">#{{ tag }}</a>{% if not loop.last %}, {% endif %}
-				  {% endfor %}
-				  - Posted in the <a href="{{ SITEURL }}/{{ article.category.url }}">{{ article.category }}</a> category
-				{% endif %}
-				{% include 'comments.html' %}
-            </article>
-            {% if loop.length > 1 %}
-                <section id="article-list">
-                    <h2>All posts</h2>
-                    <ol>
+                <time datetime="{{ article.date.isoformat() }}">{{ article.locale_date }}</time>
+                {% endif %}
+                <h1><a href="{{ SITEURL }}/{{ article.url }}" id="page-title">{{ article.title }}</a></h1>
+                {{ article.content|striptags|truncate(200) }}
+            </section>
+        {% else %}
+            {% if loop.index0 == DEFAULT_PAGINATION %}
+            <section>
+                <h1>More...</h1>
+                <ul>
             {% endif %}
-        {# other items #}
-        {% else %} 
             <li><a href="{{ SITEURL }}/{{ article.url }}" rel="bookmark" title="Permalink to {{ article.title|striptags }}">{{ article.title }}</a></li>
-        {% endif %}
-        {% if loop.last %}
-          {% if loop.length > 1 %}
-            </ol>
-            </section><!-- #article-list -->
-          {% endif %}
+            {% if loop.last %}
+                </ul>
+            </section>
+            {% endif %}
         {% endif %}
     {% endfor %}
 {% else %}

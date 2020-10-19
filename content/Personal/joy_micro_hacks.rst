@@ -37,7 +37,7 @@ I am too easily absorbed by software ideas and plans. I quickly feel accountable
 
 .. figure:: /images/microhacks-smeagol.jpg
     :align: center
-    :width: 400
+    :width: 70%
 
     Me in front of my latest project idea :)
 
@@ -97,7 +97,6 @@ That is usually the most efficient way to share the fun! Plus, it will still be 
 .. figure:: /images/microhacks-kinto-telegram.jpg
     :align: center
     :alt: kinto-telegram-wall micro hack
-    :width: 70%
 
     `A microhack <https://github.com/leplatrem/kinto-telegram-wall>`_ involving a Telegram bot with live updates on a Web page using Kinto.
 
@@ -120,7 +119,6 @@ Also, using source control gives you the ability to go back in time. It can be v
 .. figure:: /images/microhacks-disclaimer.png
     :align: center
     :alt: disclaimer example
-    :width: 70%
 
     Example of a screencast along with `a disclaimer by @almet <https://github.com/almet/web2mp3>`_
 

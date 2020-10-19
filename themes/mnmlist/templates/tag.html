@@ -1,2 +1,3 @@
 {% extends "index.html" %}
-{% block title %}{{ SITENAME }} - {{ tag }}{% endblock %}
+{% block title %}{{ tag }} - {{ super() }}{% endblock %}
+{% block pagetitle %}Posts with #{{ tag }} tag{% endblock %}

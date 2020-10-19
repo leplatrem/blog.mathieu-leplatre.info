@@ -32,7 +32,6 @@ for pushing the bicycles forward, it is still a very noisy and contaminated
 environment. Car drivers are still in velvet.
 
 .. image:: images/barcelona-giants.jpg
-    :width: 100%
 
 
 Working remotely
@@ -67,7 +66,6 @@ gatherings of the whole company twice a year. Those are super fun and extremely
 productive!
 
 .. image:: images/orlando-all-hands.jpg
-    :width: 100%
 
 
 Maintaining former projects
@@ -102,7 +100,6 @@ office in Paris. Impressed by its stairs covered with a giant fox logo, I felt l
 I wasn't up to the job!
 
 .. image:: images/mozilla-paris-stairs.jpg
-    :width: 100%
     :alt: CC-BY-SA Robert Kaiser https://www.flickr.com/photos/kairo_at/22208348283/
 
 The welcoming workmates there helped lowering the pressure quickly.
@@ -161,7 +158,6 @@ who joined the team recently!
 By the way, check out `our blog <http://www.servicedenuages.fr/>`_, in French and English.
 
 .. image:: images/london-team-selfie.jpg
-    :width: 100%
 
 
 Organization
@@ -184,7 +180,6 @@ We don't do much of agile ceremonials. Maybe because we work remotely. Also mayb
 we haven't designated anyone as a proper product owner.
 
 .. image:: images/douarnenez-meeting.jpg
-    :width: 100%
 
 
 Our first project
@@ -213,7 +208,6 @@ Unfortunately, the readinglist project was shutdown at the last moment. That was
 and we had quite a hard time recovering from this disappointment.
 
 .. image:: images/big-chair.jpg
-    :width: 100%
 
 
 Booting Kinto
@@ -245,7 +239,6 @@ As a side project I could spend some time on an offline-first Web app, `Routina 
 for which we did `a Kinto+React boilerplate <https://github.com/Kinto/kinto-react-boilerplate/>`_.
 
 .. image:: images/orlando-kinto-meeting.jpg
-    :width: 100%
 
 We saw an opportunity to spread Kinto within the organization with the `Go Faster initiative
 <http://www.servicedenuages.fr/en/summer-perspectives>`_, which consists in shipping
@@ -265,7 +258,6 @@ Facebook has Parse, now Mozilla has Kinto»*: how do we reply that we are only a
 folks hacking cool stuff and that top-management is probably not even aware of it?
 
 .. image:: images/london-laptop-pocmo.jpg
-    :width: 100%
 
 Coming next
 -----------
