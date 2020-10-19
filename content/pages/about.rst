@@ -76,6 +76,9 @@ Frontend
   I find the core ideas behind Svelte and Elm more relevant. TypeScript helps.
   CSS is fine, but not on Mondays.
 
+GIS & Webmapping
+  During a few years I was working extensively with `PostGIS <http://postgis.org/>`_ and `Leaflet <https://leafletjs.com/>`_. I really appreciate how Webmapping sits at the crossroads of databases, APIs, data representation, and aesthetics. What I learned to optimize apps in that context was extremely useful to then scale services at Mozilla.
+
 Qt
   The Qt framework allows me to build applications with nice GUIs that run everywhere.
   Using C++ is fun (in this context).
