@@ -13,8 +13,8 @@ Bonjour!
 My name is Mathieu Leplatre, and this website is mostly about my profession: developer.
 I'm employed by the `Mozilla Corporation <https://en.wikipedia.org/wiki/Mozilla_Corporation>`_ since December 2014, and currently located in Barcelona, Spain.
 
-You can contact me by email (``mathieu`` @ ``leplat`` . ``re``). If
-you are a recruiter, please take some time to read about my values below
+You can contact me by email (``mathieu`` @ ``leplat`` . ``re``). I'm also on `Github <https://github.com/leplatrem/>`_
+and `LinkedIn <https://www.linkedin.com/in/leplatre>`_, but if you are a recruiter, please take some time to read about my values below
 before reaching out.
 
 
@@ -25,6 +25,11 @@ Simplicity
   I find elegance in `simple and plain solutions <https://en.wikipedia.org/wiki/KISS_principle>`_.
   Minimalism and frugality in the domain of technology is something attractive to me.
   And being simple also connects with being clear, transparent, and honest.
+
+Sociability
+  From my experience, being social and happy leads to success. Not the opposite. I enjoy hacking alone
+  on my laptop, but spending casual, relaxed, or fun time with people is essential for my productivity
+  and creativity.
 
 Decentralization
   I value a world where horizontal cooperation is stronger than centrally
@@ -38,13 +43,13 @@ Free Culture
 
 Healthy Technology
   I am a big fan of `humane technology <https://www.humanetech.com>`_, and
-  want to partixcipate in the fight against advertisement, addiction, and 
-  commercialism in general.
+  want to partixcipate in the fight against advertisement, addiction, and
+  commercialism in general. I am not a big fan of wearables and connected devices.
 
 Ecology
   I need my profesional environment to be as consistent as possible with
   the complex ecosystem of my values. This includes a variety of notions like
-  sustainibility, the respect of the environment, education, critical thinking, 
+  sustainibility, the respect of the environment, education, critical thinking,
   work–life balance, humanism...
 
 
@@ -64,7 +69,7 @@ Rust
   on the server, in the browser, or on mobile is just fantastic.
 
 PostgreSQL
-  It is robust, performant, and powerful, but also simple to reason about.
+  It is robust, performant, and powerful. And also simple to reason about.
   And most of the time, we don't need any specific database engine, especially
   with features like JSON(B) fields.
 
@@ -75,7 +80,7 @@ Frontend
 
 Qt
   The Qt framework allows me to build applications with nice GUIs that run everywhere.
-  Using C++ is fun, in this context.
+  Using C++ is fun (in this context).
 
 Linux
   I have been a daily Linux user since Ubuntu came out, and comfortable with
