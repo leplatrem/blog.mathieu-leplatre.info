@@ -41,13 +41,13 @@ Free Culture
 
 Healthy Technology
   I am a big fan of `humane technology <https://www.humanetech.com>`_, and
-  want to partixcipate in the fight against advertisement, addiction, and
+  want to participate in the fight against advertisement, addiction, and
   commercialism in general. I am not a big fan of wearables and connected devices.
 
 Ecology
-  I need my profesional environment to be as consistent as possible with
+  I need my professional environment to be as consistent as possible with
   the complex ecosystem of my values. This includes a variety of notions like
-  sustainibility, the respect of the environment, education, critical thinking,
+  sustainability, the respect of the environment, education, critical thinking,
   work–life balance, humanism...
 
 
@@ -63,7 +63,7 @@ Python
   micro-services. I mainly use Python for my tiny daily hacks.
 
 Rust
-  I enjoy the expressivity, performance, and versatility of Rust. Shiping the same code base
+  I enjoy the expressivity, performance, and versatility of Rust. `Shiping the same code base </leveraging-rust-in-python-and-javascript.html>`_
   on the server, in the browser, or on mobile is just fantastic.
 
 PostgreSQL
