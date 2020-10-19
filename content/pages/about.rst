@@ -1,14 +1,12 @@
 About
 #####
 
-.. image:: /images/face.jpg
-   :alt: face
-   :width: 200 px
-   :align: right
-
-
 Bonjour!
 ========
+
+.. image:: /images/face.jpg
+   :alt: face
+   :align: right
 
 My name is Mathieu Leplatre, and this website is mostly about my profession: developer.
 I'm employed by the `Mozilla Corporation <https://en.wikipedia.org/wiki/Mozilla_Corporation>`_ since December 2014, and currently located in Barcelona, Spain.

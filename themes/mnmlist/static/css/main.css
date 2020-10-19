@@ -73,6 +73,10 @@ img {
     border: none;
 }
 
+img.align-right {
+  float: right;
+}
+
 blockquote {
     border-left: 1px solid var(--code-bg-color);
     margin:0px;
