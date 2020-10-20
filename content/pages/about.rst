@@ -9,7 +9,7 @@ Bonjour!
    :align: right
 
 My name is Mathieu Leplatre, and this website is mostly about my profession: developer.
-I'm employed by the `Mozilla Corporation <https://en.wikipedia.org/wiki/Mozilla_Corporation>`_ since December 2014, and currently located in Barcelona, Spain.
+I've been employed by the `Mozilla Corporation <https://en.wikipedia.org/wiki/Mozilla_Corporation>`_ since December 2014, and I'm currently located in Barcelona, Spain.
 
 You can contact me by email (``mathieu`` @ ``leplat`` . ``re``). I'm also on `Github <https://github.com/leplatrem/>`_
 and `LinkedIn <https://www.linkedin.com/in/leplatre>`_, but if you are a recruiter, please take some time to read about my values below
@@ -37,7 +37,7 @@ Decentralization
 Free Culture
   I strongly support the `copyleft movement <https://en.wikipedia.org/wiki/Free-culture_movement>`_, and the idea of freedom to
   use, study, and share content. I have been lucky to be able to publish
-  all my work under Open Source licences since 2010.
+  all my work under Open Source licenses since 2010.
 
 Healthy Technology
   I am a big fan of `humane technology <https://www.humanetech.com>`_, and
@@ -67,8 +67,8 @@ Rust
   on the server, in the browser, or on mobile is just fantastic.
 
 PostgreSQL
-  It is robust, performant, and powerful. And also simple to reason about.
-  And most of the time, we don't need any specific database engine, especially
+  It is robust, performs well, and powerful. And easy to reason about.
+  Most of the time, we don't need any specific database engine, especially
   with features like JSON(B) fields.
 
 Frontend
@@ -77,14 +77,14 @@ Frontend
   CSS is fine, but not on Mondays.
 
 GIS & Webmapping
-  During a few years I was working extensively with `PostGIS <http://postgis.org/>`_ and `Leaflet <https://leafletjs.com/>`_. I really appreciate how Webmapping sits at the crossroads of databases, APIs, data representation, and aesthetics. What I learned to optimize apps in that context was extremely useful to then scale services at Mozilla.
+  For a few years I was working extensively with `PostGIS <http://postgis.org/>`_ and `Leaflet <https://leafletjs.com/>`_. I really appreciate how Webmapping sits at the crossroads of databases, APIs, data representation, and aesthetics. What I learned to optimize apps in that context was extremely useful to then scale services at Mozilla.
 
 Qt
   The Qt framework allows me to build applications with nice GUIs that run everywhere.
   Using C++ is fun (in this context).
 
 Linux
-  I have been a daily Linux user since Ubuntu came out, and comfortable with
+  I have been a daily Linux user since Ubuntu came out, and I'm comfortable with
   running systems in production (Docker, monitoring, reverse proxies, load balancers, ...)
 
 
@@ -93,7 +93,7 @@ Projects
 
 Check out `some of my projects <https://github.com/leplatrem>`_, *most notably* :
 
-* **Kinto**, a generic JSON storage Web API, providing “database-as-a-service”. (Pyramid, PostgreSQL) http://kinto.readthedocs.org ;
+* **Kinto**, a generic JSON storage Web API, providing “database-as-a-service.” (Pyramid, PostgreSQL) http://kinto.readthedocs.org ;
 * **Subtivals**, a tool to project subtitles in movie festivals, used worldwide and mostly dedicated to captions for the hard of hearing community. (C++, Qt, packaged for Ubuntu, Mac OS and Windows) http://subtivals.org ;
 * **Geotrek**, a platform to manage, promote, and protect areas, via outdoor activities, now used by the majority of French National Parks and dozens of structures like regional parks or tourism agencies (PostGIS, GeoDjango, Leaflet, WebGL) https://geotrek.fr ;
 * `django-leaflet <https://github.com/makinacorpus/django-leaflet>`_ and `django-geojson <https://github.com/makinacorpus/django-geojson>`_, both focused on simplifying Web mapping for Django developers ;
@@ -109,9 +109,9 @@ Talks
 
 * Podcast (*English*) `episode 86 – Kinto with Alexis Metaireau and Mathieu Leplatre <https://www.podcastinit.com/episode-86-kinto-with-alexis-metaireau-and-mathieu-leplatre/>`_
 * *Don't build silos*, `at Launch&Learn Betahaus <https://leplatrem.github.io/kinto-slides/2016.11.betahaus/>`_
-* *Secure passwords without headache*, `at Betahaus <https://bl.ocks.org/leplatrem/raw/b1f23563a3028c66276ddf48705fac84/>`_
-* *Kinto*, a minimalist JSON storage service (*English*) `at PyBCN July 16 <http://kinto.github.io/kinto-slides/2016.07.pybcn/>`_
-* *Cliquet*, a toolkit to build (micro)services (*English*) `at PyBCN July 15 <http://mozilla-services.github.io/cliquet/talks/2015.07.pybcn/>`_
+* *Secure passwords without a headache*, `at Betahaus <https://bl.ocks.org/leplatrem/raw/b1f23563a3028c66276ddf48705fac84/>`_
+* *Kinto*, a minimalist JSON storage service (*English*) `at PyBCN July 2016 <http://kinto.github.io/kinto-slides/2016.07.pybcn/>`_
+* *Cliquet*, a toolkit to build (micro)services (*English*) `at PyBCN July 2015 <http://mozilla-services.github.io/cliquet/talks/2015.07.pybcn/>`_
 * *Daybed spatial backend as a service !*, (*English*), at `FOSDEM 2015 <https://fosdem.org/2015/schedule/event/daybed/>`_
 * *Publier vos données sur le Web*, (*French*), at `Forum TIC de l'ATEN <http://forum-tic.espaces-naturels.fr/edition/2014>`_
 * `Team up Django and Web mapping <http://lanyrd.com/2014/djangocon/sczqpx/>`_, at `DjangoCon Europe <http://2014.djangocon.eu>`_
@@ -125,7 +125,7 @@ Talks
   to the power of this DVCS, 2011, Toulouse. *(Keywords: Git, Makina Corpus)*
 * `La puissance des logiciels libres de cartographie <http://www.lamelee.com/autres-manifestations/openday-23-juin-2011-2.html#sig>`_ (*French*), a panorama of Open Source GIS software, 2011, Toulouse. *(Keywords: FOSS, GIS, Makina Corpus)*
 * `Miro, Internet TV <20080426-miro-flisol2008.odp>`_ (*Spanish*), a presentation of Miro and the democrative aspects of decentralized media distribution, 2008, FLISOL, Buenos Aires.
-  *(Keywords: Democracy, copyleft, colaborative media, decentralized media distribution)*
+  *(Keywords: Democracy, copyleft, collaborative media, decentralized media distribution)*
 * `Somos Libres <http://mmggrr.net/es/index.php/post/2007/08/23/Somos-ibres>`_ (*Spanish*), a presentation about Freedom in the computer world, 2007, Bolivia.
   *(Keywords: Free Software philosophy)*
 
