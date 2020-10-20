@@ -95,6 +95,7 @@ Check out `some of my projects <https://github.com/leplatrem>`_, *most notably* 
 
 * **Kinto**, a generic JSON storage Web API, providing “database-as-a-service”. (Pyramid, PostgreSQL) http://kinto.readthedocs.org ;
 * **Subtivals**, a tool to project subtitles in movie festivals, used worldwide and mostly dedicated to captions for the hard of hearing community. (C++, Qt, packaged for Ubuntu, Mac OS and Windows) http://subtivals.org ;
+* **Geotrek**, a platform to manage, promote, and protect areas, via outdoor activities, now used by the majority of French National Parks and dozens of structures like regional parks or tourism agencies (PostGIS, GeoDjango, Leaflet, WebGL) https://geotrek.fr ;
 * `django-leaflet <https://github.com/makinacorpus/django-leaflet>`_ and `django-geojson <https://github.com/makinacorpus/django-geojson>`_, both focused on simplifying Web mapping for Django developers ;
 * `landez <http://blog.mathieu-leplatre.info/landez-introducing-new-features-of-our-tiles-toolbox.html>`_ (*Python*),
   `some Leaflet plugins <http://leafletjs.com/plugins.html>`_ (*Javascript*) and
