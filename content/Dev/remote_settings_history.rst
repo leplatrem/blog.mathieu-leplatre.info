@@ -36,7 +36,7 @@ Eventually, this storage service became `Kinto <https://github.com/Kinto/>`_, an
 
 `n1k0 <https://nicolas.perriault.net/>`_ and `Magopian <https://mathieu.agopian.info/>`_ joined the team, and built a nice offline-first SDK for Kinto. Plus a generic UI to CRUD records of any accessible Kinto server (kind of remote phpmyadmin). In order to generate forms from collections JSON schema, they released `react-jsonschema-form <https://github.com/rjsf-team/react-jsonschema-form/>`_ (which now has like 9k stars on Github!).
 
-This was an exciting time! Kinto was on Hackernews [#]_ [#]_, and the number of Github stars was going up!
+This was an exciting time! Kinto was on `Hacker <https://news.ycombinator.com/item?id=10994736>`_ `news <https://news.ycombinator.com/item?id=10733164>`_, and the number of Github stars was going up!
 
 
 At this time, there were many other challengers in the field of offline-first apps and backends as a service, and we were pretty close to them. `Michiel de Jong <https://michielbdejong.com/>`_, the spec author of `Remote Storage <https://remotestorage.io/>`_, joined Mozilla and was briefly in our team. `Dale Harvey <https://arandomurl.com/>`_ was already at Mozilla and was doing `PouchDB <https://pouchdb.com/>`_. `Luca Marchesini <https://github.com/xbill82/>`_, a Fullstack Fest friend, was also working on `Kuzzle <https://kuzzle.io/>`_.
@@ -133,7 +133,7 @@ What made the success?
 
 *Remote Settings* became a critical part of Firefox. Clearly, since it is leveraging only a subset of *Kinto*, the success can be largely attributed to the vision and efforts of our early team. We're still friends and I'm super proud of what we accomplished! Big up!
 
-The patience of stakeholders who held our hand in order to land patches in Firefox massively contributed to the success. Special thanks to `Gijs <https://github.com/gijsk>`_, `Lina <https://github.com/linacambridge>`_, `Florian <http://queze.net/>`_, `mgoodwin <https://github.com/computerist>`_, `Standard8 <https://github.com/Standard8>`_...
+The patience of stakeholders who held our hand in order to land patches in Firefox massively contributed to the success. Special thanks to `Gijs <https://github.com/gijsk>`_, `Lina <https://github.com/linacambridge>`_, `Florian <http://blog.queze.net/>`_, `mgoodwin <https://github.com/computerist>`_, `Standard8 <https://github.com/Standard8>`_...
 
 Another factor is that we were consistently protecting the functional scope of the system. It is a data pipe: publish data on one side, reach the target audience reliably. It took a lot of effort to say «no», and keep the complexity trend downwards, instead of building dedicated features for specific use-cases.
 
@@ -159,7 +159,7 @@ If someone would have come to us 5 years ago with the needs of a solution to upd
 
 If we wouldn't have been desperate to «sell» Kinto internally, would we have used a database as-a-service with a CRUD API?
 
-Alexis started `Pelican <http://getpelican.com/>`_ — a static blog generator — around 2011, 4 years before we were working on the first use-cases. I find it extremely ironic that the solution described in the `Futurism <#Futurism>`_ section would basically consist in applying the same principles to publish read-only data :)
+Alexis started `Pelican <http://getpelican.com/>`_ — a static blog generator — around 2011, 4 years before we were working on the first use-cases. I find it extremely ironic that the solution described in the `Futurism <#Futurism>`_ section would basically consist in applying the same principles to publish read-only data 🙃 [#]_
 
 The current approach also has a downside that I realized only very recently. Before, if someone wanted to contribute a new password recipe in Firefox, they would just have to add a line in the ``.json`` and get their patch approved. Now the source of truth is the *Remote Settings* server. Adding a recipe means opening a ticket to request it, and a stakeholder to connect on the VPN and add it. If the source of truth was the repo, with jobs to publish data online for live updates, it would probably make more sense. Plus, it would save forks or the Thunderbird team to run `their own Remote Settings instance <https://thunderbird-settings.thunderbird.net/>`_...
 
@@ -174,5 +174,5 @@ On the front of data sovereignity, great minds like Sir Tim Berners-Lee `are wor
 But hey, in the precise context of *Remote Settings*, these solutions may not have fit anyway!
 
 .. [#] Rémy reapplied a similar concept to build `SyncTo <https://wiki.mozilla.org/Firefox_OS/Syncto>`_, a bridge from *Kinto* to *Firefox Sync* for *Firefox OS* developers.
-.. [#] https://news.ycombinator.com/item?id=10994736
-.. [#] https://news.ycombinator.com/item?id=10733164
+
+.. [#] Ethan and n1k0 say that we had considered this idea. We can't recall why we discarded it. Maybe because we were too obscessed about selling Kinto internally? Or limitations of our signing infrastructure behind the VPN?
