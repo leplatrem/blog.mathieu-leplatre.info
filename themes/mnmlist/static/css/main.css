@@ -88,9 +88,10 @@ img {
   max-width: 100%;
 }
 
-.fontnote {
+.footnote {
   font-size: 0.7em;
 }
+
 .footnote-reference {
   vertical-align: super;
   font-size: 0.7em;
