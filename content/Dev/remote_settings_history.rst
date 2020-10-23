@@ -80,7 +80,7 @@ Our goal was to unify several of these communication channels into one, and to s
 
 For most use-cases in Firefox, the *Kinto* API was too low level, and doing too much. As an example, the certificate configuration for signature verification `was unnecessarily complex <https://searchfox.org/mozilla-esr60/rev/02b4ae79b24aae2346b1338e2bf095a571192061/services/common/blocklist-clients.js#439-474>`_. And there was no official cookbook.
 
-Our new manager Benson was defending the idea of *Remote Settings*. Two methods: ``.get()`` and ``.on("sync", ...)``.
+Our new manager `Benson <https://mostlygeek.com/>`_ was defending the idea of *Remote Settings*. Two methods: ``.get()`` and ``.on("sync", ...)``.
 New collections of records had to be self-service, because we were not going to be able to continue the manual onboarding.
 
 We had all the pieces in place to achieve that, it was mostly about improving developer experience. We refactored a number of things, added OAuth support, and Ethan integrated our clients and server with the `broadcast service <https://github.com/mozilla-services/megaphone>`_ for push notifications. We morphed the existing client integrations into a high level generic API, available for any component in Firefox. And on the server side, the original Kinto Admin had everything in its DNA to become the *Remote Settings Admin UI*.
