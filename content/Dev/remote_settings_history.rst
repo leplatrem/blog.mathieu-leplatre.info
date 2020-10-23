@@ -133,6 +133,8 @@ What made the success?
 
 *Remote Settings* became a critical part of Firefox. Clearly, since it is leveraging only a subset of *Kinto*, the success can be largely attributed to the vision and efforts of our early team. We're still friends and I'm super proud of what we accomplished! Big up!
 
+We have the very early days in memory, when Tarek had managed to free some of our time so that we could build prototypes and demos. Later, Benson took over and embraced our vision. Both were advertising the idea of a reusable service within the company while we were busy coding!
+
 The patience of stakeholders who held our hand in order to land patches in Firefox massively contributed to the success. Special thanks to `Gijs <https://github.com/gijsk>`_, `Lina <https://github.com/linacambridge>`_, `Florian <http://blog.queze.net/>`_, `Standard8 <https://github.com/Standard8>`_...
 
 I believe it is also important to highlight how important our first «customers» were to the growth and adoption of *Remote Settings*. The security/crypto teams and the `Activity Stream <https://wiki.mozilla.org/Firefox/Activity_Stream>`_ (now UJET) deserve much credit (`mgoodwin <https://github.com/computerist>`_, `Nanj <https://github.com/ncloudioj>`_, `JCJ <https://insufficient.coffee/about/>`_, `Ricky <https://github.com/rlr>`_, `Andrei <https://github.com/piatra>`_...). Their advocacy for the solution and working closely with us to make it better made a big difference.
