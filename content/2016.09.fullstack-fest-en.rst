@@ -1,0 +1,200 @@
+FullstackFest 2016
+##################
+
+:date: 2016-09-16
+:slug: fullstackfest-2016
+:lang: en
+:url: fullstackfest-2016
+:summary: Summary and feedback from Fullstack Fest 2016 in Barcelona
+
+.. note::
+
+    This article was originally posted on `servicedenuages.fr <https://mozilla-services.github.io/servicedenuages.fr/en/fullstackfest-2016>`_
+
+
+I had the chance to go the Fullstack Fest 2016 and really enjoyed it — thanks Mozilla!
+
+This blog post is an attempt to give you a summary and some feedback of what happened during this 4+1 days conference!
+
+
+Huge applause!
+==============
+
+The `Codegram team <http://www.codegram.com>`_ did really really well! They raised the bar for tech conferences; all the feedback I heard was extremely positive! Plus, Barcelona is a pleasant destination :)
+
+Former *RubyCon* and *FutureJS* events were merged into one *fullstack* event, 2 days of backend talks, 1 gap day with social activites, and 2 days of frontend talks.
+
+    Problems of Today, ideas from the future. — FullstackFest motto
+
+I must congratulate the organizers for the choice of speakers and topics. It's a huge challenge to captivate 500 persons during 5 days, and they did really well! And also a big up for the impressive performance of the captioners!
+
+.. image:: {filename}/images/fullstackfest-venue.jpg
+    :alt: CC-BY @fullstackfest
+    :align: center
+
+
+Trends
+======
+
+* Docker
+* Amazon Lambda
+* GraphQL
+* Criticism of microservices
+* Offline / high latency / decentralized Web
+* Functional programming
+* Reactive programming
+* Immutability
+* Machine learning
+* Virtual reality
+* Physical Web
+
+.. image:: {filename}/images/fullstackfest-trends.jpg
+    :alt: CC-BY @fullstackfest
+    :align: center
+
+
+One sentence summaries
+======================
+
+*The videos are already online! In order to help you choose which one to watch, here is the shortest summary I could come up with for each talk, videos are linked on authors names:*
+
+- Hardware is amazing, software is crap. Use parallelism and keep your data under your control — `Joe Armstrong <https://www.youtube.com/watch?v=itKFrXghGuA&index=2&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Erlang's inventor.
+
+- Scale using «pods»: deploy several isolated stacks of your multitenant app ­— `Simon Eskildsen <https://www.youtube.com/watch?v=7UyDK2bDjc4&index=3&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Shopify
+
+- Theorical knowledge can help when designing distributed systems with high availability — `Ines Sombra <https://www.youtube.com/watch?v=bUlpp8_Mevk&index=4&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Fastly
+
+- Improve efficiency and security using a unikernel: a kernel whose components are built specifically for your app — `Amir Chaudhry <https://www.youtube.com/watch?v=XNu2lze6jS0&index=5&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Docker Inc
+
+- Instead of making X faster, do less of X ­— `Tobias Pfeiffer <https://www.youtube.com/watch?v=b9H9AtbxpPM&index=6&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Bitcrowd
+
+- Docker containers are only as secure as your best practices — `Ben Hall <https://www.youtube.com/watch?v=oANurUSaOFs&index=7&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, http://katacoda.com
+
+- Elixir provides high level abstractions that make Erlang awesome — `Saša Jurić <https://www.youtube.com/watch?v=Ba3aCm3A0o8&index=8&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Aircloak
+
+- Unison is an experiment to come up with a new programming paradigm focused on distributed computing and persistence — `Paul Chiusano <https://www.youtube.com/watch?v=f6yA3t0dO-k&index=10&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Stage N
+
+- HTTP2 reduces latency. It's here, use it with a one liner in your server configuration — `Ole Michaelis <https://www.youtube.com/watch?v=CThgMRXS8w8&index=11&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Jimdo
+
+- Scale by publishing pre-rendered content to S3 when your data source changes — `Tim Perry <https://www.youtube.com/watch?v=vUCr1oTtaKA&index=12&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, BBC
+
+- Use Amazon lambda as a very cheap and ultra-efficient scaling solution — `Austen Collins <https://www.youtube.com/watch?v=9IrFIobZUEA&index=13&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, serverless.com
+
+- Processing natural language can be very easy with simple tricks — `Duretti Hirpa <https://www.youtube.com/watch?v=vRb-El8hC-U&index=14&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Slack
+
+- It is our responsability to decentralize access and assure durability of our data. Internet of hash = bittorrent + git — `Juan Benet <https://www.youtube.com/watch?v=jONZtXMu03w&index=15&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, ipfs.io
+
+- Enable GraphQL on your API and rely on smart clients to do the hard work of querying and caching — `Marc-Andre Giroux <https://www.youtube.com/watch?v=eD7kLFGOgVw&index=16&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Shopify
+
+- Some insights about recommendation engines and machine learning techniques — `Brian Sam-Bodden <https://www.youtube.com/watch?v=SRnM_P_ygqI&index=17&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Integrallis
+
+.. image:: {filename}/images/fullstackfest-talks.jpg
+    :alt: CC-BY @fullstackfest
+    :align: center
+
+- Immutable UIs make it simpler to improve durability, utility and beauty in your software architecture — `Lee Byron <https://www.youtube.com/watch?v=pLvrZPSzHxo&index=18&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Facebook, author of Immutable.js
+
+- Elm applications have no runtime errors — `Jack Franklin <https://www.youtube.com/watch?v=rDQ22Yg3Fms&index=19&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Songkick
+
+- With new versions of Ecmascript, asynchronuous programs will look more and more synchronuous — `Jafar Husain <https://www.youtube.com/watch?v=3pKNRgResq0&index=20&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Netflix, author of Falcor
+
+- PostCSS and CSS modules are really helpful for building a libray of UI components — `David Wells <https://www.youtube.com/watch?v=j8eBXGPl_5E&index=21&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Serverless
+
+- At last we have proper grids with CSS4 — `Jen Kramer <https://www.youtube.com/watch?v=axVw1Zduqn0&index=22&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Hardvard University
+
+- Evolution of Web apps which now have views, business logic and persistence — `Luca Marchesini <https://www.youtube.com/watch?v=wtURpqTgtUs&index=23&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Kuzzle
+
+- Om Next leverages Clojure to bring conventions for data immutability, data specifications and data routing — `António Nuno Monteiro <https://www.youtube.com/watch?v=Zb18iPjDgwM&index=24&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Technische Universität Dresden
+
+- The OpenBCI project allows everyone to study brainwaves using a homemade helmet —  `Alex Castillo <https://www.youtube.com/watch?v=CSfUr3m0-w8&index=25&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Netflix
+
+- Flow based programming via CycleJS allows you to design and debug your apps via a high level of abstraction — `André Staltz <https://www.youtube.com/watch?v=R-GzJgEccEQ&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc&index=27>`_, Futurice
+
+- CSP channels in Javascript is the best tool for dealing with streams of data — `Vincenzo Chianese <https://www.youtube.com/watch?v=r7yWWxdP_nc&index=28&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Apiary
+
+- With Service workers we won't have to wait for the server response when submitting data — `Andrew Dunkman <https://www.youtube.com/watch?v=xs_QRqGZ8xQ&index=29&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Harvest
+
+- Build your apps as if there were be accessed by Martians via a high-latency connection ­— `Slobodan Stojanovic <https://www.youtube.com/watch?v=7rlEidtXlZg&index=30&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Cloud Horizon
+
+- WebAssembly allows native apps to be run by the browser VM in the same stack context as JavaScript — `Ben Smith <https://www.youtube.com/watch?v=vmzz17JGPHI&index=31&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Google
+
+- Render a 2D UI with React within a 3D WebGL scene — `Massimiliano Mantione <https://www.youtube.com/watch?v=DfPPlakRvow&index=32&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, HyperFair
+
+- Virtual reality in the browser is here! — `Liv Erickson <https://www.youtube.com/watch?v=Ciqucr_Ww9s&index=33&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Microsoft
+
+- The physical Web is built on top of the open Web and will change our lives — `Scott Jenson <https://www.youtube.com/watch?v=gV72mCdomo4&index=34&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_, Google
+
+
+Some thoughts
+=============
+
+The challenges of Web content durability and decentralization are very concerning. The Web of today has too many points of failure, Web engineers are responsible for making it better. For example, 500 attendees cannot collaborate on a document without going through servers outside the room! My great-great-grandchildren might not be able to find a picture of me on the Web! `But read this page <https://ipfs.io/#why>`_ and you'll realize this is not *only* about the future!
+
+    You are cyberwizards!  — Juan Benet
+
+Both frontend and backend talks seem to agree on the fact that REST has strong limitations for high latency connections like on the mobile Web. GraphQL and Falcor are good candidates today, and can be complementary to our usual REST/CRUD endpoints.
+
+Google and Microsoft are following Amazon and its `Lambda <https://aws.amazon.com/lambda/details/>`_ to provide a platform of nanoservices for which you don't pay when idle, and that scale on trafic peaks. A whole app can be decomposed into functions and designed using internal events. Orchestration of those tiny pieces of code is another story (*for a CRUD endpoint, each verb is bound to a function*), but `Serverless <http://blog.serverless.com/defining-serverless/>`_ wants to tackle that.
+
+.. image:: {filename}/images/fullstackfest-vr.jpg
+    :alt: CC-BY @fullstackfest
+    :align: center
+
+Functional programming is in the air. Pure (stateless) functions scale because they can be executed anywere without context. Without side effects, it also becomes obvious to test them. They give backend developers some good pattern for highly available services, and provide the necessary constraints for immutability to frontend developers. I believe that if functional programming is not adopted as much as it could, it is not because of the paradigm and concepts, but because of the disconcerting syntax!
+
+    There is no architecture nirvana!  — Lee Byron
+
+Angular/TypeScript was almost absent from the conference, but we could see a trend around type inference/checking. It really improves developer experience and reduces runtime errors in the end. With projects like Elm, developers feel safe while coding: the compiler is smart and polite, refactoring is fun! The concept of ``null`` is replaced with a notion of *maybe <type>* which makes apps robust.
+
+Everybody seemed to agree that JavaScript transpilation will last for a long time. The language will evolve, and we shouldn't hope for feature freeze. Plus, it really helps developers focus on modern stacks, leveraging modern features like `cancelable promises <https://github.com/tc39/proposal-cancelable-promises>`_. And nowadays it is rather easy to build your app for legacy versions of JavaScript like ES5. But hey, it is a bit absurd that modern browsers have to download big bundles of code full of polyfills! It would be a lot nicer if they were delivered to legacy browsers only — `<!--[if IE 10]>` oh yeah :) — or even better: shipped as something like a browser addon :)
+
+The old times where we could inspect the source code of a page ­— and learn from it — is far! It is sad, but we may have to accept it because WebAssembly goes a lot further and ships code that looks closely to assembler! It's far from the Web we know, but it's still the open Web! Note that it is very different from what we saw in the past with plugins like Java applets, now a WebAssembly function can be called from a usual JS script!
+
+The physical Web is awesome and I'm really excited about this revolution, especially how it could bring a peer-to-peer local Web, using `Web bluetooth <https://developer.mozilla.org/en-US/docs/Web/API/Web_Bluetooth_API>`_ for example. Scott told me that the Mozilla approach with `FlyWeb <https://hacks.mozilla.org/2016/09/flyweb-pure-web-cross-device-interaction/>`_ is slightly different because it goes through Wifi, but both teams in contact. The physical Web is an open project, and Google is pushing it strongly. I'm bothered by the *URL redirections* strategy though because it puts the redirection intermediary in a very strong position. I believe that Google wants to be that intermediary.
+
+
+Personal feedback
+=================
+
+I never attended a conference that was so close to my flat! 3min walking! It was kind of weird to meet so many prestigious IT talents in my neighbourhood! ...and so many floppy disks :)
+
+.. image:: {filename}/images/fullstackfest-floppy.jpg
+    :alt: CC-BY @fullstackfest
+    :align: center
+
+The venue was great, and very well setup for the show (`see the introductory video clip! <https://www.youtube.com/watch?v=vxMASndC3k4&index=1&list=PLe9psSNJBf76DOOKMkDpyo_A5PfZk7JWc>`_). The coffee was not so good though.
+
+I really enjoyed the fact that there was only **one track**. I never had to divide myself between two interesting talks, and could just sit and enjoy :)
+
+Almost every topic resonated with the challenges we face at work. We are one of the few teams at Mozilla that do both backend and frontend, and that's awesome to feel in the same boat as the whole room of attendees. For example, we implemented `something on Amazon lambda <https://amo2kinto-lambda.readthedocs.io>`_ recently, we are well aware of the frontend architecture challenges through our `Kinto-admin <https://github.com/Kinto/kinto-admin>`_, Ethan has a functional programming background in Haskell, and Nico and Mathieu `are playing with Elm <https://github.com/n1k0/kinto-elm-experiments>`_. That's why I strongly regretted that my teammates were not with me!
+
+Also, I had the opportunity to meet Luca and Anthony from the Kuzzle team! We had a lot of fun together and our conversations about generic reusable backends were super insightful — see `my post on kinto ML <https://mail.mozilla.org/pipermail/kinto/2016-September/000197.html>`_.
+
+Last, but not least, I would like to thank Pusher.com for organizing a hack contest using their API! They had a physical button in their booth, and I made a kind-of video booth that records the webcam when the button is pressed. I could not have won this BB8 droid without `Soledad's insights on MozillaHacks <https://hacks.mozilla.org/2016/04/record-almost-everything-in-the-browser-with-mediarecorder/>`_, and I thank her again :)
+
+.. image:: {filename}/images/fullstackfest-contest.jpg
+    :alt: Me holding the prize proudly!
+    :align: center
+
+
+Some links
+==========
+
+* https://www.kontena.io: open source container platform. The features are really really attractive!
+* http://toxiproxy.io: a proxy to simulate network and system conditions
+* https://openresty.org: REST via Lua in Nginx
+* `Gossip/epidemic protocols <https://en.wikipedia.org/wiki/Gossip_protocol>`_ to invalidate cache
+* Challenge unikernel security with the `Bitcoin piñata <http://amirchaudhry.com/bitcoin-pinata>`_
+* Solve deterministic problems with randomness using `the Monte Carlo method <https://en.wikipedia.org/wiki/Monte_Carlo_method>`_
+* Decision tree learning with `random forests <https://en.wikipedia.org/wiki/Random_forest>`_
+* Attack systems with `fork bombs <https://en.wikipedia.org/wiki/Fork_bomb>`_
+* The $10 million australian #censusfail `rebuilt for $500 using AWS Lambda <http://eftm.com.au/2016/08/how-two-uni-students-built-a-better-census-site-in-just-54-hours-for-500-30752>`_
+* Clean natural language with `CoreNLP <https://stanfordnlp.github.io/CoreNLP/>`_
+* https://howdy.ai: trainable bot for Slack
+* https://openbazaar.org: A free market for all, no fees, no restrictions
+* http://www.apollostack.com: everything you need to start using GraphQL
+* `The paradox of choice <https://www.ted.com/talks/barry_schwartz_on_the_paradox_of_choice?language=en>`_
+* `19 Open Source React Component Libraries to use in your next project <http://davidwells.io/19-open-source-react-component-libraries-to-use-in-your-next-project/>`_
+* `react-monocle <https://github.com/team-gryff/react-monocle>`_: A developer tool to visualize a React application's component hierarchy
+* https://hyperdev.com: A fullstack JSBin
+* http://ux.mulesoft.com: MuleSoft components library

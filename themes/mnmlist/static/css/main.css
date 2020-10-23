@@ -12,6 +12,7 @@
 
 :root {
   --main-bg-color: #fff;
+  --border-color: #ACACAC;
   --code-bg-color: #e5e5e2;
   --link-color: #F7C331;
   --text-color: #2d2d2d;
@@ -88,9 +89,21 @@ img {
 }
 
 blockquote {
-    border-left: 1px solid var(--code-bg-color);
-    margin:0px;
-    padding:0 12px 0 12px;
+  background: var(--code-bg-color);
+  border-left: 10px solid var(--border-color);
+  margin: 1.5em 10px;
+  padding: 2em 0.5em;
+  quotes: "\201C""\201D""\2018""\2019";
+  font-style: italic;
+  font-family: Georgia, serif;
+}
+blockquote:before {
+  color: var(--border-color);
+  content: open-quote;
+  font-size: 4em;
+  line-height: 0.1em;
+  margin-right: 0.25em;
+  vertical-align: -0.4em;
 }
 
 p {
@@ -216,8 +229,11 @@ section.index {
 
 
 .note {
-  background: #efefef;
+  background: var(--code-bg-color);
+  font-style: italic;
+  padding: 1em 0.5em;
   margin: 1em 0;
+  font-family: Georgia, serif;
 }
   .note p {
     display: inline;
