@@ -1,7 +1,7 @@
 The History of Firefox Remote Settings
 ######################################
 
-:tags: python, javascript, rust
+:tags: mozilla, python, kinto
 :date: 2020-10-19
 
 
