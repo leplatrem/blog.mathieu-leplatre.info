@@ -26,7 +26,7 @@ Neolithic (2015-2016)
 
 The team had accumulated a lot of experience with Web APIs, and one thing was certain: we shouldn't start each project from scratch. Even though we had a secret plan (a reusable service), we couldn't justify starting with that.
 
-We gathered a lot of good practices and a handful tooling in one library: `Cliquet <https://cliquet.readthedocs.io/en/latest/>`_. We hated the word «framework», but at least we wanted a standard way of building services (cf. `talk at PyBCN <https://mozilla-services.github.io/cliquet/talks/2015.07.pybcn/>`_).
+We gathered a lot of good practices and a handful tooling in one library: `Cliquet <https://cliquet.readthedocs.io/en/latest/>`_. We hated the word «framework», but at least we wanted a standard way of building services (cf. `introduction blog post <https://mozilla-services.github.io/servicedenuages.fr/en/why-cliquet>`_ or `talk at PyBCN <https://mozilla-services.github.io/cliquet/talks/2015.07.pybcn/>`_).
 
 .. image:: images/remote-settings-history-cliquet.png
 
@@ -55,7 +55,7 @@ We were contributing to Gecko in the ``mozilla-central`` repo, and that was not 
 
 `Ethan <http://betacantrips.com>`_ joined the team. He implemented the ``chrome.storage`` Web Extension API using *Kinto*, and suddenly we were storing addons preferences of users (carefully encrypted on the client side of course).
 
-*Kinto* now had several use-cases within Firefox. However, clearly, we still hadn't reached any critical mass. It was just another arrow on diagrams.
+*Kinto* now had `several use-cases <https://mozilla-services.github.io/servicedenuages.fr/en/kinto-at-mozilla>`_ within Firefox. However, clearly, we still hadn't reached any critical mass. It was just another arrow on diagrams.
 
 It was a boring and frustrating phase. Pushing the required configuration changes for each new use case. A lot of back and forth with the Ops for root objects manipulations. Responsibilities were limited.
 
@@ -93,9 +93,9 @@ In December 2018, I presented *Remote Settings* in front of hundreds of Firefox 
 
 We merged with the *SHIELD* team and were now part of the *Product Delivery* team. Now responsible of making off-train changes reliable and safe (ie. updates without reinstall).
 
-Since we were only pulling read-only data from the server, the whole offline bi-directionnal sync code was overkill and slightly inefficient. For the sake of simplicity, I got rid of the *Kinto offline* library in Firefox and replaced it with plain Gecko specific IndexedDB code. Way easier to reason about, especially for a future code reader who wouldn't have the back story.
+Since we were only pulling read-only data from the server, the whole offline bi-directional sync code was overkill and slightly inefficient. For the sake of simplicity, I got rid of the *Kinto offline* library in Firefox and replaced it with plain Gecko specific IndexedDB code. Way easier to reason about, especially for a future code reader who wouldn't have the back story.
 
-More and more critical components of Firefox, desktop or mobile, are now relying on *Remote Settings*. A/B testing, experiments metadata, user messages, features recommandations rules, list of password breaches for `Firefox Monitor <https://monitor.firefox.com/>`_, password fields detection rules, localization packages, search partners configuratio...  All of them using our two methods API :)
+More and more critical components of Firefox, desktop or mobile, are now relying on *Remote Settings*. A/B testing, experiments metadata, user messages, features recommandations rules, list of password breaches for `Firefox Monitor <https://monitor.firefox.com/>`_, password fields detection rules, localization packages, search partners configuration...  All of them using our two methods API :)
 
 We could not have been more successful. *Remote Settings* had become *THE* standard way to ship data in Firefox outside release trains! Some of us sometimes still call it *Kinto*.
 
@@ -133,9 +133,13 @@ What made the success?
 
 *Remote Settings* became a critical part of Firefox. Clearly, since it is leveraging only a subset of *Kinto*, the success can be largely attributed to the vision and efforts of our early team. We're still friends and I'm super proud of what we accomplished! Big up!
 
-The patience of stakeholders who held our hand in order to land patches in Firefox massively contributed to the success. Special thanks to `Gijs <https://github.com/gijsk>`_, `Lina <https://github.com/linacambridge>`_, `Florian <http://blog.queze.net/>`_, `mgoodwin <https://github.com/computerist>`_, `Standard8 <https://github.com/Standard8>`_...
+The patience of stakeholders who held our hand in order to land patches in Firefox massively contributed to the success. Special thanks to `Gijs <https://github.com/gijsk>`_, `Lina <https://github.com/linacambridge>`_, `Florian <http://blog.queze.net/>`_, `Standard8 <https://github.com/Standard8>`_...
+
+I believe it is also important to highlight how important our first «customers» were to the growth and adoption of *Remote Settings*. The security/crypto teams and the `Activity Stream <https://wiki.mozilla.org/Firefox/Activity_Stream>`_ (now UJET) deserve much credit (`mgoodwin <https://github.com/computerist>`_, `Nanj <https://github.com/ncloudioj>`_, `JCJ <https://insufficient.coffee/about/>`_, `Ricky <https://github.com/rlr>`_, `Andrei <https://github.com/piatra>`_...). Their advocacy for the solution and working closely with us to make it better made a big difference.
 
 Another factor is that we were consistently protecting the functional scope of the system. It is a data pipe: publish data on one side, reach the target audience reliably. It took a lot of effort to say «no», and keep the complexity trend downwards, instead of building dedicated features for specific use-cases.
+
+These previous two combined — motivated early adopters and product focus — were crucial in adoption. We were able to provide a good customer service because we had participated in the early integrations and implementations for other teams. When new use-cases were joining us, we *almost* had everything covered already.
 
 During our company meetings, we were making sure we would spend more time with people, and the least in front of computers. I don't cross the world to do what I can do from home! We had joyful moments and this happiness certainly contributed to the success :) Through the numerous use-cases, I got to know many teams in the company, and always worked in a fantastic atmosphere. I am happy to help, they seem happy with the solution, it is great!
 
@@ -149,7 +153,7 @@ The `Kinto organization <https://github.com/Kinto/>`_ is relatively quiet, but w
 
 Nevertheless, we cannot deny that the *Kinto* community is not as flourishing as it used to be ;) And let's be clear: from the Mozilla standpoint, *Kinto* is just an implementation detail.
 
-If I win the lottery and leave (the positive version of the bus factor idea), there is no guarantee that the next pair of eyes taking a fresh look at the *Remote Settings* architecture or the *Kinto* code base will decide to keep it. In other words, as long as *Kinto* is used in *Remote Settings*, the project will be maintained and be taken care of. The day something else is used, Mozilla will stop supporting Kinto. Undoubtedly.
+If I win the lottery and leave (the positive version of the bus factor idea), there is no guarantee that the next pair of eyes taking a fresh look at the *Remote Settings* architecture or the *Kinto* code base will decide to keep it. In other words, as long as *Kinto* is used in *Remote Settings*, the project will be maintained and be taken care of.  Mozilla will continue to invest in *Kinto* as long as it has value and makes sense.
 
 
 What if I had to do it over again?
@@ -165,7 +169,7 @@ The current approach also has a downside that I realized only very recently. Bef
 
 In 2015, JSON was everywhere and a pretty natural choice. But we had to complement it with a notion of attachments for heavy content. Today, I would probably consider going full binary for everything. JSON was problematic for content signatures, since there are many ways to serialize it (Unicode strings and float numbers, `the worse <https://github.com/gibson042/canonicaljson-spec/issues/5>`_!). Something like `CBOR <https://en.wikipedia.org/wiki/CBOR>`_ may have helped.
 
-Generally speaking — and here comes the self-flagellation part — I think that we could have done a better job if we would have studied more past research. As `James Long wrote <https://jlongster.com/How-I-Became-Better-Programmer>`_, «*If you're excited about an idea, it's super tempting to sit down and immediately get going. But you shouldn't do that until you've done some cursory research about how people have solved it before.*». In our case, we could have considered using `CRDTs <https://www.dotconferences.com/2019/12/james-long-crdts-for-mortals>`_ to sync data, `Merkle trees <https://en.wikipedia.org/wiki/Merkle_tree>`_ for content signatures of partial diffs, or all the things available from the video games industry to updates asserts etc... and this is true for specifications too. I now think we made a big mistake when we decided to deviate from the Remote Storage spec while Michiel was in our team. Same with our custom Canonical JSON.
+Generally speaking — and here comes the self-flagellation part — I think that we could have done a better job if we would have studied more past research. As `James Long wrote <https://jlongster.com/How-I-Became-Better-Programmer>`_, «*If you're excited about an idea, it's super tempting to sit down and immediately get going. But you shouldn't do that until you've done some cursory research about how people have solved it before.*». In our case, we could have considered using `CRDTs <https://www.dotconferences.com/2019/12/james-long-crdts-for-mortals>`_ to sync data, `Merkle trees <https://en.wikipedia.org/wiki/Merkle_tree>`_ for content signatures of partial diffs, or all the things available from the video games industry to update assets etc... and this is true for specifications too. I now think we made a big mistake when we decided to deviate from the Remote Storage spec while Michiel was in our team. Same with our custom Canonical JSON.
 
 With regards to *Kinto* itself, it shows that the idea itself does not have much value (`I wrote about that already </releasing-software-ideas.html>`_). *Kinto* was a very good idea, and we could develop it to a certain point. We were experienced with code, but our limits became the limits of the project: we were very unfit to pitch ideas and do product marketing.
 
