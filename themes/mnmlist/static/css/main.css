@@ -88,6 +88,14 @@ img {
   max-width: 100%;
 }
 
+.fontnote {
+  font-size: 0.7em;
+}
+.footnote-reference {
+  vertical-align: super;
+  font-size: 0.7em;
+}
+
 blockquote {
   background: var(--code-bg-color);
   border-left: 10px solid var(--border-color);
