@@ -61,7 +61,7 @@ It was a boring and frustrating phase. Pushing the required configuration change
 
 We knew we could do much more, any piece of configuration or JSON in the repository could be migrated to our system! We could use it for internationalization! But we were not good door-to-door salesmen. Feedback, positive or negative, was almost nonexistent.
 
-The revolutionary ideals of our initial team were fading away. We had to admit that we failed at promoting our vision of a user-facing storage backend (see :ref:Thoughts section). Self hosting, decentralized Web, Tor hidden services, were conversations at night around a drink, not in meeting rooms anymore. I'm pretty sure Mozilla even had a few projects running on Google Firebase at this time.
+The revolutionary ideals of our initial team were fading away. We had to admit that we failed at promoting our vision of a user-facing storage backend (see *Thoughts* section). Self hosting, decentralized Web, Tor hidden services, were conversations at night around a drink, not in meeting rooms anymore. I'm pretty sure Mozilla even had a few projects running on Google Firebase at this time.
 
 At the end of that period, most members of the original team had left, disillusioned. Ethan and I were the last «Kinto guys» at Mozilla.
 
