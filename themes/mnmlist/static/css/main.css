@@ -88,8 +88,14 @@ img {
   max-width: 100%;
 }
 
-.footnote {
-  font-size: 0.7em;
+.footnote:first-of-type {
+  border-top: 2px solid;
+  padding-top: 30px;
+}
+
+.footnote:last-of-type {
+  padding-bottom: 30px;
+  border-bottom: 2px solid;
 }
 
 .footnote-reference {
