@@ -17,6 +17,7 @@ jobs:
       - name: Print environment
         run: |
           python3 -m venv .venv
+          .venv/bin/pip install --upgrade pip
           .venv/bin/python --version
           .venv/bin/pip --version
 
@@ -27,10 +28,10 @@ jobs:
 
       - name: Build HTML
         run: |
-          .venv/bin/activate
+          source .venv/bin/activate
           make publish
 
       - name: Push to Github Pages
         run: |
-          .venv/bin/activate
+          source .venv/bin/activate
           make github 2> /dev/null
