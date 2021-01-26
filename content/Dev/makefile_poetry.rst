@@ -18,7 +18,7 @@ Everything is based on dependencies and timestamps: if a dependency's timestamp 
 
 For Python projects, the chain looks like this:
 
-* Python → Virtualenv → Install Dependencies → Run task (tests, lint)
+* Python → Virtualenv → Install packages → Run task (tests, lint)
 
 Which, in a ``Makefile`` simply looks like this:
 
@@ -34,7 +34,7 @@ Which, in a ``Makefile`` simply looks like this:
 	test: .venv/.install.stamp
 		.venv/bin/python -m pytest tests/
 
-Now, when you run ``make test`` from a recently cloned repo, the whole chain is executed. But otherwise, dependencies are installed only if your requirements file has changed since your last installation.
+Now, when you run ``make test`` from a recently cloned repo, the whole chain is executed. But otherwise, the Python packages are installed only if your requirements file has changed since your last installation.
 
 
 Use variables
@@ -118,7 +118,7 @@ When running ``make`` the ``all`` target is implicitly called. We can tweak it a
 	help:
 		@echo "Please use 'make <target>' where <target> is one of"
 		@echo ""
-		@echo "  install     install dependencies and prepare environment"
+		@echo "  install     install packages and prepare environment"
 		@echo "  format      reformat code"
 		@echo "  lint        run the code linters"
 		@echo "  test        run all the tests"
@@ -173,7 +173,7 @@ While I was reading about the multiple PHONY lines, I learned that any target ca
 		$(PYTHON) -m pip install -r requirements/app.txt
 		touch $(INSTALL_STAMP)
 
-Here, we won't reinstall all application's dependencies when just a ``dev`` library has changed.
+Here, we won't reinstall all application's packages when just a ``dev`` package has changed.
 
 
 Full Example with Poetry
@@ -193,7 +193,7 @@ I gathered most of the above tips in a full working example with Poetry (`origin
 	help:
 		@echo "Please use 'make <target>' where <target> is one of"
 		@echo ""
-		@echo "  install     install dependencies and prepare environment"
+		@echo "  install     install packages and prepare environment"
 		@echo "  clean       remove all temporary files"
 		@echo "  lint        run the code linters"
 		@echo "  format      reformat code"
@@ -210,7 +210,7 @@ I gathered most of the above tips in a full working example with Poetry (`origin
 	.PHONY: clean
 	clean:
 		find . -type d -name "__pycache__" | xargs rm -rf {};
-		rm -rf $(INSTALL_STAMP) .coverage .mypy_cache $(VERSION_FILE)
+		rm -rf $(INSTALL_STAMP) .coverage .mypy_cache
 
 	.PHONY: lint
 	lint: $(INSTALL_STAMP)
@@ -226,7 +226,7 @@ I gathered most of the above tips in a full working example with Poetry (`origin
 		$(POETRY) run black ./tests/ $(NAME)
 
 	.PHONY: test
-	test: $(INSTALL_STAMP) $(VERSION_FILE)
+	test: $(INSTALL_STAMP)
 		$(POETRY) run pytest ./tests/ --cov-report term-missing --cov-fail-under 100 --cov $(NAME)
 
 
