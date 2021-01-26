@@ -16,12 +16,12 @@ jobs:
 
       - name: Print environment
         run: |
+          python3 -m venv .venv
           .venv/bin/python --version
           .venv/bin/pip --version
 
       - name: Install dependencies
         run: |
-          python3 -m venv .venv
           .venv/bin/pip install pelican
           .venv/bin/pip install ghp-import
 
