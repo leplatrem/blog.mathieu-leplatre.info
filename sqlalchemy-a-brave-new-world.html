@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>SQLAlchemy, a brave new World - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>SQLAlchemy, a brave new World</h1>
+<time datetime="2011-02-22T15:02:00+01:00">Tue 22 February 2011</time></header>
+<article>
+    <p><a class="reference external" href="http://www.sqlalchemy.org/">SQLAlchemy</a> becomes an essential technology for any python developper interacting with relational databases.
+As a Django developper, I have sat on my laurels for long, being completely satisfied with the <a class="reference external" href="http://docs.djangoproject.com/en/dev/topics/db/queries/">Django ORM</a>. It was time to explore its challenger.</p>
+<p>First, before it sounds like I crush my favorite framework : when Django ORM was developped, there was no SQLAlchemy, or almost no good python ORM at all.</p>
+<p>Here are some of the things you might want to know first:</p>
+<ul class="simple">
+<li>Django ORM documentation is clean and well organized</li>
+<li>Dango ORM was not really meant to be used outside django apps</li>
+<li>Django ORM has limitations when it comes to <a class="reference external" href="http://sralab.com/2009/01/14/limitations-of-the-django-orm-10-in-model-inheritance/">Model</a> <a class="reference external" href="http://linfiniti.com/2010/03/django-foreign-key-inheritance-solved/">Inheritance</a></li>
+<li>Django ORM does not manage models migrations without extra stuff like <a class="reference external" href="http://south.aeracode.org/">South</a></li>
+<li>Django ORM support for multiple databases was introduced <a class="reference external" href="http://docs.djangoproject.com/en/dev/topics/db/multi-db/">in version 1.2</a></li>
+<li>Django ORM does not always manage connection pooling (e.g. <a class="reference external" href="http://code.djangoproject.com/ticket/7732">with Oracle</a>)</li>
+<li>SQLAlchemy is light and framework independant</li>
+<li>SQLAlchemy is stripped to a minimum set of (clean and well-implemented) features</li>
+<li>SQLAlchemy is very flexible and supports mapping of objects using declarations or metadata</li>
+<li>SQLAlchemy documentation is bloated (API reference is mixed-in with long explanation and use cases)</li>
+<li>SQLAlchemy requires a better knowledge of advanced python mechanisms and architecture</li>
+</ul>
+<p>In order to explore SQLAlchemy (SA) I created <a class="reference external" href="http://pypi.python.org/pypi/pyfspot">pyfspot</a> (<a class="reference external" href="https://github.com/leplatrem/pyfspot">sources are on github</a>): a very small application to manage the database of the F-Spot photo manager.
+It is not supposed to save lives, but that will at least be:</p>
+<ul class="simple">
+<li>a pretext for me to dive into the API</li>
+<li>a small and useful tool</li>
+<li>an example of SA in action for any developper interested</li>
+<li>a base for a full <a class="reference external" href="http://f-spot.org/">F-Spot</a> management application (<tt class="docutils literal">&lt;/dreamer&gt;</tt>)</li>
+</ul>
+<p>I discovered a few concrete things:</p>
+<ul class="simple">
+<li>Django inspectdb equivalent ?<ul>
+<li><a class="reference external" href="http://code.google.com/p/sqlautocode/">sqlautocode</a> (unfortunately <a class="reference external" href="http://code.google.com/p/sqlautocode/issues/detail?id=32">I could not use it</a>)</li>
+</ul>
+</li>
+<li>Django fixtures equivalent ?<ul>
+<li><a class="reference external" href="http://code.google.com/p/fixture/">fixture</a> (<a class="reference external" href="http://farmdev.com/projects/fixture/using-loadable-fixture.html#an-example-of-loading-data-using-sqlalchemy">demo</a>)</li>
+</ul>
+</li>
+<li>Django <cite>model.DoesNotExist</cite> ?</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="c1"># get() does not throw exception</span>
+<span class="n">tag</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Tag</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="c1"># filter().one() does ...</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Photo</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="mi">1337</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+<span class="k">except</span> <span class="n">sqlalchemy</span><span class="o">.</span><span class="n">orm</span><span class="o">.</span><span class="n">exc</span><span class="o">.</span><span class="n">NoResultFound</span><span class="p">:</span>
+    <span class="c1"># d&#39;oh!</span>
+    <span class="k">pass</span>
+</pre></div>
+<ul class="simple">
+<li>Invert condition like Django exclude() ?</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Photo</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">~</span><span class="n">Photo</span><span class="o">.</span><span class="n">base_uri</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+</pre></div>
+<ul class="simple">
+<li>Escape LIKE condition ?</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="n">Photo</span><span class="o">.</span><span class="n">base_uri</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="s1">&#39;%</span><span class="se">\\</span><span class="si">%%</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">escape</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\\</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+<ul class="simple">
+<li>Intersections of many-to-many ?</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="c1"># A tag</span>
+<span class="n">tag</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Tag</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+<span class="c1"># A set of photos</span>
+<span class="n">photoset</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">Photo</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="o">~</span><span class="n">Photo</span><span class="o">.</span><span class="n">base_uri</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span>
+<span class="c1"># intersect() won&#39;t work</span>
+<span class="n">photoset</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">photos</span><span class="p">)</span>
+<span class="ne">AttributeError</span><span class="p">:</span> <span class="s1">&#39;InstrumentedList&#39;</span> <span class="nb">object</span> <span class="n">has</span> <span class="n">no</span> <span class="n">attribute</span> <span class="s1">&#39;c&#39;</span>
+<span class="c1"># Use any()</span>
+<span class="n">photoset</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Photo</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">tag</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+</pre></div>
+<p>Well, those were my first steps. As expected, it did not feel so well to relearn how to walk. But at least I am now ready to get my bearings in SQLAlchemy's world.</p>
+<p><em>Original post at</em> <a class="reference external" href="http://www.makina-corpus.org/blog/sqlalchemy-brave-new-world">Makina Corpus</a></p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/sqlalchemy.html">#sqlalchemy</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/sqlalchemy-a-brave-new-world.html';
+      this.page.identifier = 'sqlalchemy-a-brave-new-world';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

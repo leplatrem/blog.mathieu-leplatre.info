@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Text extents with Python Cairo - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Text extents with Python Cairo</h1>
+<time datetime="2009-08-10T10:20:00+02:00">Mon 10 August 2009</time></header>
+<article>
+    <p>I needed this and could not find it. So I share it here (and even better if Google'd index it!)</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">textwidth</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">cairo</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="o">*</span> <span class="n">fontsize</span>
+    <span class="n">surface</span> <span class="o">=</span> <span class="n">cairo</span><span class="o">.</span><span class="n">SVGSurface</span><span class="p">(</span><span class="s1">&#39;undefined.svg&#39;</span><span class="p">,</span> <span class="mi">1280</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+    <span class="n">cr</span> <span class="o">=</span> <span class="n">cairo</span><span class="o">.</span><span class="n">Context</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+    <span class="n">cr</span><span class="o">.</span><span class="n">select_font_face</span><span class="p">(</span><span class="s1">&#39;Arial&#39;</span><span class="p">,</span> <span class="n">cairo</span><span class="o">.</span><span class="n">FONT_SLANT_NORMAL</span><span class="p">,</span> <span class="n">cairo</span><span class="o">.</span><span class="n">FONT_WEIGHT_BOLD</span><span class="p">)</span>
+    <span class="n">cr</span><span class="o">.</span><span class="n">set_font_size</span><span class="p">(</span><span class="n">fontsize</span><span class="p">)</span>
+    <span class="n">xbearing</span><span class="p">,</span> <span class="n">ybearing</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">xadvance</span><span class="p">,</span> <span class="n">yadvance</span> <span class="o">=</span> <span class="n">cr</span><span class="o">.</span><span class="n">text_extents</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">width</span>
+</pre></div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/cairo.html">#cairo</a>,         <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/text-extents-with-python-cairo.html';
+      this.page.identifier = 'text-extents-with-python-cairo';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

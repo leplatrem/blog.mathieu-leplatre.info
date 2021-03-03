@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Git : annuler proprement un commit après un push - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Git : annuler proprement un commit après un push</h1>
+<time datetime="2011-11-03T14:15:00+01:00">Thu 03 November 2011</time></header>
+<article>
+    <div class="section" id="ce-qu-il-faut-eviter">
+<h2>Ce qu'il faut éviter</h2>
+<p>Pour annuler des commits, il existe la commande <tt class="docutils literal">git reset</tt>.</p>
+<div class="highlight"><pre><span></span>git reset --hard HEAD~1
+HEAD is now at 444b1cf Rhoo
+</pre></div>
+<p>Celle-ci est pertinente tant que les commits n'ont pas été poussés. Git vous retiendra au <tt class="docutils literal">push</tt> d'ailleurs :</p>
+<div class="highlight"><pre><span></span>git push
+To /tmp/repo
+ ! <span class="o">[</span>rejected<span class="o">]</span>        master -&gt; master <span class="o">(</span>non-fast-forward<span class="o">)</span>
+error: failed to push some refs to <span class="s1">&#39;/tmp/repo&#39;</span>
+</pre></div>
+<p>En effet, à partir du moment où un commit existe sur le serveur, il est potentiellement utilisé
+par des collaborateurs (<em>mergé, à la base d'une branche, etc.</em>). On pourrait faire le sale et forcer le push :</p>
+<div class="highlight"><pre><span></span>git push -f
+Total <span class="m">0</span> <span class="o">(</span>delta <span class="m">0</span><span class="o">)</span>, reused <span class="m">0</span> <span class="o">(</span>delta <span class="m">0</span><span class="o">)</span>
+To /tmp/repo
+ + b67c343...444b1cf master -&gt; master <span class="o">(</span>forced update<span class="o">)</span>
+</pre></div>
+<p>Mais il y a beaucoup mieux !</p>
+</div>
+<div class="section" id="ce-qu-il-faut-faire">
+<h2>Ce qu'il faut faire</h2>
+<p>Annuler un commit, c'est finalement appliquer l'inverse de son <strong>diff</strong> !</p>
+<p>On peut rediriger le diff des commits à annuler vers la commande <tt class="docutils literal">patch <span class="pre">--reverse</span></tt> :)</p>
+<div class="highlight"><pre><span></span>git diff HEAD^ <span class="p">|</span> patch --reverse
+</pre></div>
+<p>Pour faire plus simple, il y a <tt class="docutils literal">git revert</tt> !</p>
+<p>Par exemple pour annuler les trois derniers commits :</p>
+<div class="highlight"><pre><span></span>git revert HEAD~3..HEAD
+</pre></div>
+<p>Ou pour annuler un commit en particulier :</p>
+<div class="highlight"><pre><span></span>git revert 444b1cff
+</pre></div>
+<p>Il suffit alors de pousser proprement le commit obtenu sur le
+serveur. Les éventuels collaborateurs qui avaient basé leur travail sur les commits
+annulés devront gérer les conflits au moment venu...</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/git.html">#git</a>,         <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/git-annuler-proprement-un-commit-apres-un-push-fr.html';
+      this.page.identifier = 'git-annuler-proprement-un-commit-apres-un-push';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Good practices for Open Source projects - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Good practices for Open Source projects</h1>
+<time datetime="2014-08-19T00:00:00+02:00">Tue 19 August 2014</time></header>
+<article>
+    <p>In this article, I gathered some good practices for open source projects.</p>
+<p>I made my best to keep it short and not too verbose. If you want to discuss,
+contribute or enhance this article, <a class="reference external" href="https://github.com/leplatrem/blog.mathieu-leplatre.info/blob/master/content/Dev/opensource_project_good_practices.rst">simply use Github</a> !</p>
+<div class="section" id="documentation">
+<h2>Documentation</h2>
+<ul class="simple">
+<li>A README file is the bare minimum</li>
+<li>More documentation content is to be stored in a <tt class="docutils literal">docs/</tt> folder</li>
+<li>Use the fabulous <a class="reference external" href="http://rtfd.org">Read the Docs</a> service</li>
+<li>Mention the license and copyright holder</li>
+<li>Explain <strong>why</strong> this project was created</li>
+<li>Mention existing related projects</li>
+<li>How to <strong>install</strong> and <strong>use</strong> it ?</li>
+<li>Frequently asked questions (<em>time saver</em>)</li>
+<li>Link to the list of contributors</li>
+<li>Provide details about design and architecture</li>
+<li>Give instructions to developers on how to contribute</li>
+<li>Mention what you expect from contributors (<em>Definition-of-Done, checklist,
+conventions...</em>)</li>
+</ul>
+</div>
+<div class="section" id="source-code">
+<h2>Source code</h2>
+<ul class="simple">
+<li>Use <strong>English</strong> everywhere</li>
+<li>Use a decentralized versioning system (<em>Git</em>, <em>mercurial</em>, ...)</li>
+<li>Unit test your code. <em>Software without tests is broken by design</em></li>
+<li>Setup continuous integration (with <a class="reference external" href="http://travis-ci.org">TravisCI</a>)</li>
+<li>Follow the programming language conventions (<a class="reference external" href="https://flake8.readthedocs.org">PEP8</a>, <a class="reference external" href="http://www.jslint.com">JSLint</a>, ...)</li>
+<li>Follow the framework conventions, and list explicitly the infringements you
+decided to make in the documentation</li>
+<li>Be a professional coder, by following <a class="reference external" href="http://www.amazon.com/The-Clean-Coder-Professional-Programmers/dp/0137081073">Uncle Bob recommendations</a></li>
+<li>Use a translation system, like <em>gettext</em>, and keep English as the default language</li>
+<li>Enable collaborative translation of your app with <a class="reference external" href="https://www.transifex.com">Transifex</a></li>
+<li>Provide simple commands to install or run tests (in a <em>Makefile</em> for example)</li>
+<li>Test your project features (<em>functional tests</em>)</li>
+<li>Make sure the tests self-describe your project specifications</li>
+</ul>
+</div>
+<div class="section" id="releases">
+<h2>Releases</h2>
+<ul class="simple">
+<li>Use semantic versionning (<em>main version, features change, bug fixes</em>)</li>
+<li>Keep a list of changes by version (<em>Changelog</em>)</li>
+<li>Follow some workflow for your changelog (Include it in docs, update it in the merge commit of pull-requests, <a class="reference external" href="http://tech.novapost.fr/changelog-howto-en.html">read more recommendations</a>...)</li>
+<li>Create a tag for each release (<tt class="docutils literal">vX.Y.Z</tt>)</li>
+<li>Create a branch for each version (<a class="reference external" href="http://fle.github.io/an-efficient-git-workflow-for-midlong-term-projects.html">recommended workflow</a>)</li>
+<li>Publish your release (<em>backup copy</em>) in a repository (<a class="reference external" href="https://pypi.python.org">PyPi</a>, <a class="reference external" href="https://www.npmjs.org">NPM</a>)</li>
+<li>Automate your release process (<em>Makefile</em>, <a class="reference external" href="http://zestreleaser.readthedocs.org">Zest releaser</a>, <a class="reference external" href="https://www.npmjs.org">npm</a>)</li>
+<li><em>Release often, release early</em></li>
+<li>Communicate about new versions (<em>tweet</em>, <a class="reference external" href="https://www.openhub.net">OpenHub</a>, <a class="reference external" href="http://freecode.com">Freecode</a>, ...)</li>
+</ul>
+</div>
+<div class="section" id="community">
+<h2>Community</h2>
+<ul class="simple">
+<li>Make sure users can interact somewhere about your project (<a class="reference external" href="https://www.uservoice.com">UserVoice</a>, <em>Google groups</em>, ...)</li>
+<li>Setup alerts on <a class="reference external" href="http://stackoverflow.com">Stackoverflow</a> to help users and promote your project</li>
+<li>Make your best to find at least one valuable contributor, and give him
+permissions on the repository</li>
+<li>Be clear about the project <em>functional perimeter</em></li>
+<li>Reject every addition of feature that introduces complexity or twists the project
+main use cases</li>
+<li>Look for a successor as soon as the motivation goes down</li>
+</ul>
+</div>
+<div class="section" id="history">
+<h2>History</h2>
+<ul class="simple">
+<li>History of commits is as valuable as comments in the source code</li>
+<li>Mention the ticket number in the commit messages (e.g. <tt class="docutils literal">Update specs (ref #123)</tt>)</li>
+<li>Respect the commits messages formatting of your community (e.g. Drupal's prefixes like <tt class="docutils literal">CHG</tt>, <tt class="docutils literal">DOC</tt>...)</li>
+</ul>
+<div class="section" id="workflow">
+<h3>Workflow</h3>
+<ul class="simple">
+<li>Keep the <em>master</em> branch stable</li>
+<li>Create a dedicated branch with an explicit name for each feature (e.g. <tt class="docutils literal">187_add_drop_down_menu</tt>)</li>
+<li>Use pull-requests</li>
+<li>Even if you are the owner, and alone in your project, use pull-requests (<em>allows code review, triggers integration tests, history is clearer, ...</em>)</li>
+<li>Ideally, who merges the pull-request is not its author</li>
+<li>Ideally merge branches with the no fast-forward option (<tt class="docutils literal">git merge <span class="pre">--no-ff</span></tt>)</li>
+<li>Create a <em>develop</em> branch in case of major refactoring, or follow a proper <em>Git workflow</em>
+to ease merging</li>
+</ul>
+</div>
+</div>
+<div class="section" id="github">
+<h2>Github</h2>
+<ul class="simple">
+<li>Use Github</li>
+<li>Use Github issues (<em>as much as you can, for everything</em>)</li>
+<li>Even if you are alone, use Github issues as a TODO list</li>
+<li>Create some standard labels (<em>help-needed</em>, <em>docs</em>, <em>duplicate</em> ...)</li>
+<li>Use the fantastic <a class="reference external" href="https://github.com/blog/1375%0A-task-lists-in-gfm-issues-pulls-comments">checklists</a> feature in issues and pull-requests descriptions</li>
+<li>Take advantage of the milestones, for the next version, or for a general roadmap (e.g. <em>Soon</em>, <em>Later</em>, <em>Final 1.0</em>, ...)</li>
+<li>Categorize the labels, renaming them with a convention (e.g. <em>priority: low</em>, <em>priority: high</em>, ...)</li>
+<li>Copy the changelog parts into the dedicated releases page</li>
+<li>Use the <a class="reference external" href="https://github.com/blog/1184-contributing-guidelines">contributing</a> feature</li>
+<li>Use the <a class="reference external" href="https://pages.github.com">gh-pages</a> feature to demo your project</li>
+<li>Configure the main branch in the settings</li>
+</ul>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/opensource.html">#opensource</a>,         <a href="https://blog.mathieu-leplatre.info/tag/github.html">#github</a>,         <a href="https://blog.mathieu-leplatre.info/tag/git.html">#git</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/good-practices-for-open-source-projects.html';
+      this.page.identifier = 'good-practices-for-open-source-projects';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

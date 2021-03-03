@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Django, gestion des settings d'application simplifiée - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Django, gestion des settings d'application simplifiée</h1>
+<time datetime="2011-07-29T18:30:00+02:00">Fri 29 July 2011</time></header>
+<article>
+    <p>Je reprends ici la méthode présentée par <a class="reference external" href="http://blog.akei.com/post/4575980188/une-autre-facon-de-gerer-ses-settings-dapplication">Nicolas</a> et je la couple avec mon petit <a class="reference external" href="https://github.com/makinacorpus/easydict">EasyDict</a> pour alléger l'utilisation !
+Comme ses snippets sont drôles, je ne les change pas !</p>
+<div class="section" id="parametres-par-default-de-l-application">
+<h2>Paramètres par défault de l'application</h2>
+<p>On a juste un constructeur à ajouter par rapport à ce qu'avait présenté NiKo (avec <a class="reference external" href="http://pypi.python.org/pypi/easydict/">EasyDict installé</a>).</p>
+<div class="highlight"><pre><span></span><span class="c1"># apps/my_app/__init__.py</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">easydict</span> <span class="kn">import</span> <span class="n">EasyDict</span>
+
+<span class="n">app_settings</span> <span class="o">=</span> <span class="n">EasyDict</span><span class="p">(</span><span class="nb">dict</span><span class="p">({</span>
+    <span class="s1">&#39;FOO&#39;</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="s1">&#39;ENABLE_CHUCK_NORRIZ_MODE&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">},</span> <span class="o">**</span><span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s1">&#39;MY_APP_CONFIG&#39;</span><span class="p">,</span> <span class="p">{})))</span>
+</pre></div>
+</div>
+<div class="section" id="surcharge-dans-le-projet">
+<h2>Surcharge dans le projet</h2>
+<div class="highlight"><pre><span></span><span class="c1"># settings.py</span>
+<span class="n">MY_APP_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;ENABLE_CHUCK_NORRIZ_MODE&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="utilisation">
+<h2>Utilisation !</h2>
+<p>EasyDict transforme les clés du <cite>dict</cite> en attributs, on accède aux settings en toute simplicité !</p>
+<div class="highlight"><pre><span></span><span class="c1"># foo/bar.py</span>
+<span class="kn">from</span> <span class="nn">my_app</span> <span class="kn">import</span> <span class="n">app_settings</span>
+
+<span class="nb">print</span> <span class="n">app_settings</span><span class="o">.</span><span class="n">FOO</span> <span class="c1"># 42</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="c1"># apps/my_app/utils.py</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">app_settings</span>
+
+<span class="k">if</span> <span class="n">app_settings</span><span class="o">.</span><span class="n">ENABLE_CHUCK_NORRIZ_MODE</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="s1">&#39;Chuck Norriz is watching you&#39;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="s1">&#39;Dance dance, little lamb&#39;</span>
+</pre></div>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/easydict.html">#easydict</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/django-gestion-des-settings-dapplication-simplifiee-fr.html';
+      this.page.identifier = 'django-gestion-des-settings-dapplication-simplifiee';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>
