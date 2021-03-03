@@ -127,6 +127,25 @@ When running ``make`` the ``all`` target is implicitly called. We can tweak it a
 		@echo "Check the Makefile to know exactly what each target is doing."
 
 
+`david <https://larlet.fr/david/>`_ suggests to produce the above help summary using `this trick <https://www.thapaliya.com/en/writings/well-documented-makefiles/>`_, that relies on ``awk`` and comments on targets:
+
+.. code-block:: makefile
+
+	.DEFAULT_GOAL := help
+
+	help:  ## Display this help
+		@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "\033[36m%-10s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+
+	deps:  ## Check dependencies
+		...
+
+	clean: ## Cleanup the project folders
+		...
+
+	build: clean deps ## Build the project
+		...
+
+
 Do you think it's PHONY?
 ''''''''''''''''''''''''
 
