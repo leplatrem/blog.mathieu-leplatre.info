@@ -23,7 +23,7 @@ I will write a small script to figure out how many hops it takes in average to g
 
 Let's reach the body of a Wikipedia random page first:
 
-.. code:: python
+.. code-block:: python
 
     from requests_html import HTMLSession
 
@@ -44,7 +44,7 @@ Something like `#mw-content-text a`?
 
 But that sometimes picks the summary section on the right side. Be more hackish and precise:
 
-::
+.. code-block:: css
 
     #mw-content-text > .mw-parser-output > p > a[href^='/wiki'],
     #mw-content-text > .mw-parser-output > ul > li > a[href^='/wiki']
@@ -53,7 +53,7 @@ This code will be probably broken by the time you read that article, but I don't
 
 Now let's iterate until the link points to the Philosophy page:
 
-.. code:: python
+.. code-block:: python
 
     SELECTOR = ("#mw-content-text > .mw-parser-output > p > a[href^='/wiki'],"
                 "#mw-content-text > .mw-parser-output > ul > li > a[href^='/wiki']")
@@ -86,7 +86,7 @@ Cool it works!
 
 Now let's repeat that for a hundred random pages, cache already visited links and compute average of degrees.
 
-.. code:: python
+.. code-block:: python
 
     results = []
     cache = {}
