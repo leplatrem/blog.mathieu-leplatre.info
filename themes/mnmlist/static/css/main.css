@@ -130,6 +130,8 @@ p {
   p.caption {
     font-size: 80%;
     margin-top: 0;
+    font-style: italic;
+    text-align: center;
   }
 
 
