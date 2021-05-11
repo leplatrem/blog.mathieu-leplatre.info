@@ -99,7 +99,7 @@ And then, we have more domain specific checks for `Remote Settings <https://remo
 - ``checks.remotesettings.push_timestamp``: fails if the timestamp of the published data does not match the one of our Push service
 - ``checks.remotesettings.certification_expiration``: fails if our certificates will expire soon
 - ``checks.remotesettings.uptake_max_age``: fails if the 75th percentile of clients receive only data after X seconds
-- ``checks.remotesettings.uptake_error_rate``:
+- ``checks.remotesettings.uptake_error_rate``: fails if the proportion of errors among reported statuses in Telemetry is above a certain threshold
 
 Adding new checks is a piece of cake, even from your own packages, as long as they are available in the ``PYTHONPATH``.
 
