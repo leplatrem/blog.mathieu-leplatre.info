@@ -103,6 +103,13 @@ In addition, exactly like planes or cars have their maintenance logs, it could b
 
 When things turn sour, take the time to write down a *post-mortem*, that breaks down the timeline of events, the steps of troubleshooting, the lessons learnt, the improvements to be made, etc. This will become highly valuable for the future maintainers.
 
+.. figure:: {static}/images/maintenance-classic-programmer.jpg
+    :alt: https://classicprogrammerpaintings.com/post/143947399671/developers-look-for-documentation-in-legacy
+    :align: center
+
+    Developers look for documentation in legacy system - Jean-François Millet, 1857 - Oil on canvas (by `classic programmer paintings <https://classicprogrammerpaintings.com/post/143947399671/developers-look-for-documentation-in-legacy>`_)
+
+
 Handle Open source Contributions
 --------------------------------
 
