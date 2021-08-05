@@ -1,7 +1,7 @@
 About Maintenance Mode
 ######################
 
-:tags: tips
+:tags: tips, methodology
 :date: 2021-08-04
 
 You may be familiar with this situation: your team has been working on a project for a while, and now that it seems to do the job, it is not really justified for so many engineers to spend time on it.
@@ -55,8 +55,8 @@ Note that sometimes it can also be relevant to ignore some bugs, if their impact
 
 Counterintuitively, fixing bugs and polishing rough edges can be entertaining. Some people are suited for maintenance (fixers!), others prefer innovation (builders!), but having experienced both perspectives is precious.
 
-Security patches
-----------------
+Apply security patches
+----------------------
 
 This one is interesting, because it means that you should keep your libraries and dependencies up-to-date.
 
@@ -79,7 +79,18 @@ If you wait too long between releases and deployments, you take the risk that so
     :alt: CC-BY-NC https://www.flickr.com/photos/compacflt/51319755467/
     :align: center
 
-Manage knowledge
+Sustain Infrastructure
+----------------------
+
+If your application uses some cloud provider's services, you will also have to keep afloat with upgrades and decommissions. If your application is not compatible with the only versions available, some code ought to be rewritten.
+
+For example, Amazon regularly rolls out new versions of PostgreSQL, and cojointly shut downs old versions.
+
+Exactly like for your software libraries, part of a Kubernetes cluster lifecycle involves performing periodic upgrades to the latest version, in order to apply the latest security releases. Automation is possible but can also give you surprises!
+
+On top of that, your company can also decide to migrate its whole infrastructure to a different cloud provider. That may require some code to be rewritten (eg. Amazon S3 versus Google Cloud Storage) and very likely critical parts.
+
+Manage Knowledge
 ----------------
 
 When the whole team is working on the project daily, knowledge flows and is globally available. In maintenance mode, a couple of people are involved sporadically, and knowledge about procedures or technical details will evaporate quickly.
@@ -92,8 +103,8 @@ In addition, exactly like planes or cars have their maintenance logs, it could b
 
 When things turn sour, take the time to write down a *post-mortem*, that breaks down the timeline of events, the steps of troubleshooting, the lessons learnt, the improvements to be made, etc. This will become highly valuable for the future maintainers.
 
-Open source contributions
--------------------------
+Handle Open source Contributions
+--------------------------------
 
 Imagine the following situation: a company develops a software for a Web API, releases it as open source, and builds a community around it. After some time, the company's strategy (or goals) changes and the API is switched to maintenance mode, with lowest risks possible. The community continues to submit contributions for new features and risky refactors.
 
@@ -111,8 +122,8 @@ I don't think there is a simple answer to this one. It truly depends on multiple
 
 Refusing pull requests is often very hard, but keep in mind that saying «no» can save everybody a lot of trouble.
 
-Risk assessment
----------------
+Assess Risks
+------------
 
 In toxic environments, engineers will sometimes blame each other for having failed to comply with certain expectations. In order to avoid that, some will work triple to reach what they see as *perfection*. Or when a top-down decision is made, they will disagree and disapprove of their management, complaining that «they have no idea how reckless this is».
 
@@ -141,6 +152,6 @@ With the amount of connected devices that depend on closed-source Web APIs out t
 
 ------
 
-Many thanks to `Nico <https://nl.linkedin.com/in/nicolas-metaye-27766633>`_, `John <https://www.linkedin.com/in/johnwhitlock>`_, `Benson <https://www.linkedin.com/in/mostlygeek>`_, and `Stephen <http://stephenhood.com>`_, for your precious feedback and suggestions!
+Many thanks to `Nico <https://nl.linkedin.com/in/nicolas-metaye-27766633>`_, `John <https://www.linkedin.com/in/johnwhitlock>`_, `Benson <https://www.linkedin.com/in/mostlygeek>`_, `Stephen <http://stephenhood.com>`_, and `Sven <https://www.linkedin.com/in/smarnach/>`_ for your precious feedback and suggestions!
 
 As usual, please don't hesitate to share your feedback or thoughts, I would be super happy to have a chat and/or integrate your contributions in the article!
