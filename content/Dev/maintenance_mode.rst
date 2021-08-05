@@ -12,9 +12,11 @@ From my experience, there is often some misunderstanding about turning a softwar
 
 So, if the software still runs in production and is switched to maintenance, what should you expect to be done?
 
-.. image:: {static}/images/maintenance-nasa.jpg
-    :alt: CC-BY-NC https://www.flickr.com/photos/nasa2explore/49243482926/
+.. figure:: {static}/images/maintenance-nasa.jpg
+    :alt: NASA Engine Maintenance Training CC-BY-NC https://www.flickr.com/photos/nasa2explore/49243482926/
     :align: center
+
+    NASA Engine Maintenance Training `CC-NC-ND <https://www.flickr.com/photos/nasa2explore/49243482926/>`_
 
 Monitor production
 ------------------
@@ -75,9 +77,11 @@ In a perfect world, you have a setup with continuous deployment, at least on sta
 
 If you wait too long between releases and deployments, you take the risk that some deployment recipe breaks, or becomes out of date, relying on missing resources or permissions.
 
-.. image:: {static}/images/maintenance-plane.jpg
-    :alt: CC-BY-NC https://www.flickr.com/photos/compacflt/51319755467/
+.. figure:: {static}/images/maintenance-plane.jpg
+    :alt: Aviation Machinist conducts maintenance on an afterburner CC-BY-NC https://www.flickr.com/photos/compacflt/51319755467/
     :align: center
+
+    Aviation Machinist conducts maintenance on an afterburner `CC-BY-NC <https://www.flickr.com/photos/compacflt/51319755467/>`_
 
 Sustain Infrastructure
 ----------------------
