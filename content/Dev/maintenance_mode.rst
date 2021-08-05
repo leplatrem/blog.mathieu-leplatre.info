@@ -125,6 +125,8 @@ Refusing pull requests is often very hard, but keep in mind that saying «no» c
 Assess Risks
 ------------
 
+You may not have enough resources to complete all of the above successfully. Maintenance of complex software is hard. And shit happens. Think of your software as an old building open to the public, it is your responsability to report any potential danger that you see.
+
 In toxic environments, engineers will sometimes blame each other for having failed to comply with certain expectations. In order to avoid that, some will work triple to reach what they see as *perfection*. Or when a top-down decision is made, they will disagree and disapprove of their management, complaining that «they have no idea how reckless this is».
 
 Of course, there are really bad managers out there, but I believe that the most common mistake is to keep your risk analysis for yourself.
@@ -137,7 +139,7 @@ The *Risk Assessment* exercice consists in:
 2. Evaluating likelihood, severity, and impact of each identified risk
 3. Deciding which ones to ignore and why, and which ones that will have to be taken care of.
 
-By making this list explicit and public, your long term maintenance strategy, whatever it is, is supported by a proper evaluation and awareness of risks.
+By making this list explicit and public, your long-term maintenance strategy, whatever it is, is supported by a proper evaluation and awareness of risks.
 
 Conclusion
 ----------
@@ -148,10 +150,10 @@ Maintenance cost is probably less than investing in new features, but it is defi
 
 Shutting down a service is also an option, leaving consumers in despair.
 
-With the amount of connected devices that depend on closed-source Web APIs out there, I believe that long term maintenance is going to become a major concern in the next years...
+With the amount of connected devices that depend on closed-source Web APIs out there, I believe that long-term maintenance is going to become a major concern in the next years...
 
 ------
 
-Many thanks to `Nico <https://nl.linkedin.com/in/nicolas-metaye-27766633>`_, `John <https://www.linkedin.com/in/johnwhitlock>`_, `Benson <https://www.linkedin.com/in/mostlygeek>`_, `Stephen <http://stephenhood.com>`_, and `Sven <https://www.linkedin.com/in/smarnach/>`_ for your precious feedback and suggestions!
+Many thanks to `Nico <https://nl.linkedin.com/in/nicolas-metaye-27766633>`_, `John <https://www.linkedin.com/in/johnwhitlock>`_, `Benson <https://www.linkedin.com/in/mostlygeek>`_, `Stephen <http://stephenhood.com>`_, `Sven <https://www.linkedin.com/in/smarnach/>`_, and `Areski <http://areskibelaid.com/>`_ for your precious feedback and suggestions!
 
 As usual, please don't hesitate to share your feedback or thoughts, I would be super happy to have a chat and/or integrate your contributions in the article!
