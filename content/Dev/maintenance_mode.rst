@@ -84,7 +84,7 @@ Sustain Infrastructure
 
 If your application uses some cloud provider's services, you will also have to keep afloat with upgrades and decommissions. If your application is not compatible with the only versions available, some code ought to be rewritten.
 
-For example, Amazon regularly rolls out new versions of PostgreSQL, and cojointly shut downs old versions.
+For example, Amazon regularly rolls out new versions of PostgreSQL, and cojointly shutdowns old versions.
 
 Exactly like for your software libraries, part of a Kubernetes cluster lifecycle involves performing periodic upgrades to the latest version, in order to apply the latest security releases. Automation is possible but can also give you surprises!
 
