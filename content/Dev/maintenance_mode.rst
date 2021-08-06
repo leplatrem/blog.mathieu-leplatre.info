@@ -44,7 +44,7 @@ If you know that you are going for the long run, investing in optimization can b
 
 Of course, it is imperative to evaluate how much you can save per month/year before investing efforts! Beware of rabbit holes, always timebox your work! Start with low hanging fruits, like slow queries, endpoints that serve static data, ...
 
-If your infrastructure allows it, you could also leverage some of the auto-scaling features of your cloud provider. For example, at Mozilla, we clearly have pattern of loads depending time and day of the week. Setup rules to scale up/out or in/down your resources can help you save money. Combined with proper monitoring and metrics, it can be truly rewarding.
+If your infrastructure allows it, you could also leverage some of the auto-scaling features of your cloud provider. For example, at Mozilla, we clearly have pattern of loads depending of time and day of the week. Setting up rules to scale up/out or in/down your resources can help you save money. Combined with proper monitoring and metrics, it can truly be rewarding.
 
 Fix bugs
 --------
