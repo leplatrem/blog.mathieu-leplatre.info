@@ -16,7 +16,7 @@ While I was working at `Makina Corpus <https://makina-corpus.com>`_, we were reg
 I wanted to build a reusable backend, where you define your models in JSON and retrieve/store records.
 `Alexis <https://blog.notmyidea.org/>`_ and I wrote down some pseudo code at a DjangoCon and we started the `Daybed project <https://github.com/spiral-project/daybed/>`_, using `Pyramid <https://trypyramid.com/>`_. It became functional and I even talked about it at `FOSDEM <https://archive.fosdem.org/2015/schedule/event/daybed/>`_.
 
-Alexis, `Rémy <https://devhub.io/developer/Natim>`_, and `Tarek <https://ziade.org/>`_ were building Web APIs in the Cloud Services team, and there were needs to offer remote storage features to `Firefox OS <https://en.wikipedia.org/wiki/Firefox_OS>`_ app developers.
+Alexis, `Rémy <https://devhub.io/developer/Natim>`_, and `Tarek <https://ziade.org/>`_ were building Web APIs in the Cloud Services team at Mozilla, and there were needs to offer remote storage features to `Firefox OS <https://en.wikipedia.org/wiki/Firefox_OS>`_ app developers.
 
 I was hired onto their team and we were about to roll out our first app: a «reading list» service (à-la Pocket).
 
@@ -175,7 +175,7 @@ Generally speaking — and here comes the self-flagellation part — I think tha
 
 With regards to *Kinto* itself, it shows that the idea itself does not have much value (`I wrote about that already </releasing-software-ideas.html>`_). *Kinto* was a very good idea, and we could develop it to a certain point. We were experienced with code, but our limits became the limits of the project: we were very unfit to pitch ideas and do product marketing.
 
-On the front of data sovereignity, great minds like Sir Tim Berners-Lee `are working on it <https://solidproject.org>`_, and the need of a reusable backend for Web developers hasn't disappeared. `Appwrite <https://appwrite.io/>`_ and `kuzzle <https://kuzzle.io/>`_ (👏) seemd to be relevant open source solutions in 2020! I don't know about other projects like https://backendless.com/ or http://hood.ie/ though. Among the last challengers, `PostgREST <http://postgrest.org/>`_ and `Hasura  <https://hasura.io/>`_ seem to be doing great.
+On the front of data sovereignity, great minds like Sir Tim Berners-Lee `are working on it <https://solidproject.org>`_, and the need of a reusable backend for Web developers hasn't disappeared. `Appwrite <https://appwrite.io/>`_ and `kuzzle <https://kuzzle.io/>`_ (👏) seemed to be relevant open source solutions in 2020! I don't know about other projects like https://backendless.com/ or http://hood.ie/ though. Among the last challengers, `PostgREST <http://postgrest.org/>`_ and `Hasura  <https://hasura.io/>`_ seem to be doing great.
 
 But hey, in the precise context of *Remote Settings*, these solutions may not have fit anyway!
 
