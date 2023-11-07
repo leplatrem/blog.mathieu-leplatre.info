@@ -309,3 +309,9 @@ The equivalent with ``virtualenv``, which depends on ``python3`` being available
 	.PHONY: test
 	test: $(INSTALL_STAMP)
 		$(PYTHON) -m pytest ./tests/ --cov-report term-missing --cov-fail-under 100 --cov $(NAME)
+
+
+See Also
+========
+
+* `Your Makefiles are wrong <https://tech.davis-hansson.com/p/make/>`_
