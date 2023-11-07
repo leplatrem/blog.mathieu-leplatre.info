@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Avec Git rebase, vos arbres poussent droit - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Avec Git rebase, vos arbres poussent droit</h1>
+<time datetime="2011-09-16T17:37:00+02:00">Fri 16 September 2011</time></header>
+<article>
+    <div class="section" id="le-probleme">
+<h2>Le problème</h2>
+<p>Par défaut, un <tt class="docutils literal">git pull</tt> est équivalent à <tt class="docutils literal">git fetch</tt> et <tt class="docutils literal">git merge</tt>.</p>
+<p>Les <tt class="docutils literal">merge</tt>, c'est bien pour les branches, mais pour le tronc, c'est pénible : ça pollue l'historique et
+ça zig-zag sévère !</p>
+<img alt="" class="align-center" src="/images/git-merge-mess.png" />
+</div>
+<div class="section" id="la-solution">
+<h2>La solution</h2>
+<p>En réalité, quand on travaille sur le tronc, ce qu'on veut c'est faire <tt class="docutils literal">git fetch</tt> et <tt class="docutils literal">git rebase</tt>.
+C'est à dire, au lieu de ça :</p>
+<pre class="literal-block">
+      A-----B-----C master
+     /             \
+D---E---F---G---H---I origin/master
+</pre>
+<p>on veut ça :</p>
+<pre class="literal-block">
+                  A---B---C master
+                 /
+D---E---F---G---H origin/master
+</pre>
+<p>Autrement dit, un <tt class="docutils literal">git pull <span class="pre">--rebase</span></tt> ! Pour le faire par défaut :</p>
+<div class="highlight"><pre><span></span>git<span class="w"> </span>config<span class="w"> </span>--global<span class="w"> </span>branch.autosetuprebase<span class="w"> </span>always
+</pre></div>
+<p>Et ensuite, au cas-où, pour le désactiver ponctuellement, utiliser <tt class="docutils literal">git pull <span class="pre">--no-rebase</span></tt>.</p>
+<p>Maintenant, le tronc, il est tout propre !</p>
+<img alt="" class="align-center" src="/images/git-merge-clean.png" />
+</div>
+<div class="section" id="les-consequences">
+<h2>Les conséquences ?</h2>
+<p>Lors d'un <tt class="docutils literal">git pull</tt>, il faudra résoudre chaque <em>commit</em> conflictuel indépendamment (perso, je préfère).</p>
+<p>Les êtres humains voudront utiliser <a class="reference external" href="http://meld.sourceforge.net/">meld</a>. Il suffit de l'installer, et lors
+d'un conflit, de lancer <tt class="docutils literal">git mergetool</tt>.</p>
+<p>Une fois que tous les conflits sont résolus, terminer l'opération, avec <tt class="docutils literal">git rebase <span class="pre">--continue</span></tt>, et pousser vos prouesses à
+vos amis avec <tt class="docutils literal">git push</tt>.</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/git.html">#git</a>,         <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/avec-git-rebase-vos-arbres-poussent-droit-fr.html';
+      this.page.identifier = 'avec-git-rebase-vos-arbres-poussent-droit';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Placeholder for empty lists in CSS - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Placeholder for empty lists in CSS</h1>
+<time datetime="2018-01-15T00:00:00+01:00">Mon 15 January 2018</time></header>
+<article>
+    <p>Call me a weirdo but one of my guilty pleasures is to implement minimalist apps with vanilla JavaScript.</p>
+<p>Especially now that we can do ES6, async/await and <a class="reference external" href="https://twitter.com/FirefoxNightly/status/951382754125545473">even modules</a>, it's a bliss! No npm, no browserify, no transpilation, just those three files <tt class="docutils literal">index.html</tt>, <tt class="docutils literal">style.css</tt> and <tt class="docutils literal">script.js</tt>— like we used to do 15 years ago — pure sweetness :)</p>
+<p>Today I needed to show a <em>«Empty»</em> placeholder when a <tt class="docutils literal">&lt;ul&gt;</tt> list is empty (ie. no <tt class="docutils literal">&lt;li&gt;</tt> child). My first attempt consisted in checking if the list had more than one child, more or less like so:</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+  Empty
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s2">&quot;ul&quot;</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">list</span><span class="p">.</span><span class="nx">childNodes</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">list</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">;</span><span class="w">  </span><span class="c1">// Remove placeholder.</span>
+<span class="p">}</span>
+<span class="nx">list</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+</pre></div>
+<p>That's disturbing, bad and ugly. Mainly because the <em>Empty</em> text node is also a child node, but especially because of this <tt class="docutils literal">if</tt> statement in the application code. Like <a class="reference external" href="https://youtu.be/qrYt4bbEUrU?t=15m33s">Linus said at TED</a>, «[…] good code is when the special case goes away and becomes the normal case» :)</p>
+<p>Like it or not, but CSS can really help to keep the HTML and JS code to bare minimum. After a little research, I discovered that the <tt class="docutils literal">:empty</tt> selector works on any tag! And look, the special case goes away!</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="nt">ul</span><span class="p">:</span><span class="nd">empty</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Empty&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="s2">&quot;ul&quot;</span><span class="p">);</span>
+<span class="nx">list</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+</pre></div>
+<p>Yes, that's better!</p>
+<p>In order to keep the CSS a little more decoupled from content, we can even do:</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">ul</span> <span class="na">placeholder</span><span class="o">=</span><span class="s">&quot;Empty&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="nt">ul</span><span class="p">:</span><span class="nd">empty</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="nb">attr</span><span class="p">(</span><span class="n">placeholder</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>Some folks achieve amazing stuff using simple but powerful CSS rules! I often use <a class="reference external" href="https://css-tricks.com/functional-css-tabs-revisited/">these tabs</a> for example :)</p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/css.html">#css</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>,         <a href="https://blog.mathieu-leplatre.info/tag/html.html">#html</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/placeholder-for-empty-lists-in-css.html';
+      this.page.identifier = 'placeholder-for-empty-lists-in-css';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

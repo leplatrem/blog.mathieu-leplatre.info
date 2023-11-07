@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Use PostGIS topologies to clean-up road networks - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Use PostGIS topologies to clean-up road networks</h1>
+<time datetime="2013-07-03T14:25:00+02:00">Wed 03 July 2013</time></header>
+<article>
+    <p>This article gives a few basics to get started with using the PostGIS topology extension.</p>
+<p>We will take avandtage of topologies to clean-up a real topological road network, coming from <a class="reference external" href="http://data.grandtoulouse.fr/web/guest/les-donnees/-/opendata/card/12693-filaire-de-voirie">Toulouse OpenData files</a>.</p>
+<img alt="" class="align-center" src="/images/toulouse-voirie.png" />
+<div class="section" id="topological">
+<h2>Topological</h2>
+<p>A topology is a general concept, where objects are defined by their relationships
+instead of their geometries. Instead of lines, we manipulate edges, vertices and faces :
+might remind you the core concepts of graph theory.</p>
+<p>A topological road network is supposed to have their lines (edges) connected at single points (nodes).</p>
+<p>In this example dataset, <a class="reference external" href="http://wiki.openstreetmap.org/wiki/JOSM/Validator">JOSM  validator</a> detects not less than 1643 errors :) Broken connections, crossing lines ...</p>
+<img alt="" src="/images/toulouse-voirie-error.png" />
+<img alt="" src="/images/toulouse-voirie-error2.png" />
+<img alt="" src="/images/toulouse-voirie-error3.png" />
+<p><strong>Let's clean this up !</strong></p>
+</div>
+<div class="section" id="installation">
+<h2>Installation</h2>
+<p>On Ubuntu 12.04, you just have to install PostGIS :</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-add-repository<span class="w"> </span>-y<span class="w"> </span>ppa:ubuntugis/ppa
+sudo<span class="w"> </span>apt-get<span class="w"> </span>update
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>postgresql<span class="w"> </span>postgis
+</pre></div>
+<p>The topology extension is installed by default. Just activate it in your database:</p>
+<div class="highlight"><pre><span></span><span class="k">CREATE</span><span class="w"> </span><span class="k">DATABASE</span><span class="w"> </span><span class="ss">&quot;roadsdb&quot;</span><span class="p">;</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="n">EXTENSION</span><span class="w"> </span><span class="n">postgis</span><span class="p">;</span>
+<span class="k">CREATE</span><span class="w"> </span><span class="n">EXTENSION</span><span class="w"> </span><span class="n">postgis_topology</span><span class="p">;</span>
+<span class="k">SET</span><span class="w"> </span><span class="n">search_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">topology</span><span class="p">,</span><span class="k">public</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="section" id="data-import">
+<h2>Data Import</h2>
+<p>Load your shapefile (using command-line) like usual :</p>
+<div class="highlight"><pre><span></span><span class="nv">schema</span><span class="o">=</span><span class="s2">&quot;public.&quot;</span>
+<span class="nv">db</span><span class="o">=</span><span class="s2">&quot;roadsdb&quot;</span>
+<span class="nv">user</span><span class="o">=</span><span class="s2">&quot;postgres&quot;</span>
+<span class="nv">password</span><span class="o">=</span><span class="s2">&quot;postgres&quot;</span>
+<span class="nv">host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span>
+ogr2ogr<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;PostgreSQL&quot;</span><span class="w"> </span>PG:<span class="s2">&quot;host=</span><span class="si">${</span><span class="nv">host</span><span class="si">}</span><span class="s2"> user=</span><span class="si">${</span><span class="nv">user</span><span class="si">}</span><span class="s2"> dbname=</span><span class="si">${</span><span class="nv">db</span><span class="si">}</span><span class="s2"> password=</span><span class="si">${</span><span class="nv">password</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-a_srs<span class="w"> </span><span class="s2">&quot;EPSG:2154&quot;</span><span class="w"> </span>-nln<span class="w"> </span><span class="si">${</span><span class="nv">schema</span><span class="si">}</span>roads<span class="w"> </span>-nlt<span class="w"> </span>MULTILINESTRING<span class="w"> </span>ROAD_SHAPEFILE.SHP
+</pre></div>
+<p>Create and associate the PostGIS topology:</p>
+<div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="n">topology</span><span class="p">.</span><span class="n">CreateTopology</span><span class="p">(</span><span class="s1">&#39;roads_topo&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">2154</span><span class="p">);</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">topology</span><span class="p">.</span><span class="n">AddTopoGeometryColumn</span><span class="p">(</span><span class="s1">&#39;roads_topo&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;public&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;roads&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;topo_geom&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;LINESTRING&#39;</span><span class="p">);</span>
+</pre></div>
+<p>Convert linestrings to vertices and edges within the topology :</p>
+<div class="highlight"><pre><span></span><span class="c1">-- Layer 1, with 1.0 meter tolerance</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">roads</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">topo_geom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">topology</span><span class="p">.</span><span class="n">toTopoGeom</span><span class="p">(</span><span class="n">wkb_geometry</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;roads_topo&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">);</span>
+</pre></div>
+<p>From now on, we have a topology, whose imperfections were corrected. It smoothly merged
+all <em>dirty</em> junctions, whose defects were at most 1.0 meter wide.</p>
+<img alt="" src="/images/toulouse-voirie-clean.png" />
+<p>You may enconter insertion problems : the tool fails <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a> and aborts the whole transaction.
+Use this snippet to skip errors and go on with the next records:</p>
+<div class="highlight"><pre><span></span><span class="k">DO</span><span class="w"> </span><span class="err">$$</span><span class="k">DECLARE</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="n">record</span><span class="p">;</span>
+<span class="k">BEGIN</span>
+<span class="w">  </span><span class="k">FOR</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="k">IN</span><span class="w"> </span><span class="k">SELECT</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">roads</span><span class="w"> </span><span class="n">LOOP</span>
+<span class="w">    </span><span class="k">BEGIN</span>
+<span class="w">      </span><span class="k">UPDATE</span><span class="w"> </span><span class="n">roads</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">topo_geom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">topology</span><span class="p">.</span><span class="n">toTopoGeom</span><span class="p">(</span><span class="n">wkb_geometry</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;roads_topo&#39;</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">      </span><span class="k">WHERE</span><span class="w"> </span><span class="n">ogc_fid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">ogc_fid</span><span class="p">;</span>
+<span class="w">    </span><span class="k">EXCEPTION</span>
+<span class="w">      </span><span class="k">WHEN</span><span class="w"> </span><span class="n">OTHERS</span><span class="w"> </span><span class="k">THEN</span>
+<span class="w">        </span><span class="n">RAISE</span><span class="w"> </span><span class="n">WARNING</span><span class="w"> </span><span class="s1">&#39;Loading of record % failed: %&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">ogc_fid</span><span class="p">,</span><span class="w"> </span><span class="n">SQLERRM</span><span class="p">;</span>
+<span class="w">    </span><span class="k">END</span><span class="p">;</span>
+<span class="w">  </span><span class="k">END</span><span class="w"> </span><span class="n">LOOP</span><span class="p">;</span>
+<span class="k">END</span><span class="err">$$</span><span class="p">;</span>
+</pre></div>
+<p>This is rather frustrating to face topological errors at insertion ! You can try with a lower tolerance,
+or check that your records have at least valid geometries. <em>Any clarification or help on this would be welcome</em> :)</p>
+</div>
+<div class="section" id="visualize-and-export">
+<h2>Visualize and export</h2>
+<p>In order to visualize your topology vertices in QGIS, browse your database tables,
+and add the following layers: <tt class="docutils literal">roads_topo.edge_data</tt> and  <tt class="docutils literal">roads_topo.node</tt>.</p>
+<img alt="" src="/images/toulouse-voirie-topology.png" />
+<p>You can also export the resulting geometries into a new table :</p>
+<div class="highlight"><pre><span></span><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">roads_clean</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ogc_fid</span><span class="p">,</span><span class="w"> </span><span class="n">topo_geom</span><span class="p">::</span><span class="n">geometry</span>
+<span class="w">    </span><span class="k">FROM</span><span class="w"> </span><span class="n">roads</span>
+<span class="p">);</span>
+</pre></div>
+<p>Or obtain your lovable Shapefile in return :</p>
+<div class="highlight"><pre><span></span><span class="n">ogr2ogr</span><span class="w"> </span><span class="o">-</span><span class="n">f</span><span class="w"> </span><span class="ss">&quot;ESRI Shapefile&quot;</span><span class="w"> </span><span class="n">ROAD_CLEAN</span><span class="p">.</span><span class="n">SHP</span><span class="w"> </span><span class="n">PG</span><span class="p">:</span><span class="ss">&quot;host=${host} user=${user} dbname=${db} password=${password}&quot;</span><span class="w"> </span><span class="o">-</span><span class="k">sql</span><span class="w"> </span><span class="ss">&quot;SELECT topo_geom::geometry FROM roads&quot;</span>
+</pre></div>
+<p>If, like <a class="reference external" href="http://gis.stackexchange.com/questions/71270/split-line-at-intersection-and-attach-attributes/">Amit</a>  you want to split the lines at
+intersections and assign original attributes, just join <tt class="docutils literal">roads_topo.edge_data</tt> and on the <tt class="docutils literal">roads</tt> table :</p>
+<div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">lib_off</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">.</span><span class="n">ogc_fid</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">geom</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">roads_topo</span><span class="p">.</span><span class="n">edge</span><span class="w"> </span><span class="n">e</span><span class="p">,</span>
+<span class="w">     </span><span class="n">roads_topo</span><span class="p">.</span><span class="n">relation</span><span class="w"> </span><span class="n">rel</span><span class="p">,</span>
+<span class="w">     </span><span class="n">roads</span><span class="w"> </span><span class="n">r</span>
+<span class="k">WHERE</span><span class="w"> </span><span class="n">e</span><span class="p">.</span><span class="n">edge_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rel</span><span class="p">.</span><span class="n">element_id</span>
+<span class="w">  </span><span class="k">AND</span><span class="w"> </span><span class="n">rel</span><span class="p">.</span><span class="n">topogeo_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">r</span><span class="p">.</span><span class="n">topo_geom</span><span class="p">).</span><span class="n">id</span>
+</pre></div>
+</div>
+<div class="section" id="going-further">
+<h2>Going further...</h2>
+<p>We could collapse crossing lines and disconnected junctions into a nice and clean network.</p>
+<p>Yes ahem, we weren't able to repair <em>every</em> topological error of this dataset using this automatic method.
+Some inconsistencies, like the following one, are like 6 meters wide ! They are, by the way, perfectly described in OpenStreetMap :</p>
+<img alt="" src="/images/toulouse-voirie-error4.png" />
+<p>We could also play with simplifications using <a class="reference external" href="http://strk.keybit.net/blog/2012/04/13/simplifying-a-map-layer-using-postgis-topology/">Sandro Santilli</a>'s <tt class="docutils literal">SimplifyEdgeGeom</tt> <a class="footnote-reference" href="#footnote-2" id="footnote-reference-2">[2]</a> function, it will collapse edges with a higher tolerance ...</p>
+<div class="highlight"><pre><span></span><span class="k">SELECT</span><span class="w"> </span><span class="n">SimplifyEdgeGeom</span><span class="p">(</span><span class="s1">&#39;roads_topo&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">edge_id</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">roads_topo</span><span class="p">.</span><span class="n">edge</span><span class="p">;</span>
+</pre></div>
+<p>Don't hesitate to share your thoughts and feedback. Concrete use cases and examples are rare about this!
+And as usual, drop a comment if anything is wrong or not clear :)</p>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td><tt class="docutils literal">SQL/MM Spatial exception</tt>, <tt class="docutils literal">geometry intersects edge</tt>, <tt class="docutils literal">side location conflict</tt>, ...</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="footnote-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-2">[2]</a></td><td>Just execute the <a class="reference external" href="https://gist.github.com/leplatrem/5729022">function SQL code</a>. It's
+just an elegant wrapper around <tt class="docutils literal">ST_ChangeEdgeGeom</tt> and <tt class="docutils literal">ST_Simplify</tt>.</td></tr>
+</tbody>
+</table>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/postgis.html">#postgis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/sql.html">#sql</a>,         <a href="https://blog.mathieu-leplatre.info/tag/topology.html">#topology</a>,         <a href="https://blog.mathieu-leplatre.info/tag/opendata.html">#opendata</a>,         <a href="https://blog.mathieu-leplatre.info/tag/toulouse.html">#toulouse</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/use-postgis-topologies-to-clean-up-road-networks.html';
+      this.page.identifier = 'use-postgis-topologies-to-clean-up-road-networks';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

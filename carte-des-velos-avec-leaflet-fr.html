@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Carte des vélos avec Leaflet - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Carte des vélos avec Leaflet</h1>
+<time datetime="2011-05-30T15:25:00+02:00">Mon 30 May 2011</time></header>
+<article>
+    <p><em>Article original publié chez</em> <a class="reference external" href="http://makina-corpus.org">Makina Corpus</a></p>
+<p>Les bookmarks, un peu comme les cahiers de recettes, c'est bien de les remplir mais encore faut-il trouver les bons au moment adéquate !
+Même quand il s'agit d'outils, de bibliothèques et de services Web, il faut trouver l'occasion de les tester avant le grand soir !
+Et si on veut en faire un article de blog, alors là, il faut en plus donner envie d'y goûter :)</p>
+<p>Ici, je prends plein d'ingrédients trouvés au bord des chemins :</p>
+<ul class="simple">
+<li><a class="reference external" href="http://packages.python.org/pyquery/">pyquery</a></li>
+<li><a class="reference external" href="http://leaflet.cloudmade.com">leaflet</a></li>
+<li><a class="reference external" href="http://developer.yahoo.com/yql/">Yahoo Query Language</a></li>
+<li><a class="reference external" href="http://mustache.github.com/">mustache</a></li>
+</ul>
+<p>Je secoue bien fort ! (sans oublier de saupoudrer de <a class="reference external" href="http://jquery.com">jquery</a>) et j'obtiens une carte interactive des stations vélos de Toulouse !</p>
+<div class="section" id="la-liste-des-stations">
+<h2>La liste des stations</h2>
+<p>Sur le site <a class="reference external" href="http://velonow.info">http://velonow.info</a>, je récupère un fichier XML qui contient
+la liste statique des stations de vélo et leurs identifiants.</p>
+<p>C'est l'occasion d'utiliser <a class="reference external" href="http://packages.python.org/pyquery/">pyquery</a> pour le transformer en GeoJSON. <a class="reference external" href="http://www.gawel.org">Gawel</a> nous l'avait présenté aux djangocongs, il s'agit du portage de l'API de JQuery en python !</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyquery</span> <span class="kn">import</span> <span class="n">PyQuery</span> <span class="k">as</span> <span class="n">pq</span>
+
+<span class="n">d</span> <span class="o">=</span> <span class="n">pq</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;http://server.com/file.xml&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">pq</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">d</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">)):</span>
+    <span class="n">pt</span> <span class="o">=</span> <span class="n">geojson</span><span class="o">.</span><span class="n">Point</span><span class="p">([</span><span class="n">m</span><span class="o">.</span><span class="n">attr</span><span class="p">(</span><span class="s1">&#39;lng&#39;</span><span class="p">),</span>
+                        <span class="n">m</span><span class="o">.</span><span class="n">attr</span><span class="p">(</span><span class="s1">&#39;lat&#39;</span><span class="p">)])</span>
+    <span class="o">...</span>
+    <span class="o">...</span>
+</pre></div>
+<p>Je trouve ça génial d'avoir la même syntaxe de manipulation du DOM en python et en javascript ! Et pour faire du webscrapping, c'est top !</p>
+</div>
+<div class="section" id="affichage-de-la-carte">
+<h2>Affichage de la carte</h2>
+<p><a class="reference external" href="http://cloudmade.com">Cloudmade</a> a créé <a class="reference external" href="http://leaflet.cloudmade.com">leaflet</a> qui rejoint <a class="reference external" href="http://www.tile5.org">Tile5</a> et <a class="reference external" href="http://polymaps.org">Polymaps</a> en tant que challenger d'Openlayers !</p>
+<p>C'est une bibliothèque légère, jolie, fluide, optimisée pour les mobiles,
+et même compatible Internet Explorer !</p>
+<p>Pour afficher une carte centrée sur la localisation du visiteur de la page, il suffit de faire ça :</p>
+<div class="highlight"><pre><span></span><span class="kd">var</span><span class="w"> </span><span class="nx">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nb">Map</span><span class="p">(</span><span class="s1">&#39;map&#39;</span><span class="p">);</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nx">cloudmadeUrl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/997/256/{z}/{x}/{y}.png&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">cloudmade</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">TileLayer</span><span class="p">(</span><span class="nx">cloudmadeUrl</span><span class="p">);</span>
+
+<span class="nx">map</span><span class="p">.</span><span class="nx">addLayer</span><span class="p">(</span><span class="nx">cloudmade</span><span class="p">);</span>
+
+<span class="nx">map</span><span class="p">.</span><span class="nx">locateAndSetView</span><span class="p">();</span>
+</pre></div>
+<p>Pour l'instant, Leaflet ne gère pas les couches au format GeoJSON, en
+attendant <a class="reference external" href="https://github.com/CloudMade/Leaflet/issues/13">la prochaine release</a>,
+nous allons ajouter les points des stations en 2 coups de cuillère à pot :</p>
+<div class="highlight"><pre><span></span><span class="nx">$</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">$</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="nx">data</span><span class="p">.</span><span class="nx">features</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span><span class="w"> </span><span class="nx">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">cc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">geometry</span><span class="p">.</span><span class="nx">coordinates</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">marker</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">Marker</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">LatLng</span><span class="p">(</span><span class="nx">cc</span><span class="p">[</span><span class="mf">1</span><span class="p">],</span><span class="w"> </span><span class="nx">cc</span><span class="p">[</span><span class="mf">0</span><span class="p">]));</span>
+<span class="w">        </span><span class="nx">map</span><span class="p">.</span><span class="nx">addLayer</span><span class="p">(</span><span class="nx">marker</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<div class="section" id="details-d-une-station-en-popup">
+<h2>Détails d'une station en popup</h2>
+<p>Les détails d'une station (nombre de vélos, emplacements, libres, occupés) sont disponibles en fournissant un identifiant sur le site de <a class="reference external" href="http://www.velo.toulouse.fr">velo toulouse</a>.
+Mais lorsqu'on appelle la page en Ajax, le corps de la réponse XML est vide. Une protection contre la bidouillabilité sûrement.</p>
+<p>C'est là que <a class="reference external" href="http://developer.yahoo.com/yql/">Yahoo Query Language</a> nous aide ! On passe par Yahoo pour accèder aux ressources du Web avec <a class="reference external" href="http://developer.yahoo.com/yql/console/">des requêtes similaires aux bases de données</a> !</p>
+<div class="highlight"><pre><span></span><span class="kd">var</span><span class="w"> </span><span class="nx">yql</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;select * from xml where url = &#39;&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">url</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span>
+<span class="w"> </span><span class="nx">yqlurl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;http://query.yahooapis.com/v1/public/yql?q=&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">encodeURIComponent</span><span class="p">(</span><span class="nx">yql</span><span class="p">);</span>
+<span class="nx">$</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">yqlurl</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// show data in pop up !</span>
+<span class="p">});</span>
+</pre></div>
+<p>Je fais une petite fonction pour transformer l'XML récupéré en objet :</p>
+<div class="highlight"><pre><span></span><span class="kd">function</span><span class="w"> </span><span class="nx">xml2obj</span><span class="p">(</span><span class="nx">xmldata</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
+<span class="w">    </span><span class="nx">$</span><span class="p">(</span><span class="nx">xmldata</span><span class="p">).</span><span class="nx">children</span><span class="p">().</span><span class="nx">each</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span><span class="w"> </span><span class="nx">value</span><span class="p">){</span>
+<span class="w">        </span><span class="nx">d</span><span class="p">[</span><span class="nx">$</span><span class="p">(</span><span class="nx">value</span><span class="p">).</span><span class="nx">get</span><span class="p">(</span><span class="mf">0</span><span class="p">).</span><span class="nx">nodeName</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">$</span><span class="p">(</span><span class="nx">value</span><span class="p">).</span><span class="nx">text</span><span class="p">();</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">d</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="nt">&lt;station&gt;</span>
+<span class="w">    </span><span class="nt">&lt;free&gt;</span>12<span class="nt">&lt;/free&gt;</span>
+<span class="w">    </span><span class="nt">&lt;available&gt;</span>4<span class="nt">&lt;/available&gt;</span>
+<span class="w">    </span><span class="nt">&lt;total&gt;</span>16<span class="nt">&lt;/total&gt;</span>
+<span class="nt">&lt;/station&gt;</span>
+</pre></div>
+<p>devient :</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nx">free</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">12</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">available</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="mf">4</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">total</span><span class="o">:</span><span class="w"> </span><span class="mf">16</span>
+<span class="p">}</span>
+</pre></div>
+<p>Pour mettre en forme ces informations dans la pop-up, nous allons utiliser <a class="reference external" href="http://mustache.github.com/">mustache</a> !
+Conceptuellement, il s'agit tout simplement d'un moteur de template avec <a class="reference external" href="http://mustache.github.com/mustache.5.html">une syntaxe simplifiée</a> ! Il y a une implémentation
+dans quasiment tous les languages, dont Javascript.</p>
+<p>Cela évite principalement de faire du code javascript pour la mise en forme des données, notamment pour
+celles récupérées en JSON via Ajax.</p>
+<p>On construit une chaîne avec les fameuses <cite>{{}}</cite> et on fournit un objet pour substituer les valeurs :</p>
+<div class="highlight"><pre><span></span><span class="kd">var</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">xml2obj</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="nx">xmldata</span><span class="p">).</span><span class="nx">find</span><span class="p">(</span><span class="s1">&#39;station&#39;</span><span class="p">)),</span>
+<span class="w">    </span><span class="nx">template</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;h2&gt;Station #{{ number }}&lt;/h2&gt;</span>
+<span class="s2">                &lt;p&gt;{{ address }}&lt;/p&gt;                    \</span>
+<span class="s2">                {{# station }}                          \</span>
+<span class="s2">                &lt;ul&gt;                                    \</span>
+<span class="s2">                  &lt;li&gt;{{ available }} available&lt;/li&gt;    \</span>
+<span class="s2">                  &lt;li&gt;{{ free }} free slots&lt;/li&gt;        \</span>
+<span class="s2">                &lt;/ul&gt;                                   \</span>
+<span class="s2">                {{/ station }}&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">content</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Mustache</span><span class="p">.</span><span class="nx">to_html</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="p">);</span>
+
+<span class="c1">// Show marker popup !</span>
+<span class="nx">marker</span><span class="p">.</span><span class="nx">bindPopup</span><span class="p">(</span><span class="nx">content</span><span class="p">).</span><span class="nx">openPopup</span><span class="p">();</span>
+</pre></div>
+<p>Et voilà !</p>
+<img alt="" src="/images/leaflet-velo.png" />
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>,         <a href="https://blog.mathieu-leplatre.info/tag/leaflet.html">#leaflet</a>,         <a href="https://blog.mathieu-leplatre.info/tag/mustache.html">#mustache</a>,         <a href="https://blog.mathieu-leplatre.info/tag/pyquery.html">#pyquery</a>,         <a href="https://blog.mathieu-leplatre.info/tag/jquery.html">#jquery</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/carte-des-velos-avec-leaflet-fr.html';
+      this.page.identifier = 'carte-des-velos-avec-leaflet';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

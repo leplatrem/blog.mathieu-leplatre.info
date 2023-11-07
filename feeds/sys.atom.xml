@@ -1,0 +1,923 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Mathieu Leplatre - Sys</title><link href="https://blog.mathieu-leplatre.info/" rel="alternate"></link><link href="https://blog.mathieu-leplatre.info/feeds/sys.atom.xml" rel="self"></link><id>https://blog.mathieu-leplatre.info/</id><updated>2014-01-09T12:25:00+01:00</updated><entry><title>Publish your Pelican blog on Github pages via Travis-CI</title><link href="https://blog.mathieu-leplatre.info/publish-your-pelican-blog-on-github-pages-via-travis-ci.html" rel="alternate"></link><published>2014-01-09T12:25:00+01:00</published><updated>2014-01-09T12:25:00+01:00</updated><author><name>Mathieu Leplatre</name></author><id>tag:blog.mathieu-leplatre.info,2014-01-09:/publish-your-pelican-blog-on-github-pages-via-travis-ci.html</id><summary type="html">&lt;p&gt;This blog is powered by Pelican, and until recently I have rendered the HTML pages
+on my local machine and published them on a personal server via SSH.&lt;/p&gt;
+&lt;p&gt;Most of the time, I used to forget pushing the raw files on Github. Therefore automatizing
+the publishing process based on commits …&lt;/p&gt;</summary><content type="html">&lt;p&gt;This blog is powered by Pelican, and until recently I have rendered the HTML pages
+on my local machine and published them on a personal server via SSH.&lt;/p&gt;
+&lt;p&gt;Most of the time, I used to forget pushing the raw files on Github. Therefore automatizing
+the publishing process based on commits looked like a good idea :)&lt;/p&gt;
+&lt;p&gt;The strategy is :&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;I write, commit and push articles in rST as usual ;&lt;/li&gt;
+&lt;li&gt;Travis-CI detects changes ;&lt;/li&gt;
+&lt;li&gt;It builds the HTML pages ;&lt;/li&gt;
+&lt;li&gt;It pushes the content on the repo's &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;gh-pages&lt;/span&gt;&lt;/tt&gt; branch.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Andrea Zonca &lt;a class="reference external" href="http://zonca.github.io/2013/09/automatically-build-pelican-and-publish-to-github-pages.html"&gt;wrote something similar&lt;/a&gt;
+with a very appealing title, but it was not very enlightening to me.
+I hope getting it done will be clear enough with this present article.&lt;/p&gt;
+&lt;div class="section" id="travis-ci-configuration"&gt;
+&lt;h2&gt;Travis-CI configuration&lt;/h2&gt;
+&lt;p&gt;Just add a &lt;tt class="docutils literal"&gt;.travis.yml&lt;/tt&gt; file, like you would do for your unit-tests.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;language: python
+branches:
+  only:
+  - master
+install:
+- pip install pelican ghp-import
+script:
+- make publish github
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;In order to avoid the blog to be updated by changes on the &lt;tt class="docutils literal"&gt;draft&lt;/tt&gt; branch,
+only commits of &lt;tt class="docutils literal"&gt;master&lt;/tt&gt; trigger updates.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="travis-authentication-on-github"&gt;
+&lt;h2&gt;Travis authentication on Github&lt;/h2&gt;
+&lt;p&gt;Since it will push to the &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;gh-pages&lt;/span&gt;&lt;/tt&gt; branch of your repo, it has to authenticate on
+Github. For this, we use a &lt;a class="reference external" href="https://github.com/blog/1270-easier-builds-and-deployments-using-git-over-https-and-oauth"&gt;OAuth token&lt;/a&gt;,
+that can be created and revoked from the &lt;a class="reference external" href="https://github.com/settings/applications"&gt;GitHub applications&lt;/a&gt; page.&lt;/p&gt;
+&lt;p&gt;In order to keep it secret with Travis, we use their Ruby application to
+encrypt it :&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt-get install ruby1.9.1-dev build-essential
+sudo gem install travis
+
+travis encrypt GH_TOKEN=your_token
+&lt;/pre&gt;
+&lt;p&gt;A new block will be added to &lt;tt class="docutils literal"&gt;.travis.yml&lt;/tt&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;env:
+  global:
+    secure: NWjh6sCvmjuX...yWo=
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="push-on-github-pages"&gt;
+&lt;h2&gt;Push on Github pages&lt;/h2&gt;
+&lt;p&gt;I modified the &lt;tt class="docutils literal"&gt;Makefile&lt;/tt&gt; provided in Pelican.&lt;/p&gt;
+&lt;p&gt;It uses &lt;em&gt;ghp-import&lt;/em&gt; to build the branch from the output folder and pushes quietly with force via HTTPS using the token variable.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nf"&gt;github&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;publish&lt;/span&gt;
+
+&lt;span class="w"&gt;  &lt;/span&gt;ghp-import&lt;span class="w"&gt; &lt;/span&gt;-n&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="k"&gt;$(&lt;/span&gt;OUTPUTDIR&lt;span class="k"&gt;)&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;@git&lt;span class="w"&gt; &lt;/span&gt;push&lt;span class="w"&gt; &lt;/span&gt;-fq&lt;span class="w"&gt; &lt;/span&gt;https://&lt;span class="si"&gt;${&lt;/span&gt;&lt;span class="nv"&gt;GH_TOKEN&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;@github.com/&lt;span class="k"&gt;$(&lt;/span&gt;TRAVIS_REPO_SLUG&lt;span class="k"&gt;)&lt;/span&gt;.git&lt;span class="w"&gt; &lt;/span&gt;gh-pages&lt;span class="w"&gt; &lt;/span&gt;&amp;gt;&lt;span class="w"&gt; &lt;/span&gt;/dev/null
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Use leading &lt;tt class="docutils literal"&gt;&amp;#64;&lt;/tt&gt; to remove command from output, thanks &lt;a class="reference external" href="https://github.com/leplatrem/blog.mathieu-leplatre.info/issues/1"&gt;Ryan Peck&lt;/a&gt;!&lt;/p&gt;
+&lt;p&gt;Also disable pull request builds in Travis to prevent the blog being updated by a pull request (thanks &lt;a class="reference external" href="https://github.com/leplatrem/blog.mathieu-leplatre.info/pull/2"&gt;Andrew Aitken&lt;/a&gt; !).&lt;/p&gt;
+&lt;img alt="" src="/images/travis-pull-request.png" /&gt;
+&lt;/div&gt;
+&lt;div class="section" id="custom-domain"&gt;
+&lt;h2&gt;Custom domain&lt;/h2&gt;
+&lt;p&gt;Github expects a &lt;tt class="docutils literal"&gt;CNAME&lt;/tt&gt; file. Pelican provides a simple way to create it using &lt;em&gt;extra paths&lt;/em&gt;,
+controlled via settings :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;STATIC_PATHS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;images&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;extra/CNAME&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;span class="n"&gt;EXTRA_PATH_METADATA&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;extra/CNAME&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;path&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s1"&gt;&amp;#39;CNAME&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;},}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If any doubt, just have a look the &lt;a class="reference external" href="https://github.com/leplatrem/blog.mathieu-leplatre.info"&gt;repository of this blog&lt;/a&gt;...&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="Sys"></category><category term="pelican"></category><category term="github"></category><category term="travis"></category></entry><entry><title>Deploy Django projects using git push</title><link href="https://blog.mathieu-leplatre.info/deploy-django-projects-using-git-push.html" rel="alternate"></link><published>2013-08-12T22:00:00+02:00</published><updated>2013-08-12T22:00:00+02:00</updated><author><name>Mathieu Leplatre</name></author><id>tag:blog.mathieu-leplatre.info,2013-08-12:/deploy-django-projects-using-git-push.html</id><summary type="html">&lt;p&gt;Deploying stuff in one command is becoming the Holy Grail of development,
+with currently ten times more blog articles than Medieval crusades :)&lt;/p&gt;
+&lt;p&gt;I could not miss the opportunity to write mine !&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Disclaimer:&lt;/strong&gt; In order to keep this article as clear (and short) as possible,
+the first step setup on a …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Deploying stuff in one command is becoming the Holy Grail of development,
+with currently ten times more blog articles than Medieval crusades :)&lt;/p&gt;
+&lt;p&gt;I could not miss the opportunity to write mine !&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Disclaimer:&lt;/strong&gt; In order to keep this article as clear (and short) as possible,
+the first step setup on a blank server does not use any provisionning system
+(&lt;em&gt;another religious matter&lt;/em&gt;).&lt;/p&gt;
+&lt;div class="section" id="prerequesites-easy-dependencies"&gt;
+&lt;h2&gt;Prerequesites : easy dependencies&lt;/h2&gt;
+&lt;p&gt;Having a simple &lt;tt class="docutils literal"&gt;Makefile&lt;/tt&gt; for your application is highly recommended, it will gather all repetitive
+commands for setting up dependencies.&lt;/p&gt;
+&lt;p&gt;Here is a minimalist (working) example, with a project called &lt;tt class="docutils literal"&gt;revolution&lt;/tt&gt;&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+install: bin/python
+
+bin/python:
+    virtualenv .
+    bin/python setup.py develop
+
+serve: bin/python
+    bin/python ./manage.py runserver 8888
+
+deploy: bin/python
+    bin/python ./manage.py collectstatic --clear --noinput
+    touch revolution/wsgi.py  # trigger reload
+
+clean:
+    rm -rf bin/ lib/ build/ dist/ *.egg-info/ include/ local/
+&lt;/pre&gt;
+&lt;p&gt;If your project does have any &lt;tt class="docutils literal"&gt;setup.py&lt;/tt&gt;, just write one &lt;a class="footnote-reference" href="#footnote-1" id="footnote-reference-1"&gt;[1]&lt;/a&gt; or use a &lt;tt class="docutils literal"&gt;requirements.txt&lt;/tt&gt; file &lt;a class="footnote-reference" href="#footnote-2" id="footnote-reference-2"&gt;[2]&lt;/a&gt;
+and replace &lt;tt class="docutils literal"&gt;bin/python setup.py develop&lt;/tt&gt; in &lt;em&gt;Makefile&lt;/em&gt; with &lt;tt class="docutils literal"&gt;bin/pip install &lt;span class="pre"&gt;-r&lt;/span&gt; requirements.txt&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;Now you can then run your deployment commands with &lt;tt class="docutils literal"&gt;make deploy&lt;/tt&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="first-step-server-setup"&gt;
+&lt;h2&gt;First step : server setup&lt;/h2&gt;
+&lt;div class="section" id="prepare-repository"&gt;
+&lt;h3&gt;Prepare repository&lt;/h3&gt;
+&lt;p&gt;On your server, create two folders : the repository and deployed app.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;mkdir&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;/var/git/yourapp.git
+mkdir&lt;span class="w"&gt; &lt;/span&gt;-p&lt;span class="w"&gt; &lt;/span&gt;/var/www/yourapp
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;The Git repository will serve as a remote for our code.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nb"&gt;cd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;/var/git/yourapp.git
+git&lt;span class="w"&gt; &lt;/span&gt;init&lt;span class="w"&gt; &lt;/span&gt;--bare&lt;span class="w"&gt; &lt;/span&gt;.
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Using Git hooks, we will deploy the code being pushed into the
+deployed app folder. Create the file &lt;em&gt;hooks/post-receive&lt;/em&gt;
+with the following content&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+#!/bin/sh
+dest=/var/www/yourapp
+echo &amp;quot;Deploying into $dest&amp;quot;
+GIT_WORK_TREE=$dest git checkout --force
+cd $dest
+make deploy
+&lt;/pre&gt;
+&lt;p&gt;And make it executable&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+chmod +x /var/git/yourapp.git/hooks/post-receive
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="setup-web-server"&gt;
+&lt;h3&gt;Setup Web server&lt;/h3&gt;
+&lt;p&gt;Again, in order to make this straight to the point, I will use &lt;em&gt;Apache's mod_wsgi&lt;/em&gt;,
+since the configuration is trivial.&lt;/p&gt;
+&lt;p&gt;Of course, &lt;em&gt;nginx&lt;/em&gt;, &lt;em&gt;gunicorn&lt;/em&gt;, &lt;em&gt;uwsgi&lt;/em&gt; or &lt;em&gt;circus&lt;/em&gt; still belong to our prefered stacks but
+currently our main point is &lt;em&gt;deploying with git push&lt;/em&gt; !&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt-get install libapache2-mod-wsgi
+&lt;/pre&gt;
+&lt;p&gt;Create a very simple Apache configuration file in &lt;em&gt;/etc/apache2/sites-available/001-yourapp&lt;/em&gt;&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+WSGIPythonPath /var/www/yourapp:/var/www/yourapp/lib/python2.6/site-packages
+
+&amp;lt;VirtualHost *:80&amp;gt;
+    ServerName yourapp.com
+    ServerAdmin contact&amp;#64;yourapp.com
+
+    Alias /static/ /var/www/yourapp/public/static/
+    &amp;lt;Directory /var/www/yourapp/public/static&amp;gt;
+        Order deny,allow
+        Allow from all
+    &amp;lt;/Directory&amp;gt;
+
+    WSGIScriptAlias / /var/www/yourapp/revolution/wsgi.py
+    &amp;lt;Directory /var/www/yourapp/revolution/&amp;gt;
+        &amp;lt;Files wsgi.py&amp;gt;
+            Order deny,allow
+            Allow from all
+        &amp;lt;/Files&amp;gt;
+    &amp;lt;/Directory&amp;gt;
+&amp;lt;/VirtualHost&amp;gt;
+&lt;/pre&gt;
+&lt;p&gt;And enable it&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo a2ensite 001-yourapp
+sudo /etc/init.d/apache2 restart
+&lt;/pre&gt;
+&lt;p&gt;Your site is now up and running...&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="next-steps-push-updates"&gt;
+&lt;h2&gt;Next steps : push updates !&lt;/h2&gt;
+&lt;p&gt;Now that the application is in production, you will obviously want to push updates !&lt;/p&gt;
+&lt;p&gt;Comfortably installed at your desk, you just have to push commits to the server,
+the same way you already do for your code !&lt;/p&gt;
+&lt;p&gt;Add the remote (once)&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ git remote add production ssh://user&amp;#64;server:/var/git/yourapp.git
+&lt;/pre&gt;
+&lt;p&gt;And push !&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+$ git push production master
+
+...
+Counting objects: 862, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (437/437), done.
+Writing objects: 100% (817/817), 121.16 KiB, done.
+Total 817 (delta 608), reused 452 (delta 332)
+remote: Deploying into /var/www/yourapp
+...
+remote: bin/python setup.py develop
+...
+...
+remote: 345 static files copied.
+To server:/var/git/yourapp.git
+   2fe81f4..76a3fb8  master -&amp;gt; master
+&lt;/pre&gt;
+&lt;p&gt;Your site is up-to-date ! Depending of course of caching policies, but it runs the last version.&lt;/p&gt;
+&lt;p&gt;Obviously, it is very likely that you will want to push specific branches, but that, you already know!&lt;/p&gt;
+&lt;img alt="" src="/images/cat_pope.jpg" /&gt;
+&lt;table class="docutils footnote" frame="void" id="footnote-1" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#footnote-reference-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="https://docs.djangoproject.com/en/dev/intro/reusable-apps/#packaging-your-app"&gt;https://docs.djangoproject.com/en/dev/intro/reusable-apps/#packaging-your-app&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="footnote-2" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#footnote-reference-2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;&lt;a class="reference external" href="http://www.pip-installer.org/en/latest/requirements.html"&gt;http://www.pip-installer.org/en/latest/requirements.html&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+</content><category term="Sys"></category><category term="django"></category><category term="git"></category></entry><entry><title>Serve your map layers with a usual Web hosting service</title><link href="https://blog.mathieu-leplatre.info/serve-your-map-layers-with-a-usual-web-hosting-service.html" rel="alternate"></link><published>2012-05-05T00:00:00+02:00</published><updated>2012-05-05T00:00:00+02:00</updated><author><name>Mathieu Leplatre</name></author><id>tag:blog.mathieu-leplatre.info,2012-05-05:/serve-your-map-layers-with-a-usual-web-hosting-service.html</id><summary type="html">&lt;p&gt;Someone asked me about serving map tiles from a basic Web host. I agreed
+to reply with a blog post, since it completes the stories I've been telling
+in my last &lt;a class="reference external" href="http://www.slideshare.net/makinacorpus/solutions-alternatives-google-maps-11501753"&gt;two&lt;/a&gt;
+&lt;a class="reference external" href="/des-cartes-dun-autre-monde-la-suite-fr.html"&gt;talks&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;How to serve your map layers (&lt;em&gt;tiles&lt;/em&gt;) with the simplest Apache or nginx ?&lt;/p&gt;
+&lt;div class="section" id="get-the-mbtiles-file"&gt;
+&lt;h2&gt;Get the MBTiles file …&lt;/h2&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;Someone asked me about serving map tiles from a basic Web host. I agreed
+to reply with a blog post, since it completes the stories I've been telling
+in my last &lt;a class="reference external" href="http://www.slideshare.net/makinacorpus/solutions-alternatives-google-maps-11501753"&gt;two&lt;/a&gt;
+&lt;a class="reference external" href="/des-cartes-dun-autre-monde-la-suite-fr.html"&gt;talks&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;How to serve your map layers (&lt;em&gt;tiles&lt;/em&gt;) with the simplest Apache or nginx ?&lt;/p&gt;
+&lt;div class="section" id="get-the-mbtiles-file"&gt;
+&lt;h2&gt;Get the MBTiles file&lt;/h2&gt;
+&lt;p&gt;We start from a tiles package (&lt;em&gt;MBTiles&lt;/em&gt;). Depending on where your layers come
+from, you can either choose :&lt;/p&gt;
+&lt;div class="section" id="to-publish-your-tilemill-map"&gt;
+&lt;h3&gt;To publish your Tilemill map&lt;/h3&gt;
+&lt;p&gt;Design your map in Tilemill, even &lt;a class="reference external" href="http://mapbox.com/tilemill/docs/guides/osm-bright-ubuntu-quickstart/"&gt;your own OpenStreetMap style customization&lt;/a&gt;,
+and export it as MBTiles !
+&lt;a class="reference external" href="http://mapbox.com/"&gt;MapBox hosting&lt;/a&gt; is the prefered solution, but you can still host and
+serve your exported MBTiles file yourself !&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="to-mirror-a-wms-server"&gt;
+&lt;h3&gt;To mirror a WMS server&lt;/h3&gt;
+&lt;p&gt;Again, using &lt;a class="reference external" href="/landez-introducing-new-features-of-our-tiles-toolbox.html"&gt;landez&lt;/a&gt;, you can build a MBTiles
+file from a WMS source (&lt;em&gt;orthophoto&lt;/em&gt;...), and then serve those layers yourself as tiles (at the speed of light !).&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="to-mirror-tiles-services"&gt;
+&lt;h3&gt;To mirror tiles services&lt;/h3&gt;
+&lt;p&gt;Using &lt;a class="reference external" href="/landez-introducing-new-features-of-our-tiles-toolbox.html"&gt;landez&lt;/a&gt;, you
+can gather tiles from a tiles service, and package them in a &lt;tt class="docutils literal"&gt;.mbtiles&lt;/tt&gt;
+file locally.&lt;/p&gt;
+&lt;p&gt;If you plan on mirroring public tile services, do not forget to add attributions
+and &lt;strong&gt;make sure it respects the terms of service&lt;/strong&gt;. Most services restrict bulk downloads &lt;a class="footnote-reference" href="#footnote-1" id="footnote-reference-1"&gt;[1]&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="extract-files-on-disk"&gt;
+&lt;h2&gt;Extract files on disk&lt;/h2&gt;
+&lt;p&gt;Using &lt;a class="reference external" href="https://github.com/mapbox/mbutil"&gt;mbutil&lt;/a&gt;, we can extract the &lt;tt class="docutils literal"&gt;.mbtiles&lt;/tt&gt;
+file into a destination folder.&lt;/p&gt;
+&lt;p&gt;Unfortunately, the &lt;em&gt;pypi&lt;/em&gt; mirror is quite old, we'll install the last development version.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;wget&lt;span class="w"&gt; &lt;/span&gt;https://github.com/mapbox/mbutil/zipball/master&lt;span class="w"&gt; &lt;/span&gt;-O&lt;span class="w"&gt; &lt;/span&gt;mbutil.zip
+unzip&lt;span class="w"&gt; &lt;/span&gt;mbutil
+&lt;span class="nb"&gt;cd&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;mapbox-mbutil*
+sudo&lt;span class="w"&gt; &lt;/span&gt;python&lt;span class="w"&gt; &lt;/span&gt;setup.py&lt;span class="w"&gt; &lt;/span&gt;install
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Done. Now extract. (&lt;em&gt;Note that the ``DEST`` folder must not exist&lt;/em&gt;) :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;mb-util&lt;span class="w"&gt; &lt;/span&gt;--scheme&lt;span class="o"&gt;=&lt;/span&gt;osm&lt;span class="w"&gt; &lt;/span&gt;FILE.mbtiles&lt;span class="w"&gt; &lt;/span&gt;/path/to/DEST/
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If your MBTiles has an interaction layer (&lt;em&gt;UTFGrid&lt;/em&gt;), both &lt;tt class="docutils literal"&gt;.png&lt;/tt&gt; and &lt;tt class="docutils literal"&gt;.json&lt;/tt&gt;
+files will be expanded in folders.&lt;/p&gt;
+&lt;p&gt;Just push the folder to your hosting, and you're done !&lt;/p&gt;
+&lt;div class="section" id="cache-headers"&gt;
+&lt;h3&gt;Cache headers&lt;/h3&gt;
+&lt;p&gt;If you the master on board, tweak the cache headers :&lt;/p&gt;
+&lt;p&gt;With &lt;em&gt;Apache&lt;/em&gt; :&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+ExpiresActive On
+ExpiresDefault &amp;quot;access plus 7 days&amp;quot;
+Alias /DEST /path/to/DEST/;
+&lt;/pre&gt;
+&lt;p&gt;With &lt;em&gt;nginx&lt;/em&gt; :&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+server {
+    location /DEST {
+        expires 7d;
+        alias /path/to/DEST/;
+    }
+}
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="boost-with-subdomains"&gt;
+&lt;h3&gt;Boost with subdomains&lt;/h3&gt;
+&lt;p&gt;Browsers limit parallel downloads on the same domain. If you can declare
+subdomains (&lt;em&gt;a.yourserver.org&lt;/em&gt;, &lt;em&gt;b.yourserver.org&lt;/em&gt;, ...), it will speed-up
+tiles download.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="use-it-in-your-mapping-library"&gt;
+&lt;h2&gt;Use it in your mapping library&lt;/h2&gt;
+&lt;p&gt;With &lt;a class="reference external" href="http://leaflet.cloudmade.com"&gt;Leaflet&lt;/a&gt; for example :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kd"&gt;var&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;map&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;L&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nb"&gt;Map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;map&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="nx"&gt;map&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;addLayer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ow"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;L&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;TileLayer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;http://{s}.yourserver.org/DEST/{z}/{x}/{y}.png&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;));&lt;/span&gt;
+&lt;span class="nx"&gt;map&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;setView&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="ow"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;L&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;LatLng&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;43.60&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;1.45&lt;/span&gt;&lt;span class="p"&gt;),&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;14&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Or &lt;a class="reference external" href="http://modestmaps.com"&gt;Modestmaps&lt;/a&gt; :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kd"&gt;var&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;provider&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;MM&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;TemplatedLayer&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;http://{s}.yourserver.org/DEST/{z}/{x}/{y}.png&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="kd"&gt;var&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;map&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="ow"&gt;new&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;MM&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nb"&gt;Map&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;map&amp;#39;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;provider&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;span class="nx"&gt;map&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="nx"&gt;setCenter&lt;/span&gt;&lt;span class="p"&gt;({&lt;/span&gt;&lt;span class="nx"&gt;lat&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;43.60&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nx"&gt;lon&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;1.45&lt;/span&gt;&lt;span class="p"&gt;}).&lt;/span&gt;&lt;span class="nx"&gt;setZoom&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mf"&gt;14&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It will also work with interaction layers if you use &lt;a class="reference external" href="http://mapbox.com/wax/"&gt;Wax&lt;/a&gt; :)&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="footnote-1" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#footnote-reference-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;MapBox &lt;a class="reference external" href="http://mapbox.com/tos/"&gt;strictly forbids&lt;/a&gt; proxying and further distribution of their tiles.
+Bulk downloading from OpenStreetMap.org &lt;a class="reference external" href="http://wiki.openstreetmap.org/wiki/Tile_usage_policy#Bulk_Downloading"&gt;is strongly discouraged too&lt;/a&gt;.
+And mass downloads &lt;a class="reference external" href="http://support.cloudmade.com/answers/offline-maps"&gt;cost money on Cloudmade&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+</content><category term="Sys"></category><category term="tilemill"></category><category term="landez"></category><category term="mbutil"></category><category term="gis"></category></entry><entry><title>TileMill on your Web server behind a reverse proxy</title><link href="https://blog.mathieu-leplatre.info/tilemill-on-your-web-server-behind-a-reverse-proxy.html" rel="alternate"></link><published>2012-01-31T11:12:00+01:00</published><updated>2012-01-31T11:12:00+01:00</updated><author><name>Mathieu Leplatre</name></author><id>tag:blog.mathieu-leplatre.info,2012-01-31:/tilemill-on-your-web-server-behind-a-reverse-proxy.html</id><summary type="html">&lt;p&gt;In the last version (0.9), &lt;a class="reference external" href="http://mapbox.com/tilemill/"&gt;TileMill&lt;/a&gt; has an additional dedicated process to
+serve the tiles. We had to change some bits of our server configuration.&lt;/p&gt;
+&lt;p&gt;Instead of documenting the new configuration in our internal Wiki,
+I prefered to share here a few technical lines (quite rough though).&lt;/p&gt;
+&lt;p&gt;We run …&lt;/p&gt;</summary><content type="html">&lt;p&gt;In the last version (0.9), &lt;a class="reference external" href="http://mapbox.com/tilemill/"&gt;TileMill&lt;/a&gt; has an additional dedicated process to
+serve the tiles. We had to change some bits of our server configuration.&lt;/p&gt;
+&lt;p&gt;Instead of documenting the new configuration in our internal Wiki,
+I prefered to share here a few technical lines (quite rough though).&lt;/p&gt;
+&lt;p&gt;We run TileMill inside a &lt;a class="reference external" href="/a-virtual-local-server-room-for-you-developper.html"&gt;virtual machine&lt;/a&gt; on a server with reverse proxy rules.&lt;/p&gt;
+&lt;div class="section" id="reverse-proxy-configuration"&gt;
+&lt;h2&gt;Reverse Proxy configuration&lt;/h2&gt;
+&lt;p&gt;Assuming your reach your TileMill virtual machine at &lt;tt class="docutils literal"&gt;tilemill.sillywalk.loc&lt;/tt&gt;,
+with its two processes running (ports &lt;tt class="docutils literal"&gt;20008&lt;/tt&gt; for tiles, &lt;tt class="docutils literal"&gt;20009&lt;/tt&gt; for the application),
+your Apache reverse proxy configuration will be :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="nt"&gt;&amp;lt;VirtualHost&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="err"&gt;*:80&lt;/span&gt;&lt;span class="nt"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;ServerName&lt;span class="w"&gt; &lt;/span&gt;tilemill.yourdomain.com
+
+&lt;span class="w"&gt;    &lt;/span&gt;ProxyPreserveHost&lt;span class="w"&gt; &lt;/span&gt;On
+&lt;span class="w"&gt;    &lt;/span&gt;RewriteEngine&lt;span class="w"&gt; &lt;/span&gt;on
+
+&lt;span class="w"&gt;    &lt;/span&gt;#&lt;span class="w"&gt; &lt;/span&gt;Serve&lt;span class="w"&gt; &lt;/span&gt;the&lt;span class="w"&gt; &lt;/span&gt;tiles&lt;span class="w"&gt; &lt;/span&gt;as&lt;span class="w"&gt; &lt;/span&gt;/tiles/
+&lt;span class="w"&gt;    &lt;/span&gt;RewriteCond&lt;span class="w"&gt; &lt;/span&gt;%{REQUEST_URI}&lt;span class="w"&gt; &lt;/span&gt;^(/tiles.*)$
+&lt;span class="w"&gt;    &lt;/span&gt;RewriteRule&lt;span class="w"&gt; &lt;/span&gt;^/tiles(.*)&lt;span class="w"&gt; &lt;/span&gt;http://tilemill.sillywalk.loc:20008$1&lt;span class="w"&gt; &lt;/span&gt;[L,P]
+&lt;span class="w"&gt;    &lt;/span&gt;ProxyPassReverse&lt;span class="w"&gt; &lt;/span&gt;/tiles&lt;span class="w"&gt; &lt;/span&gt;http://tilemill.sillywalk.loc:20008/
+
+&lt;span class="w"&gt;    &lt;/span&gt;#&lt;span class="w"&gt; &lt;/span&gt;Serve&lt;span class="w"&gt; &lt;/span&gt;the&lt;span class="w"&gt; &lt;/span&gt;application&lt;span class="w"&gt; &lt;/span&gt;on&lt;span class="w"&gt; &lt;/span&gt;/
+&lt;span class="w"&gt;    &lt;/span&gt;ProxyPass&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;http://tilemill.sillywalk.loc:20009/
+&lt;span class="w"&gt;    &lt;/span&gt;ProxyPassReverse&lt;span class="w"&gt; &lt;/span&gt;/&lt;span class="w"&gt; &lt;/span&gt;http://tilemill.sillywalk.loc:20009
+&lt;span class="nt"&gt;&amp;lt;/VirtualHost&amp;gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="tilemill-configuration"&gt;
+&lt;h2&gt;TileMill configuration&lt;/h2&gt;
+&lt;p&gt;Now that tiles and application ports are reachable respectively on &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;http://tilemill.yourdomain.com/tiles&lt;/span&gt;&lt;/tt&gt;
+and &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;http://tilemill.yourdomain.com/&lt;/span&gt;&lt;/tt&gt;, just tell TileMill to serve its pages accordingly in its configuration, &lt;tt class="docutils literal"&gt;/etc/tilemill/tilemill.config&lt;/tt&gt; :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;files&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;/usr/share/mapbox&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;server&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="kc"&gt;true&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;coreUrl&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;tilemill.yourdomain.com:80&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;tileUrl&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;tilemill.yourdomain.com:80/tiles&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;port&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mf"&gt;20009&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;span class="w"&gt;  &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;listenHost&amp;quot;&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="s2"&gt;&amp;quot;0.0.0.0&amp;quot;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Restart it...&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;service&lt;span class="w"&gt; &lt;/span&gt;tilemill&lt;span class="w"&gt; &lt;/span&gt;restart
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Done !&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="Sys"></category><category term="tilemill"></category><category term="apache"></category><category term="howto"></category></entry><entry><title>A Virtual Local Server Room for you Developper</title><link href="https://blog.mathieu-leplatre.info/a-virtual-local-server-room-for-you-developper.html" rel="alternate"></link><published>2011-09-02T09:12:00+02:00</published><updated>2011-09-02T09:12:00+02:00</updated><author><name>Mathieu Leplatre (credits: Anthony Prades)</name></author><id>tag:blog.mathieu-leplatre.info,2011-09-02:/a-virtual-local-server-room-for-you-developper.html</id><summary type="html">&lt;p&gt;This how-to will help you setting-up a very powerful development environment
+on your workstation, using virtual machines all in a virtual local network.&lt;/p&gt;
+&lt;div class="section" id="but-why"&gt;
+&lt;h2&gt;But Why ?&lt;/h2&gt;
+&lt;p&gt;You work on various projects, with specific requirements, with various
+technologies, diverse operating systems or cpu architectures, usually with
+a couple of services like databases …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;This how-to will help you setting-up a very powerful development environment
+on your workstation, using virtual machines all in a virtual local network.&lt;/p&gt;
+&lt;div class="section" id="but-why"&gt;
+&lt;h2&gt;But Why ?&lt;/h2&gt;
+&lt;p&gt;You work on various projects, with specific requirements, with various
+technologies, diverse operating systems or cpu architectures, usually with
+a couple of services like databases or Web servers.&lt;/p&gt;
+&lt;p&gt;You would prefer not taking this whole family with you each time you start your machine.&lt;/p&gt;
+&lt;p&gt;Probably, you also want to upgrade your workstation to the last unstable eye-candy OS
+without compromising your projects dependencies and without reinstalling all this stuff,
+or you may want to restore the environment you had when you were working on this famous project a year ago.&lt;/p&gt;
+&lt;p&gt;You want your colleague to give you a hand, and would like to give him your
+whole project environment and dependencies quickly and effortlessly ?
+Your sysadmin put KVM on servers and you would like to push your local instances on
+production in a blink ?&lt;/p&gt;
+&lt;p&gt;The magic medicine exists, and is freely available :)&lt;/p&gt;
+&lt;p&gt;At the end, you are promised to enjoy :&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;a GUI to manage your Virtual Machines (VM)&lt;/li&gt;
+&lt;li&gt;a local domain to access your VMs by their name&lt;/li&gt;
+&lt;li&gt;a fully integrated set of machines, accessible from each others&lt;/li&gt;
+&lt;li&gt;movable and shareable virtual machines with automatic network configuration&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;We chose the Linux Kernel-based Virtualization System (KVM), since it is maintained
+along with the Linux kernel, and is thus fully integrated in the OS. However, this
+how-to is mainly networking oriented and would be useful for any virtualization system.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="a-strict-minimum"&gt;
+&lt;h2&gt;A Strict Minimum&lt;/h2&gt;
+&lt;p&gt;A strict minimum is to install &lt;tt class="docutils literal"&gt;kvm&lt;/tt&gt; and a set of commands to control it : &lt;tt class="docutils literal"&gt;libvirt&lt;/tt&gt;.
+As a human being, you may want a GUI : &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;virt-manager&lt;/span&gt;&lt;/tt&gt;.&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;apt-get&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;kvm&lt;span class="w"&gt; &lt;/span&gt;libvirt-bin&lt;span class="w"&gt; &lt;/span&gt;virt-manager
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="virtual-machines-network"&gt;
+&lt;h3&gt;Virtual Machines Network&lt;/h3&gt;
+&lt;p&gt;Make sure your VM networking is set to &lt;em&gt;NAT&lt;/em&gt;. This will allow
+your VM to access your host network (LAN, Internet, etc.)&lt;/p&gt;
+&lt;p&gt;During your VM operating system installation, or after login into it,
+setup your VM network interface as automatic DHCP.&lt;/p&gt;
+&lt;p&gt;By default KVM creates a virtual network (&lt;tt class="docutils literal"&gt;virnet&lt;/tt&gt;). Inspect its setup
+using &lt;tt class="docutils literal"&gt;ifconfig&lt;/tt&gt; or &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;virt-manager&lt;/span&gt;&lt;/tt&gt; in &lt;em&gt;Connection Details&lt;/em&gt; &amp;gt; &lt;em&gt;Virtual Networks&lt;/em&gt;.
+Your VM and your host are thus accessible within this virtual network (probably &lt;tt class="docutils literal"&gt;172.16.23.0&lt;/tt&gt;).&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="a-local-network-domain"&gt;
+&lt;h2&gt;A Local Network Domain&lt;/h2&gt;
+&lt;p&gt;In order to access your VM by their name, we run a DNS daemon on main host. We chose &lt;em&gt;bind&lt;/em&gt; :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;aptitude&lt;span class="w"&gt; &lt;/span&gt;install&lt;span class="w"&gt; &lt;/span&gt;bind9
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Add a new master zone, for example &lt;tt class="docutils literal"&gt;sillywalk.loc&lt;/tt&gt; in the file &lt;tt class="docutils literal"&gt;/etc/bind/named.conf.local&lt;/tt&gt; :&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+zone &amp;quot;sillywalk.loc&amp;quot; {
+    type master;
+    file &amp;quot;/etc/bind/db.sillywalk.loc&amp;quot;;
+};
+&lt;/pre&gt;
+&lt;p&gt;Define your DNS entries :&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Set the name server authority (&lt;em&gt;SOA&lt;/em&gt;) to &lt;tt class="docutils literal"&gt;ns.sillywalk.loc&lt;/tt&gt; (&lt;em&gt;nameserver&lt;/em&gt;)&lt;/li&gt;
+&lt;li&gt;Define a serial number like date+number (&lt;tt class="docutils literal"&gt;YYYYmmdd##&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;Associate &lt;tt class="docutils literal"&gt;ns.sillywalk.loc&lt;/tt&gt; to the IP of your KVM virtual network (&lt;em&gt;see above paragraph&lt;/em&gt;)&lt;/li&gt;
+&lt;li&gt;Define an alias &lt;cite&gt;gw.sillywalk.loc&lt;/cite&gt; so that you can refer to your host as &lt;cite&gt;gw&lt;/cite&gt; (&lt;em&gt;gateway&lt;/em&gt;) instead of &lt;cite&gt;ns&lt;/cite&gt;.&lt;/li&gt;
+&lt;li&gt;Define a couple of entries for your VM (e.g. &lt;tt class="docutils literal"&gt;myvm1&lt;/tt&gt;, &lt;tt class="docutils literal"&gt;myvm2&lt;/tt&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For &lt;em&gt;bind&lt;/em&gt;, it would look like this &lt;em&gt;(started from an existing file like ``/etc/bind/db.empty``)&lt;/em&gt; :&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+;/etc/bind/db.sillywalk.loc
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+&amp;#64;   IN  SOA ns.sillywalk.loc. root.ns.sillywalk.loc. (
+         2011080301     ; Serial
+             604800     ; Refresh
+              86400     ; Retry
+            2419200     ; Expire
+             604800 )   ; Negative Cache TTL
+;
+&amp;#64;   IN  NS      ns.sillywalk.loc.
+&amp;#64;   IN  A       172.16.23.1
+ns  IN  A       172.16.23.1
+gw  IN  CNAME   ns.sillywalk.loc.
+
+myvm1       IN  A   172.16.23.11
+myvm2       IN  A   172.16.23.12
+&lt;/pre&gt;
+&lt;div class="section" id="use-your-dns"&gt;
+&lt;h3&gt;Use your DNS&lt;/h3&gt;
+&lt;p&gt;Use your Network Manager to set the search domain to &lt;tt class="docutils literal"&gt;sillywalk.loc&lt;/tt&gt; and
+to add your local DNS server (&lt;tt class="docutils literal"&gt;127.0.0.1&lt;/tt&gt;) in front of the other(s).&lt;/p&gt;
+&lt;p&gt;Apply and your &lt;tt class="docutils literal"&gt;/etc/resolv.conf&lt;/tt&gt; could then look like this :&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# Generated by NetworkManager
+search sillywalk.loc          # search domain
+nameserver 127.0.0.1          # your local DNS server
+nameserver 192.168.1.254      # your FAI/company DNS
+nameserver 8.8.8.8            # Google public DNS
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="test-it"&gt;
+&lt;h3&gt;Test it !&lt;/h3&gt;
+&lt;p&gt;Even if your VM are not running, you can at least test the name resolving
+and the default search domain :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;~$&lt;span class="w"&gt; &lt;/span&gt;ping&lt;span class="w"&gt; &lt;/span&gt;myvm1.sillywalk.loc
+PING&lt;span class="w"&gt; &lt;/span&gt;myvm1.sillywalk.loc&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.16.23.11&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;56&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;84&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;bytes&lt;span class="w"&gt; &lt;/span&gt;of&lt;span class="w"&gt; &lt;/span&gt;data.
+&lt;span class="c1"&gt;# (Ctrl+C)&lt;/span&gt;
+
+~$&lt;span class="w"&gt; &lt;/span&gt;ping&lt;span class="w"&gt; &lt;/span&gt;myvm2
+PING&lt;span class="w"&gt; &lt;/span&gt;myvm2.sillywalk.loc&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.16.23.12&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;56&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="m"&gt;84&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;bytes&lt;span class="w"&gt; &lt;/span&gt;of&lt;span class="w"&gt; &lt;/span&gt;data.
+&lt;span class="c1"&gt;# (Ctrl+C)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="dynamic-configuration"&gt;
+&lt;h2&gt;Dynamic Configuration&lt;/h2&gt;
+&lt;p&gt;In order to make sure your VM always obtains the same IP adress when it
+boots, we setup a DHCP daemon on host.&lt;/p&gt;
+&lt;p&gt;We chose &lt;em&gt;ISC DHCP server&lt;/em&gt; :&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo aptitude install isc-dhcp-server
+&lt;/pre&gt;
+&lt;p&gt;In the configuration file &lt;tt class="docutils literal"&gt;/etc/dhcp/dhcpd.conf&lt;/tt&gt;, we specify :&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;a domain name (&lt;tt class="docutils literal"&gt;sillywalk.loc&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;the name server to be configured on clients (&lt;tt class="docutils literal"&gt;ns.sillywalk.loc&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;the subnet and mask (&lt;em&gt;matching the KVM virtual network&lt;/em&gt;)&lt;/li&gt;
+&lt;li&gt;an IP range (e.g. from &lt;tt class="docutils literal"&gt;172.16.23.10&lt;/tt&gt; to &lt;tt class="docutils literal"&gt;172.16.23.100&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;the default gateway to be configured on clients (&lt;tt class="docutils literal"&gt;ns.sillywalk.loc&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;... and two entries for &lt;tt class="docutils literal"&gt;myvm1&lt;/tt&gt; and  &lt;tt class="docutils literal"&gt;myvm2&lt;/tt&gt; with their Mac addresses.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="literal-block"&gt;
+# /etc/dhcp/dhcpd.conf
+
+option domain-name &amp;quot;sillywalk.loc&amp;quot;;
+option domain-name-servers ns.sillywalk.loc;
+
+subnet 172.16.23.0 netmask 255.255.255.0 {
+  range 172.16.23.10 172.16.23.100;
+  option broadcast-address 172.16.23.255;
+  option routers gw.sillywalk.loc;
+}
+
+# Entries
+
+host myvm1 {
+  hardware ethernet 52:54:00:55:d1:80;
+  fixed-address myvm1.sillywalk.loc;
+}
+
+host myvm2 {
+  hardware ethernet 52:54:00:55:e1:66;
+  fixed-address myvm2.sillywalk.loc;
+}
+&lt;/pre&gt;
+&lt;div class="section" id="test-it-1"&gt;
+&lt;h3&gt;Test it !&lt;/h3&gt;
+&lt;p&gt;Log you in on the VM.&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Configure its hostname (e.g. &lt;tt class="docutils literal"&gt;myvm1&lt;/tt&gt;, &lt;tt class="docutils literal"&gt;myvm2&lt;/tt&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;root@myvm1:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/etc/hostname
+myvm1
+root@myvm1:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/etc/hosts
+&lt;span class="m"&gt;127&lt;/span&gt;.0.0.1&lt;span class="w"&gt;   &lt;/span&gt;localhost
+&lt;span class="m"&gt;127&lt;/span&gt;.0.1.1&lt;span class="w"&gt;   &lt;/span&gt;myvm1.sillywalk.loc&lt;span class="w"&gt; &lt;/span&gt;myvm1
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Make sure your VM network is set to DHCP automatic configuration&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;root@myvm1:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/etc/network/interfaces
+...
+&lt;span class="c1"&gt;# The primary network interface&lt;/span&gt;
+allow-hotplug&lt;span class="w"&gt; &lt;/span&gt;eth0
+iface&lt;span class="w"&gt; &lt;/span&gt;eth0&lt;span class="w"&gt; &lt;/span&gt;inet&lt;span class="w"&gt; &lt;/span&gt;dhcp
+&lt;/pre&gt;&lt;/div&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Reboot it (or restart networking)&lt;/li&gt;
+&lt;li&gt;Check that it caught the right network configuration (IP, domain, and nameserver)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;root@myvm1:~#&lt;span class="w"&gt; &lt;/span&gt;ifconfig
+eth0&lt;span class="w"&gt;      &lt;/span&gt;Link&lt;span class="w"&gt; &lt;/span&gt;encap:Ethernet&lt;span class="w"&gt;  &lt;/span&gt;HWaddr&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;52&lt;/span&gt;:54:00:55:d1:80
+&lt;span class="w"&gt;          &lt;/span&gt;inet&lt;span class="w"&gt; &lt;/span&gt;addr:172.16.23.11&lt;span class="w"&gt;  &lt;/span&gt;Bcast:172.16.23.255&lt;span class="w"&gt;  &lt;/span&gt;Mask:255.255.255.0
+&lt;span class="w"&gt;          &lt;/span&gt;...
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;root@myvm1:~#&lt;span class="w"&gt; &lt;/span&gt;cat&lt;span class="w"&gt; &lt;/span&gt;/etc/resolv.conf
+domain&lt;span class="w"&gt; &lt;/span&gt;sillywalk.loc
+search&lt;span class="w"&gt; &lt;/span&gt;sillywalk.loc
+nameserver&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;172&lt;/span&gt;.16.23.1
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="note"&gt;
+&lt;h3&gt;Note&lt;/h3&gt;
+&lt;p&gt;While your host is booting, the DHCP daemon usually starts before the KVM service, failing
+then at accessing the virtual network interface (&lt;tt class="docutils literal"&gt;virbr1&lt;/tt&gt;, &lt;tt class="docutils literal"&gt;172.16.23.0&lt;/tt&gt;), not yet mounted.&lt;/p&gt;
+&lt;p&gt;A simple solution is to manually restart your DHCP daemon, once your machine's booted :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;/etc/init.d/isc-dhcp-server&lt;span class="w"&gt; &lt;/span&gt;restart
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="checklist-to-add-a-new-vm"&gt;
+&lt;h2&gt;Checklist to add a new VM&lt;/h2&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Get its Mac address (with &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;virt-manager&lt;/span&gt;&lt;/tt&gt; : &lt;em&gt;Virtual machine details&lt;/em&gt; &amp;gt; &lt;em&gt;Virtual network interface&lt;/em&gt; &amp;gt; &lt;em&gt;Mac Address&lt;/em&gt;)&lt;/li&gt;
+&lt;li&gt;Add it to your DHCP configuration (&lt;tt class="docutils literal"&gt;/etc/dhcp/dhcpd.conf&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;Add an IP for this entry in your DNS zone (&lt;tt class="docutils literal"&gt;/etc/bind/db.sillywalk.loc&lt;/tt&gt;) and increment the serial.&lt;/li&gt;
+&lt;li&gt;Restart DHCP service and reload DNS configuration&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;/etc/init.d/isc-dhcp-server&lt;span class="w"&gt; &lt;/span&gt;restart
+sudo&lt;span class="w"&gt; &lt;/span&gt;/etc/init.d/bind9&lt;span class="w"&gt; &lt;/span&gt;reload
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you do that all day, you'll quickly find it relevant to write a script...&lt;/p&gt;
+&lt;div class="section" id="note-on-cloning"&gt;
+&lt;h3&gt;Note on cloning&lt;/h3&gt;
+&lt;p&gt;Cloning your VM with &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;virt-manager&lt;/span&gt;&lt;/tt&gt; is a piece-of-cake.&lt;/p&gt;
+&lt;p&gt;However, during cloning, KVM assigns a new Mac address to the clone.
+For debian-based virtual machines (+Ubuntu), log you in on the clone, and reinitialize network interfaces names :&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;sudo&lt;span class="w"&gt; &lt;/span&gt;rm&lt;span class="w"&gt; &lt;/span&gt;/etc/udev/rules.d/70-persistent-net.rules
+sudo&lt;span class="w"&gt; &lt;/span&gt;reboot
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="conclusion"&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Your virtual machines can :&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;access your network (LAN, Internet) and your host (at &lt;tt class="docutils literal"&gt;ns.sillywalk.loc&lt;/tt&gt;)&lt;/li&gt;
+&lt;li&gt;be accessed at &lt;tt class="docutils literal"&gt;user&amp;#64;hostname&lt;/tt&gt; (from host or from other VMs)&lt;/li&gt;
+&lt;li&gt;be moved to any host set up likewise (since VM networking is fully automatic)&lt;/li&gt;
+&lt;li&gt;be cloned easily&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Read again &amp;quot;&lt;a class="reference internal" href="#but-why"&gt;But Why ?&lt;/a&gt;&amp;quot; and enjoy your new life !&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="Sys"></category><category term="network"></category><category term="kvm"></category><category term="virtualization"></category><category term="howto"></category></entry><entry><title>Another success story about Ruby On Rails working with Apache</title><link href="https://blog.mathieu-leplatre.info/another-success-story-about-ruby-on-rails-working-with-apache.html" rel="alternate"></link><published>2008-08-01T09:12:00+02:00</published><updated>2008-08-01T09:12:00+02:00</updated><author><name>Mathieu Leplatre</name></author><id>tag:blog.mathieu-leplatre.info,2008-08-01:/another-success-story-about-ruby-on-rails-working-with-apache.html</id><summary type="html">&lt;p&gt;This procedure does not guarantee anything and should be considered approximate. However this should be fairly enough for someone familiar with Apache environments.&lt;/p&gt;
+&lt;div class="section" id="ruby-environment"&gt;
+&lt;h2&gt;Ruby environment&lt;/h2&gt;
+&lt;p&gt;We install Ruby via apt-get&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt-get install ruby libzlib-ruby rdoc irb
+&lt;/pre&gt;
+&lt;p&gt;At this point, you can run Ruby scripts like you did with Python …&lt;/p&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;This procedure does not guarantee anything and should be considered approximate. However this should be fairly enough for someone familiar with Apache environments.&lt;/p&gt;
+&lt;div class="section" id="ruby-environment"&gt;
+&lt;h2&gt;Ruby environment&lt;/h2&gt;
+&lt;p&gt;We install Ruby via apt-get&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt-get install ruby libzlib-ruby rdoc irb
+&lt;/pre&gt;
+&lt;p&gt;At this point, you can run Ruby scripts like you did with Python or Perl.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="gems"&gt;
+&lt;h2&gt;Gems&lt;/h2&gt;
+&lt;p&gt;Gems are like perl's CPAN or PHP's PEAR. We install it from source in order to enjoy the whole Gems repository (instead of being limited to packaged gems only).&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+wget &amp;quot;http://rubyforge.org/frs/download.php/38646/rubygems-x.x.x.tgz&amp;quot;
+tar -xvzf rubygems-x.x.x.tgz
+rm rubygems-x.x.x.tgz
+cd rubygems-x.x.x
+sudo ruby setup.rb
+cd ..
+rm -r rubygems-1.2.0
+sudo ln -s /usr/bin/gem1.8 /usr/bin/gem
+&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;(DO NOT use sudo ruby rubygemsx.x.x/setup.rb)&lt;/em&gt;&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo gem update --system
+&lt;/pre&gt;
+&lt;p&gt;We will install additionnal applications... those depend on your needs. The Gems are compiled on the fly, therefore development packages are usually required along.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ruby-on-rails"&gt;
+&lt;h2&gt;Ruby on Rails&lt;/h2&gt;
+&lt;pre class="literal-block"&gt;
+sudo gem install rails --include-dependencies
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="mysql-support"&gt;
+&lt;h2&gt;Mysql support&lt;/h2&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt-get install libmysql-ruby libmysqlclient15-dev
+sudo gem install mysql
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="imagemagick-support"&gt;
+&lt;h2&gt;ImageMagick support&lt;/h2&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt-get install librmagick-ruby1.8 libmagick9-dev
+sudo gem install rmagick
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="integrate-with-apache"&gt;
+&lt;h2&gt;Integrate with Apache&lt;/h2&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt-get install apache2-prefork-dev
+&lt;/pre&gt;
+&lt;p&gt;Enable additionnal modules&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+a2enmod rewrite
+a2enmod suexec
+a2enmod include
+&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;I might have missed some.&lt;/em&gt;. Some tutorials recommend Fast-CGI.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="install-phusion-passenger-mod-rails"&gt;
+&lt;h2&gt;Install Phusion Passenger (mod_rails)&lt;/h2&gt;
+&lt;p&gt;Usually, RubyOnRails has its own web server (&lt;a class="reference external" href="http://en.wikipedia.org/wiki/Mongrel_(web_server)"&gt;Mongrel&lt;/a&gt;) on port 3000. It is also quite common to have a cluster of processes with load balancing and Apache proxy...&lt;/p&gt;
+&lt;p&gt;But you may want to do something very simple that just integrates within Apache. Here comes Phusion Passenger!&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo gem install passenger
+sudo passenger-install-apache2-module
+&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;(following the instructions, or look at the [[http://www.modrails.com/documentation/Users%20guide.html|user guide]]).&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;At the end, the wizard tells you to add some lines in &lt;cite&gt;httpd.conf&lt;/cite&gt;. I recommend the following method instead, which splits those lines into a module that you can enable / disable.&lt;/p&gt;
+&lt;p&gt;Create two files :
+* /etc/apache2/mods-available/mod_rails.load&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+LoadModule passenger_module /usr/lib/ruby/gems/1.8/gems/passenger-2.0.2/ext/apache2/mod_passenger.so
+&lt;/pre&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;/etc/apache2/mods-available/mod_rails.conf&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+PassengerRoot /usr/lib/ruby/gems/1.8/gems/passenger-2.0.2
+PassengerRuby /usr/bin/ruby1.8
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Enable this new module&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo a2enmod mod_rails
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-your-virtualhost"&gt;
+&lt;h2&gt;Create your VirtualHost&lt;/h2&gt;
+&lt;p&gt;The DocumentRoot must point to the public folder of your Ruby On Rails application.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;If your Ruby application is alone, your apache site will be something like this&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;lt;virtualhost *:80&amp;gt;
+    ServerName yourapp
+    DocumentRoot /var/rails/yourapp/public/
+    ErrorLog /var/rails/yourapp/log/apache.log
+
+    &amp;lt;directory /var/rails/yourapp/public&amp;gt;
+       Options ExecCGI FollowSymLinks
+       AddHandler cgi-script .cgi
+       AllowOverride all
+       Order allow,deny
+       Allow from all
+    &amp;lt;/directory&amp;gt;
+&amp;lt;/virtualhost&amp;gt;
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;If you want it a subfolder of your current DocumentRoot, look at this.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;The simplest for me was to setup a sub-domain. Don't forget to update your DNS information.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Relax ! Restart Apache and that's it !&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="Sys"></category><category term="ruby"></category><category term="howto"></category></entry><entry><title>Apply Debian patches step-by-step</title><link href="https://blog.mathieu-leplatre.info/apply-debian-patches-step-by-step.html" rel="alternate"></link><published>2008-08-01T09:12:00+02:00</published><updated>2008-08-01T09:12:00+02:00</updated><author><name>Mathieu Leplatre</name></author><id>tag:blog.mathieu-leplatre.info,2008-08-01:/apply-debian-patches-step-by-step.html</id><summary type="html">&lt;p&gt;I thought it may be relevant to share the history of commands I used to apply a patch and submit it to &lt;a class="reference external" href="http://launchpad.net"&gt;launchpad&lt;/a&gt;.&lt;/p&gt;
+&lt;div class="section" id="get-the-tools"&gt;
+&lt;h2&gt;0) Get the tools&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;You'll need a working PGP key&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Install the necessary tools&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt-get install devscripts dpatch fakeroot dh-make
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;(I might have forgotten some...)&lt;/em&gt; :)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="get-the-files"&gt;
+&lt;h2&gt;1 …&lt;/h2&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;I thought it may be relevant to share the history of commands I used to apply a patch and submit it to &lt;a class="reference external" href="http://launchpad.net"&gt;launchpad&lt;/a&gt;.&lt;/p&gt;
+&lt;div class="section" id="get-the-tools"&gt;
+&lt;h2&gt;0) Get the tools&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;You'll need a working PGP key&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Install the necessary tools&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+sudo apt-get install devscripts dpatch fakeroot dh-make
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;(I might have forgotten some...)&lt;/em&gt; :)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="get-the-files"&gt;
+&lt;h2&gt;1) Get the files&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;Get the last package source, from the package page : &lt;a class="reference external" href="http://packages.ubuntu.com/hardy/exaile"&gt;http://packages.ubuntu.com/hardy/exaile&lt;/a&gt;&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+dget -x http://archive.ubuntu.com/ubuntu/pool/universe/e/exaile/exaile_0.2.11.1-0ubuntu3.dsc
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Get the patch file&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+wget http://launchpadlibrarian.net/9466876/gui_track_filter.patch
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Step in the package code&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+cd exaile-0.2.11.1/
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="section" id="apply-the-patch"&gt;
+&lt;h2&gt;2) Apply the patch&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;Have a look at the list of patches in the &lt;cite&gt;debian/patches&lt;/cite&gt; folder&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+ls debian/patches/
+
+00list
+01_fix_makefile_for_pysupport.dpatch
+02_files-on-share-dir.dpatch
+03_fix_mmkeys.dpatch
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Create yours respecting dpatch filenames pattern (without extension)&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+dpatch-edit-patch 04_fix_search_exit
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;You now have a shell in the &lt;cite&gt;/tmp&lt;/cite&gt; folder.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Apply the patch file&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+patch -p0 &amp;lt; $HOME/Desktop/gui_track_filter.patch
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Exit the shell&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="section" id="describe-your-changes"&gt;
+&lt;h2&gt;3) Describe your changes&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;Add your dpatch name in the &lt;cite&gt;00list&lt;/cite&gt; file&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+nano debian/patches/00list
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Modify Debian changelog using&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+dch -i
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Your name and signing information will be automatically added.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Look at previous descriptions and respect their structure.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Include launchpad bug number with &lt;cite&gt;(LP: #number)&lt;/cite&gt; string&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+exaile (0.2.11.1-0ubuntu4) hardy; urgency=low
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;&lt;cite&gt;debian/patches/04_fix_search_exit.dpatch&lt;/cite&gt;&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+debian/patches/00list:
+- Fix clean search terms on exit (LP: #95860)
+
+-- Mathieu Leplatre &amp;lt;xxxx&amp;#64;gmail.com&amp;gt;  Tue, 27 May 2008 10:45:42 -0300
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div class="section" id="create-debdiff"&gt;
+&lt;h2&gt;4) Create debdiff&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p class="first"&gt;Create the dsc and diff files using&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+debuild -S
+cd ..
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Step in the package code&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Create the debdiff file using&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+debdiff exaile_0.2.11.1-0ubuntu3.dsc exaile_0.2.11.1-0ubuntu4.dsc &amp;gt; exaile_0.2.11.1-0ubuntu4.debdiff
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p class="first"&gt;Have a look at it, it should include all modifications of previous steps&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+diff -Nru exaile-0.2.11.1/debian/changelog exaile-0.2.11.1/debian/changelog
+--- exaile-0.2.11.1/debian/changelog        2008-05-27 10:54:56.000000000 -0300
++++ exaile-0.2.11.1/debian/changelog        2008-05-27 10:54:56.000000000 -0300
+&amp;#64;&amp;#64; -1,3 +1,11 &amp;#64;&amp;#64;
++exaile (0.2.11.1-0ubuntu4) hardy; urgency=low
++
++  * debian/patches/04_fix_search_exit.dpatch,
++    debian/patches/00list:
++    - Fix clean search terms on exit (LP: #95860)
++
++ -- Mathieu Leplatre &amp;lt;xxxx&amp;#64;gmail.com&amp;gt;  Tue, 27 May 2008 10:45:42 -0300
++
+ exaile (0.2.11.1-0ubuntu3) hardy; urgency=low
+
+   * debian/patches/03_fix_mmkeys.dpatch,
+diff -Nru /tmp/RIBRnUlXkn/exaile-0.2.11.1/debian/patches/00list /tmp/XQpuhOBOst/exaile-0.2.11.1/debian/patches/00l
+ist
+--- exaile-0.2.11.1/debian/patches/00list   2008-05-27 10:54:56.000000000 -0300
++++ exaile-0.2.11.1/debian/patches/00list   2008-05-27 10:54:56.000000000 -0300
+&amp;#64;&amp;#64; -1,3 +1,5 &amp;#64;&amp;#64;
+ 01_fix_makefile_for_pysupport
+ 02_files-on-share-dir
+ 03_fix_mmkeys
++04_fix_search_exit
++
+diff -Nru /tmp/RIBRnUlXkn/exaile-0.2.11.1/debian/patches/04_fix_search_exit.dpatch /tmp/XQpuhOBOst/exaile-0.2.11.1
+/debian/patches/04_fix_search_exit.dpatch
+--- exaile-0.2.11.1/debian/patches/04_fix_search_exit.dpatch        1969-12-31 21:00:00.000000000 -0300
++++ exaile-0.2.11.1/debian/patches/04_fix_search_exit.dpatch        2008-05-27 10:54:56.000000000 -0300
+&amp;#64;&amp;#64; -0,0 +1,27 &amp;#64;&amp;#64;
++#! /bin/sh /usr/share/dpatch/dpatch-run
++## 04_fix_search_exit.dpatch by Mathieu Leplatre &amp;lt;xxxx&amp;#64;gmail.com&amp;gt;
++##
++## All lines beginning with `## DP:' are a description of the patch.
++## DP: Patch to clean search terms on exit
++
++&amp;#64;DPATCH&amp;#64;
++diff -urNad exaile-0.2.11.1~/xl/gui/main.py exaile-0.2.11.1/xl/gui/main.py
++--- exaile-0.2.11.1~/xl/gui/main.py        2007-11-07 13:12:52.000000000 -0300
+++++ exaile-0.2.11.1/xl/gui/main.py 2008-05-27 10:37:36.000000000 -0300
++&amp;#64;&amp;#64; -1659,8 +1659,16 &amp;#64;&amp;#64;
++         queuefile = xl.path.get_config('queued.save')
++         if os.path.isfile(queuefile):
++             os.unlink(queuefile)
+++
++
++         if self.player.current: self.player.current.stop()
+++
+++        # Clear the search filter so that the entire playlist is saved
+++        self.tracks_filter.set_text('')
+++        try:
+++            self.on_search()
+++        except:  # In case we're quitting before the playlist loaded
+++            pass
++
++         for i in range(self.playlists_nb.get_n_pages()):
++             page = self.playlists_nb.get_nth_page(i)
+&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+</content><category term="Sys"></category><category term="debian"></category><category term="howto"></category></entry></feed>

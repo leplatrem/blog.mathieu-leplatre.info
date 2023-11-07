@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Announcing Subtivals, realtime subtitles for film festivals - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Announcing Subtivals, realtime subtitles for film festivals</h1>
+<time datetime="2012-03-17T00:00:00+01:00">Sat 17 March 2012</time></header>
+<article>
+    <img alt="" src="/images/subtivals-logo.png" />
+<div class="section" id="that-s-how-it-started">
+<h2>That's how it started...</h2>
+<p>Subtitles and captions for the deaf and hard-of-hearing during film festivals
+are rarely a priority, at least in France. Thus, most film copies are not
+subtitled (except foreign movies shown in their original version).</p>
+<p>At the beginning of last year, <a class="reference external" href="http://st2l.fr">my friend Lilian</a> was promoting his project
+of improving and facilitating the projection of subtitles during film festivals.
+His activity consists in superimposing subtitles or projecting them on a
+separate display below the screen.</p>
+<img alt="" class="align-center" src="/images/subtivals-superimposed.png" />
+<p>In this way, subtitling dissociates from the movie reel, unlike DVDs for example.
+An operator is thence in charge of keeping captions synchroneous. It is sometimes called
+&quot;<em>virtual subtitling</em>&quot;; it is cheaper and easier than subtitled hard copies.</p>
+<p>Since there was no suitable Open Source tools to fulfill these precise needs,
+<a class="reference external" href="http://gedial.com">Arnaud</a> and I gave him a hand. We developed <a class="reference external" href="https://github.com/traxtech/subtivals">Subtivals</a>,
+a Free Software with simplicity and usuability for the technical operator in mind.</p>
+<img alt="" class="align-center" src="/images/subtivals-screenshot.png" />
+</div>
+<div class="section" id="main-features">
+<h2>Main features</h2>
+<p><em>Subtivals</em> has gained many features on the way, we released the <strong>version 1.0</strong> last month,
+after almost a year of development, driven by Lilian's experience.</p>
+<p>Among most notable features :</p>
+<ul class="simple">
+<li>Support of Advanced SubStation Alpha subtitles (ASS, *.ass) format</li>
+<li>Control Play / Pause / Delay / Speed</li>
+<li>Switch between several modes : timecode based, semi-automatic or fully manual</li>
+<li>Support for subtitles without timecodes (fixes duration automatically)</li>
+<li>SSA styles (italic, positions, colors)</li>
+<li>Customize and override styles (color and font size)</li>
+</ul>
+<p>In the small world of subtitles projection, where most tools are either
+very expensive, or very archaic, <em>Subtivals</em> is a revolution !</p>
+</div>
+<div class="section" id="hall-of-fame">
+<h2>Hall of fame</h2>
+<p><em>Subtivals</em> has proven its efficiency for several months now ! It was used
+successfully in many film festivals (<a class="reference external" href="http://www.festival-douarnenez.com">Festival de cinéma de Douarnenez</a>,
+<a class="reference external" href="http://festival-galactique.infini.fr">Festival Intergalactique de Brest</a>,
+<a class="reference external" href="http://www.festivaldebiarritz.com">Festival de Cinéma d'Amérique Latine de Biarritz</a>,
+<a class="reference external" href="http://www.filmfestamiens.org">Festival International du film d'Amiens</a>,
+<a class="reference external" href="http://www.lacinemathequedetoulouse.com/archives/2012/thematiques">Festival Zoom Arrière, 6e édition</a>,
+... and soon :
+<a class="reference external" href="http://www.cinelatino.com.fr">Cinélatino de Toulouse</a>,
+<a class="reference external" href="http://festival-resistances.fr">Résistances à Foix</a>)</p>
+<p>Its semi-manual mode also allows <a class="reference external" href="http://en.wikipedia.org/wiki/Surtitle">surtitling</a> at theaters (or opera, ballets, ...).</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation</h2>
+<p><em>Subtivals</em> runs on GNU/Linux, Windows, Mac OS X and has no other external dependencies.</p>
+<p>On Ubuntu, install it easily using our PPA :</p>
+<pre class="literal-block">
+sudo add-apt-repository ppa:mathieu.leplatre/subtivals
+sudo apt-get update &amp;&amp; sudo apt-get install subtivals
+</pre>
+<p>Mac OS X and Windows installers are for sale, contact us !</p>
+</div>
+<div class="section" id="contribute">
+<h2>Contribute</h2>
+<p><em>Subtivals</em> is written in C++/Qt and released under the <a class="reference external" href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a> .
+It is available in English, French, Spanish and Catalan.</p>
+<p>If you feel like contributing, testing, translating... <a class="reference external" href="https://github.com/traxtech/subtivals">join us on Github</a> !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/subtivals.html">#subtivals</a>,         <a href="https://blog.mathieu-leplatre.info/tag/subtitles.html">#subtitles</a>,         <a href="https://blog.mathieu-leplatre.info/tag/accessibility.html">#accessibility</a>,         <a href="https://blog.mathieu-leplatre.info/tag/qt.html">#qt</a>,         <a href="https://blog.mathieu-leplatre.info/tag/c.html">#c++</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/announcing-subtivals-realtime-subtitles-for-film-festivals.html';
+      this.page.identifier = 'announcing-subtivals-realtime-subtitles-for-film-festivals';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Design for the Long Term - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Design for the Long Term</h1>
+<time datetime="2021-10-18T00:00:00+02:00">Mon 18 October 2021</time></header>
+<article>
+    <p>I really enjoyed reading the debates around choosing <a class="reference external" href="http://boringtechnology.club">boring</a> or <a class="reference external" href="https://lucjan.medium.com/choose-exciting-technology-e735bba08acc">exciting</a> technology.
+In my opinion, there is another interesting point, beyond new or old, that is about longevity, or durability.</p>
+<p>Some software can be deliberately ephemeral, like a mobile app for a specific event. But usually we want software to last as long as possible, like a Web API with millions of clients.</p>
+<p>As I outlined in <a class="reference external" href="https://blog.mathieu-leplatre.info/about-maintenance-mode.html">a previous post</a>, long term maintenance takes all sorts of efforts. And logically, applications with the least maintenance cost are more likely to last longer.</p>
+<p>So, what makes software durable? How can we take long term maintenance into consideration during the design phase?</p>
+<p><strong>tl;dr</strong>: <em>Think of your software architecture as a multi-generational building. Simplicity and adaptability are key to guarantee long term survival in a constantly changing environment. Designing for the long term requires experience and judgement, so focus on values and people more than technologies.</em></p>
+<div class="section" id="typical-lifecycle">
+<h2>Typical Lifecycle</h2>
+<p>From my experience, the typical phases of software engineering are:</p>
+<ol class="arabic simple">
+<li>Define the needs and requirements</li>
+<li>Assemble a team</li>
+<li>Design, develop and deploy</li>
+<li>Validate conformity</li>
+<li>Dismantle the team</li>
+<li>Run and maintain forever</li>
+</ol>
+<p>The last phase is the critical one: you go from a top priority project, backed by a whole team with daily activities, to a low priority project, with a few people involved only sporadically. And it can last years.</p>
+<p>What if we would build software with this critical <em>last phase</em> in mind?</p>
+<blockquote>
+Engineering is 99% managing legacy, 1% deciding on what legacy you want to have in the future. ─ <a class="reference external" href="https://twitter.com/rakyll/status/1440067121522692104">&#64;rakyll, 20 sept. 2021</a></blockquote>
+</div>
+<div class="section" id="elegance-vs-adaptability">
+<h2>Elegance vs. Adaptability</h2>
+<p>A CTO recently reminded his teams <a class="footnote-reference" href="#preply" id="footnote-reference-1">[1]</a> that they should «<em>build boxes, not arches</em>». He uses this metaphor to remind programmers that <strong>elegance in their design should not delay the production of value</strong>. Arches are more elegant than blocks, but they show value only when the top key stone is put. Unlike arches, blocks can be easily rearranged and replaced over time, helping adaptability and market fit.</p>
+<p>I could reuse this metaphor, and say that blocks are more likely to last over time than arches.</p>
+<p>In the book <a class="reference external" href="https://en.wikipedia.org/wiki/How_Buildings_Learn">How buildings learn</a>, Stewart Brand shows that buildings which were built quickly to look impressive have a terrible maintenance record.</p>
+<p>Engineers who want exciting technology in their curriculum are like architects who want beautiful buildings in their portfolio. Do they really care how practical it will be over the years? Is it built to last or to shine?</p>
+<div class="figure align-center">
+<img alt="Notre-Dame Cathedral reconstruction" src="https://blog.mathieu-leplatre.info/images/long-term-notre-dame.jpg" />
+<p class="caption">Notre-Dame Cathedral reconstruction © habibeh Madjdabadi architecture Studio</p>
+</div>
+<p>As Joel famously wrote 21 years ago, «<em>rewriting the code from scratch is the single worst strategic mistake that any software company can make</em>»: <a class="footnote-reference" href="#fjoel" id="footnote-reference-2">[2]</a></p>
+<blockquote>
+Programmers are, in their hearts, architects, and the first thing they want to do when they get to a site is to bulldoze the place flat and build something grand.</blockquote>
+<p>Do we want to build, demolish, and rebuild? Or should we design software like a building where engineers and operators have to live for several generations?</p>
+<p>When aiming for eternal design, you must focus on an architecture where it is viable to «<em>fail fast, fail small, fail often, learn, and reiterate</em>».</p>
+</div>
+<div class="section" id="pace-layered-design">
+<h2>Pace-layered Design</h2>
+<p>How do you balance stability and adaptability with innovation?</p>
+<p>I would advise you to spend 30' to watch <a class="reference external" href="https://www.youtube.com/watch?v=ZSaWdp833YM">how buildings are built for change</a>. The parallel with software is very inspiring. You'll think of your application code as a structure with <strong>solid, simple, slow-moving foundations</strong>, whose upper blocks can be replaced and remodeled, fostering innovation. You want to be able to repaint bedrooms or replace windows without jeopardizing life in it!</p>
+<div class="figure align-center">
+<img alt="“Pace Layers” diagram from Stewart Brand’s book “The Clock of the Long Now”" src="https://blog.mathieu-leplatre.info/images/long-term-pace-layering.jpg" />
+<p class="caption">Everlasting, slow, and powerful core layers, versus ephemeral, fast, and weak skin layers</p>
+</div>
+<p>The firm Gartner applied this concept of <a class="reference external" href="https://en.wikipedia.org/wiki/Shearing_layers">shearing layers</a> to software, where each application layer obeys to a different strategy:</p>
+<ul class="simple">
+<li><strong>Powerful lower parts move at slow pace</strong>: Change is risky and expensive, strict and only incremental (APIs, databases, ...)</li>
+<li><strong>Middle parts adapt to business</strong>: Change occurs more often, following the company's business processes and specifities (custom integrations, SaaS, cloud...)</li>
+<li><strong>Top parts move fast</strong>: Change requires less governance and planning, encouraging experimentation (proof-of-concepts, frontend, ...)</li>
+</ul>
+<p>Uncle Bob's also advocates the same ideas in his book about <a class="reference external" href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">Clean Architecture</a>. Breaking the myth that restarting from scratch is a solution, he expands familiar principles like <a class="reference external" href="https://en.wikipedia.org/wiki/SOLID">SOLID</a> and <a class="reference external" href="https://en.wikipedia.org/wiki/Separation_of_concerns">SoC</a> to system architecture.</p>
+</div>
+<div class="section" id="wear-and-tear-parts">
+<h2>Wear and Tear Parts</h2>
+<p>Compare a classic reflux valve with the <a class="reference external" href="https://www.youtube.com/watch?v=suIAo0EYwOE">valve designed by Nikola Tesla</a>. One has at least two moving parts, a spring and a «stopper», the other one has none, which gives it an almost infinite lifetime.</p>
+<div class="figure align-center">
+<img alt="Tesla Valve | The complete physics - https://www.youtube.com/watch?v=suIAo0EYwOE" src="https://blog.mathieu-leplatre.info/images/long-term-tesla-valve.jpg" />
+</div>
+<p>When your application handles a request, <strong>what moving parts are involved</strong>?</p>
+<p>Compare the moving parts of a statically generated website, with one powered by Wordpress, relying on a MySQL database, a Web server running PHP, with extensions and system libraries, an Admin UI in React, a Varnish cache... With the former, you write your articles in Markdown, run a command once to generate the HTML pages, and simply serve the static content to millions of readers, without any moving part. No monitoring, no security patches, and resilient to system upgrades. In twenty years, even if the script that generates the files doesn't run anymore, the website will still be online.</p>
+<p>Take MDN for example. It used to be powered by a <a class="reference external" href="https://github.com/mdn/kuma">Django application</a> with thousands lines of code. Instead of this complex wiki application, the team replaced it with Markdown files in a <a class="reference external" href="https://github.com/mdn/content">Github repo</a>, and some commands to publish the HTML website.</p>
+<p>Similarly, <a class="reference external" href="https://youtu.be/vUCr1oTtaKA?t=965">Tim showed us</a> how they fixed the BBC News app scaling issues by prerendering content into static files on Amazon S3, instead of relying directly on BBC Web services.</p>
+<p>It's not all or nothing, just make sure to <strong>think about how much resources, machines and people, will be required to operate this service years after the original team built it</strong>.</p>
+</div>
+<div class="section" id="conviviality">
+<h2>Conviviality</h2>
+<p>In 1973, Ivan Illich wrote <a class="reference external" href="https://en.wikipedia.org/wiki/Tools_for_Conviviality">Tools for Conviviality</a>. This book contains radical ideas about progress, emancipation, and technology. Illich explains how it is crucial to be able to share, understand, repair, and modify our tools in order to reach independence over the long term.
+It is not a coincidence if the book had an immense influence of the first computer hackers <a class="footnote-reference" href="#illich" id="footnote-reference-3">[3]</a>.</p>
+<p>Which of the appliances that you own are repairable?</p>
+<p>The <a class="reference external" href="https://www.ifixit.com/Manifesto">iFixit Manifesto</a> says it clearly: «<em>If you can't fix it, you don't own it</em>».</p>
+<p>Not so long ago, if your <a class="reference external" href="https://en.wikipedia.org/wiki/Citro%C3%ABn_2CV">Citroën 2CV</a>'s belt broke in the middle of nowhere, you could use your <a class="reference external" href="https://en.wikipedia.org/wiki/Fully_fashioned_stockings">nylon stockings</a> as a temporary spare part and make it home.</p>
+<div class="figure align-center">
+<img alt="Citroën Ami 6" src="https://blog.mathieu-leplatre.info/images/long-term-ami-6.jpg" />
+<p class="caption">One of the old cars of my colleague Florian, long term Gecko hacker :)</p>
+</div>
+<p>If you build your whole application (or business!) on the unique features of a cloud solution (Spanner, Firebase, ...) or on the latest trendy all-in-one framework, you obtain the opposite of conviviality! <strong>Avoid vendor lock-in!</strong> You will need to use their specific screwdrivers to repair it, you won't find standard spare parts, and years later planned obsolescence will threaten you. Avoid «easy» (no effort), and go for «simple» (no complexity).</p>
+<p><strong>Simple is understandable. Simple scales. Simple always wins over the long term</strong>. <a class="reference external" href="https://www.youtube.com/watch?v=OuF9weSkS68">Think more like ARM, and less like Intel :)</a></p>
+</div>
+<div class="section" id="beware-of-over-engineering">
+<h2>Beware of Over-engineering</h2>
+<p>Most intelligent people produce <strong>intelligent designs</strong>. The reality is that their creations eventually become extremely fragile, costly to maintain, or they just <strong>don't survive the company's successive turnovers</strong>. Because most of us aren't super smart, are sometimes sleepy, often very lazy, or with scars from the past.</p>
+<p>I recently fell upon <a class="reference external" href="https://github.com/taskcluster/taskcluster/blob/5a25a717/infrastructure/tooling/src/build/tasks/taskcluster-proxy.js#L65-L79">this example</a>, where a piece of JavaScript will produce a static <tt class="docutils literal">Dockerfile</tt>. What's wrong with static files? It's not because you <em>can</em> do it, that you <em>have</em> to do it!</p>
+<p>Discriminating intelligence is crucial.</p>
+<p>In the past, we would build Web services as big monoliths. <a class="reference external" href="https://en.wikipedia.org/wiki/Microservices">Microservices</a> emerged in early 2010s, mainly as a response to the needs of continuous deployment, following the <a class="reference external" href="https://en.wikipedia.org/wiki/Unix_philosophy">Unix philosophy</a>. After a decade of hype, where engineers would build all sort of applications using dozens of tiny services, in the late 2010s, monolithic applications <a class="reference external" href="https://www.craigkerstiens.com/2019/03/13/give-me-back-my-monolith/">became</a> <a class="reference external" href="https://shopify.engineering/shopify-monolith">acceptable</a> <a class="reference external" href="https://www.bennadel.com/blog/3944-why-ive-been-merging-microservices-back-into-the-monolith-at-invision.htm">again</a>. And as people with discerning abilities <a class="reference external" href="https://martinfowler.com/bliki/MonolithFirst.html">sensed it</a> early, you should just «<em>start with a monolithic approach and move to microservices if needed</em>».</p>
+</div>
+<div class="section" id="skin-in-the-game">
+<h2>Skin in the Game</h2>
+<p>Like factories and towns who release their waste in the river, assuming others downstream will handle it, some engineers and managers consider themselves as <em>builders</em>, and will let future <em>fixers</em> handle maintenance over time.</p>
+<p>Taleb explores this mistake in his book about <a class="reference external" href="https://en.wikipedia.org/wiki/Antifragile_(book)#Skin_in_the_game">Antifragility</a>:</p>
+<blockquote>
+Every captain goes down with every ship</blockquote>
+<p>If a engineer (or a manager) collects benefits when she/he is right and let others pay the price when she/he is wrong, the result will be fragile.</p>
+<p>Like UX designers who don't use their app, or architects who don't spend time in their buildings, software developers who never have experienced the romance of maintenance are less likely to produce long lasting solutions.</p>
+<p>Engineers should experience being maintainers.</p>
+<div class="figure align-center">
+<img alt="A minor upgrade of React Router breaking the entire app." src="https://blog.mathieu-leplatre.info/images/long-term-minor-upgrade.jpg" />
+<p class="caption">A patch version upgrade of React Router breaking the entire app.</p>
+</div>
+<p>You need first-hand experience, having done mistakes, and having paid the consequences, or your ships will keep drowning.</p>
+<p>Experience helps you adjust priorities in life. You grow up. Age doesn't really matter. You may have missed the joy of upgrading Redmine on your personal server 15 years ago, if you had to deal with upgrades of React Router in your SPA recently, you know what this is all about. You paid the price of your bad draw. You now have less patience to deal with fragile stuff. You aim to work less, and that's extremely beneficial when it comes to designing solid and durable stuff.</p>
+<p>I think that it's also one of the succesful ideas behind <em>Dev Ops</em>, when developers are also accoutable for running their stuff in production.</p>
+</div>
+<div class="section" id="technology-pick">
+<h2>Technology Pick</h2>
+<p>Which technology will stand the test of time?</p>
+<div class="figure align-center">
+<img alt="Design of the BIC pen" src="https://blog.mathieu-leplatre.info/images/long-term-bic-pen.jpg" />
+<p class="caption"><a class="reference external" href="https://twitter.com/fxn/status/1443249162653511687">&#64;fxn, 29 sept. 2021</a></p>
+</div>
+<p>I like one of the first answers to this tweet, arguing that «<em>paper didn't change much, that's why!</em>».
+In the world of software, and technology in general, the environment evolves constantly. Some top-notch innovations of yesterday become mainstream building blocks of tomorrow. Others fall under the pressure of the heartless natural selection of their ecosystems.</p>
+<p>There are <a class="reference external" href="https://opensource.com/article/18/3/pick-right-technology">rational criteria</a> to maximize your chances, but life always remains full of surprises :) Naturally, technologies capable of embracing and coexisting nicely with other ones have a better chance to survive! Rust, for example, can be executed from almost any language, from Python to Javascript, and can itself execute external libraries written in C++, which makes it a great tool for gradual rewrites.</p>
+<p>We can argue that you should <strong>listen to your old guard</strong>. They've seen trends pass by, their sweat shirt may not be cool anymore, but they've washed it a thousand times and it <a class="reference external" href="https://blog.mathieu-leplatre.info/tips-for-your-makefile-with-python.html">still does the job nicely</a>. <strong>They have a lot less free time than young intrepid engineers, and are therefore less likely to reinvent the wheel</strong>.</p>
+<p>Successful technologies with a low rate of evolution can be a good bet. As <a class="reference external" href="https://nicolas.perriault.net/">Nico</a> said, a <a class="reference external" href="https://fr.wikipedia.org/wiki/Gibson_Les_Paul">Gibson Les Paul</a> doesn't need any enhancement, it's simple, built with quality, and maintenance will only consist in replacing the strings from time to time. That's also one of the reasons why I enjoyed working with <a class="reference external" href="https://trypyramid.com/">Pyramid</a>, instead of <a class="reference external" href="https://www.djangoproject.com/">Django</a>.</p>
+<p>The <a class="reference external" href="https://en.wikipedia.org/wiki/Lindy_effect">Lindy effect</a> gives an interesting perspective too: the future life expectancy of some non-perishable things, like a technology or an idea, is proportional to their current age. Obviously, other forces like the <a class="reference external" href="https://en.wikipedia.org/wiki/Network_effect">network effects</a> come into play. Do you realize that the usage of jQuery only <a class="reference external" href="https://twitter.com/mikesherov/status/1443679254009483273">started to decline</a> at the end of 2020?</p>
+<p>Besides, you cannot ignore recruiting. Perl enthusiasts can argue that their ecosystem is fantastic because any library upgrade is almost guaranteed to be backward compatible, nonetheless it will be very hard to recruit talents. Of course, good engineers can learn anything. Even though it's not always that simple. I read that sometimes new hires refused to learn Elm <a class="footnote-reference" href="#elm" id="footnote-reference-4">[4]</a> because they wouldn't see the value for their curriculum!</p>
+<p>Anyway, there is no magic rule of thumb here, but I would recommend to <strong>get the people part right because it matters more</strong>. Any technology in the hands of reasonable craftsmen will always perform better over time than great technologies under disastrous management.</p>
+</div>
+<div class="section" id="architecture-legacy">
+<h2>Architecture Legacy</h2>
+<div class="figure align-center">
+<img alt="Tsunami stones: do not build any homes below this point" src="https://blog.mathieu-leplatre.info/images/long-term-tsunami.jpg" />
+<p class="caption">Centuries old <em>tsunami stone</em> in Japan, warning descendants to not build any homes below this point because of great tsunamis</p>
+</div>
+<p>In order to help future engineers understand your choices, and their context, a good practice consists in documenting <em>architecturally significant</em> decisions.</p>
+<p>The idea is to answer potential <em>Why?</em> questions, and focus on «design decisions that are costly to change»  <a class="footnote-reference" href="#folzzio" id="footnote-reference-5">[5]</a> <a class="footnote-reference" href="#fcognitect" id="footnote-reference-6">[6]</a>.</p>
+<p>The documents must be relatively short to read, but must at least describe the context, what options were considered, with their pros and cons, and what are the consequences of the decision. And must of course be kept in the repo along with the source code.</p>
+<p>Check out <a class="reference external" href="https://github.com/joelparkerhenderson/architecture-decision-record#adr-example-templates">the various templates</a>, and <a class="reference external" href="https://github.com/joelparkerhenderson/architecture-decision-record/blob/6c4f515/examples/index.md">examples</a>, think long term, and <strong>start writing architecture decision records</strong>!</p>
+<hr class="docutils" />
+<p>Many thanks to everyone that participated in these extremely valuable conversations about this topic lately! And a special one to <a class="reference external" href="https://twitter.com/mostlygeek">Benson</a> who introduced me to the work of Stewart Brand.</p>
+<p>Please share your feedback and ideas, and as usual don't hesitate to correct me if I'm wrong!</p>
+<p>While I was writing this article, Justin wrote <a class="reference external" href="https://www.simplethread.com/20-things-ive-learned-in-my-20-years-as-a-software-engineer/">20 Things I’ve Learned in my 20 Years as a Software Engineer</a> and I think it's is a nice complementary read of this one :)</p>
+<table class="docutils footnote" frame="void" id="preply" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td><a class="reference external" href="https://medium.com/preply-engineering/do-you-want-to-be-right-or-successful-52a2cd0a220b">https://medium.com/preply-engineering/do-you-want-to-be-right-or-successful-52a2cd0a220b</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="fjoel" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-2">[2]</a></td><td><a class="reference external" href="https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/">https://www.joelonsoftware.com/2000/04/06/things-you-should-never-do-part-i/</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="illich" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-3">[3]</a></td><td><a class="reference external" href="http://conviviality.ouvaton.org/spip.php?article39">http://conviviality.ouvaton.org/spip.php?article39</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="elm" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-4">[4]</a></td><td><a class="reference external" href="https://discourse.elm-lang.org/t/reasons-that-people-were-forced-to-move-from-elm-to-something-else/6390/18">https://discourse.elm-lang.org/t/reasons-that-people-were-forced-to-move-from-elm-to-something-else/6390/18</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="folzzio" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-5">[5]</a></td><td><a class="reference external" href="https://medium.com/olzzio/from-architectural-decisions-to-design-decisions-f05f6d57032b">https://medium.com/olzzio/from-architectural-decisions-to-design-decisions-f05f6d57032b</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="fcognitect" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-6">[6]</a></td><td><a class="reference external" href="https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions">https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions</a></td></tr>
+</tbody>
+</table>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/methodology.html">#methodology</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/design-for-the-long-term.html';
+      this.page.identifier = 'design-for-the-long-term';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

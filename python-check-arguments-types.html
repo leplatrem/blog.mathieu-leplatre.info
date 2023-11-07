@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Python check arguments types - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Python check arguments types</h1>
+<time datetime="2010-06-10T11:25:00+02:00">Thu 10 June 2010</time></header>
+<article>
+    <p>Decorators help us wrap some routines at function invocation. Here I show a small example that raises <cite>TypeError</cite> exceptions when given args have unexpected type. Note that <strong>it is not pythonic to type check</strong>.</p>
+<p>This recipe is quite old, as its first pieces appear in <a class="reference external" href="http://www.python.org/dev/peps/pep-0318/">PEP-0318</a> in 2003. <a class="reference external" href="http://pypi.python.org/pypi/typecheck">A module exists too</a> but it looks neglected...</p>
+<p>The (heretic) decorator itself !</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">accepts</span><span class="p">(</span><span class="o">*</span><span class="n">argstypes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargstypes</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">argstypes</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">() takes at most </span><span class="si">%s</span><span class="s2"> non-keyword arguments (</span><span class="si">%s</span><span class="s2"> given)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">argstypes</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)))</span>
+            <span class="n">argspairs</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">argstypes</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargstypes</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Unexpected keyword argument &#39;</span><span class="si">%s</span><span class="s2">&#39; for </span><span class="si">%s</span><span class="s2">()&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+                <span class="n">argspairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="n">kwargstypes</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+            <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">expected</span> <span class="ow">in</span> <span class="n">argspairs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">expected</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Parameter &#39;</span><span class="si">%s</span><span class="s2">&#39; is not </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">expected</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapped</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+</pre></div>
+<p>Let us decorate !</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nd">@accepts</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">arg2</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="o">...</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="o">...</span>     <span class="k">pass</span>
+<span class="o">...</span>
+</pre></div>
+<p>See it in action...</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">arg2</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="p">()</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">f</span><span class="p">()</span> <span class="n">takes</span> <span class="n">at</span> <span class="n">least</span> <span class="mi">1</span> <span class="n">argument</span> <span class="p">(</span><span class="mi">0</span> <span class="n">given</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">f</span><span class="p">()</span> <span class="n">takes</span> <span class="n">at</span> <span class="n">most</span> <span class="mi">1</span> <span class="n">non</span><span class="o">-</span><span class="n">keyword</span> <span class="n">arguments</span> <span class="p">(</span><span class="mi">2</span> <span class="n">given</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">arg2</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">Parameter</span> <span class="s1">&#39;bar&#39;</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">int</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">f</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">arg3</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">Unexpected</span> <span class="n">keyword</span> <span class="n">argument</span> <span class="s1">&#39;arg3&#39;</span> <span class="k">for</span> <span class="n">f</span><span class="p">()</span>
+</pre></div>
+<p>Or with classes...</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">class</span> <span class="nc">A</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="o">...</span>     <span class="k">pass</span>
+<span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="k">class</span> <span class="nc">B</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="o">...</span>     <span class="nd">@accepts</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">unicode</span><span class="p">))</span>
+<span class="o">...</span>     <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+<span class="o">...</span>         <span class="k">pass</span>
+<span class="o">...</span>
+<span class="o">...</span>     <span class="nd">@accepts</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span>
+<span class="o">...</span>     <span class="k">def</span> <span class="nf">g</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+<span class="o">...</span>         <span class="k">pass</span>
+
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">b</span> <span class="o">=</span> <span class="n">B</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">b</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">b</span><span class="o">.</span><span class="n">f</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">b</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">A</span><span class="p">())</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">b</span><span class="o">.</span><span class="n">g</span><span class="p">(</span><span class="n">B</span><span class="p">())</span>
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">Parameter</span> <span class="s1">&#39;&lt;__main__.B object at 0x902466c&gt;&#39;</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">A</span>
+</pre></div>
+<p>The same can be applied to <cite>return</cite> :)</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">returns</span><span class="p">(</span><span class="n">rtype</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">rtype</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;return value </span><span class="si">%r</span><span class="s2"> does not match </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">rtype</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="n">wrapped</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nd">@accepts</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">arg2</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="o">...</span> <span class="nd">@returns</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="o">...</span> <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">arg1</span><span class="p">,</span> <span class="n">arg2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="o">...</span>     <span class="k">return</span> <span class="mi">0</span>
+<span class="o">...</span>
+</pre></div>
+<p>..but kids, don't do this at home :-)</p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/decorators.html">#decorators</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/python-check-arguments-types.html';
+      this.page.identifier = 'python-check-arguments-types';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Subtivals 1.4 is out - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Subtivals 1.4 is out</h1>
+<time datetime="2013-01-08T00:00:00+01:00">Tue 08 January 2013</time></header>
+<article>
+    <p>Since the <a class="reference external" href="/announcing-subtivals-realtime-subtitles-for-film-festivals.html">article introducing Subtivals</a> was
+published, a lot of exciting things happened ! The first reward was the
+<a class="reference external" href="http://www.cinelatino.com.fr/">festival of Cinelatino</a> in Toulouse, which had a major focus on accessibility this year.
+Subtivals was used successfully : subtitles had never been so beautiful and refined,
+and the public really acknowledged the efforts !</p>
+<p>Along the year we were in contact with people from Spain, Portugal, Canada,
+Lebanon, Greece, Russia, Mexico... and the interest they showed in our tool
+really made us cheerful and enthusiasts ! We had the proof that Subtivals
+can be used in many contexts, from primary school performances to short-movie
+festivals, through cinematheques and movie transcribers...</p>
+<img alt="" class="align-center" src="/images/subtivals-arabic.png" />
+<div class="section" id="subtivals-a-surtitling-captioning-subtitling-program">
+<h2>Subtivals, a surtitling / captioning / subtitling program</h2>
+<p>I usually have difficulties at explaining Subtivals goals, since its usage
+is very specific to the world of movie projection.</p>
+<p>In addition, the activity of projecting subtitles on top of a movie has many names (soft-titling, surtitling,
+supertitling, electronic subtitles, virtual subtitles or even <a class="reference external" href="http://en.wikipedia.org/wiki/Closed_captioning">closed
+captioning</a>...) making it harder for such
+a tool to become visible on the Web.</p>
+<p>Subtivals won’t transcribe sound and perform voice recognition ! It is a
+projection software, with fancy subtitles and advanced positioning, necessary
+to reproduce music, ambiance, dialogs and context for the hard of hearing.</p>
+<p>Subtivals is very stable, very easy, very comfortable for the operator,
+and particularly bullet-proof : subtitling should never fail in live!
+Its particular strength lies in the control of the projection,
+with a very good cooperation between automatic and manual modes.</p>
+<img alt="" class="align-center" src="/images/subtivals-1.4dev-crop-win32.png" />
+</div>
+<div class="section" id="whats-new-in-1-4">
+<h2>What’s new in 1.4</h2>
+<p>Since the version 1.0, we improved a lot of things, and added many features
+(see <a class="reference external" href="https://github.com/traxtech/subtivals/blob/master/debian/changelog">changelog</a>).</p>
+<p>Among them :</p>
+<ul class="simple">
+<li>Subrip (SRT) support</li>
+<li>Subtitles progress highlighting</li>
+<li>Better interactions (shortcuts, scrolling)</li>
+<li>Text outlining and fullscreen</li>
+<li>Characters per second feedback</li>
+<li>ASS absolute positioning support</li>
+<li>Styles edition (colors, font, size, margins, alignments)</li>
+<li>Better calibration screen</li>
+<li>Mac OS version installation package</li>
+</ul>
+<p>From now, if you have a video mixer, with chroma-key support, then a separate
+projector is not necessary for inlaying subtitles !</p>
+<img alt="" class="align-center" src="/images/subtivals-chromakey.png" />
+</div>
+<div class="section" id="get-it">
+<h2>Get it !</h2>
+<p>Subtivals is released under <a class="reference external" href="http://www.gnu.org/copyleft/gpl.html">GPL</a>,
+this means you can use, access the source code, modify, package, distribute the software,
+as long as it remains GPL.</p>
+<p>Like previous versions, we provide packages for Ubuntu. If you already
+installed it, it will be updated automatically. Otherwise, it's just simple as :</p>
+<pre class="literal-block">
+sudo add-apt-repository ppa:mathieu.leplatre/subtivals
+sudo apt-get update &amp;&amp; sudo apt-get install subtivals
+</pre>
+<p>Regarding Mac OS and Windows, we still follow <a class="reference external" href="http://gcompris.net/-Download-">Bruno’s approach</a> :
+we sell the installers on proprietary operating systems, in order to promote GNU/Linux.</p>
+<p>But from now on, we also distribute a demo version ! <a class="reference external" href="http://mathieu-leplatre.info/media/subtivals/subtivals-setup-1.4.1-demo.exe">Download it
+here</a> !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/subtivals.html">#subtivals</a>,         <a href="https://blog.mathieu-leplatre.info/tag/subtitles.html">#subtitles</a>,         <a href="https://blog.mathieu-leplatre.info/tag/accessibility.html">#accessibility</a>,         <a href="https://blog.mathieu-leplatre.info/tag/qt.html">#qt</a>,         <a href="https://blog.mathieu-leplatre.info/tag/c.html">#c++</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/subtivals-14-is-out.html';
+      this.page.identifier = 'subtivals-14-is-out';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Static build of Cairo and librsvg - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Static build of Cairo and librsvg</h1>
+<time datetime="2008-07-01T11:25:00+02:00">Tue 01 July 2008</time></header>
+<article>
+    <img alt="" src="/images/unicode.png" />
+<div class="section" id="why">
+<h2>Why ?</h2>
+<ul class="simple">
+<li>Convert SVG files to PDF or PNG, with full Unicode support (right-to-left languages), transparency, gradients, PDF image compression, ...</li>
+<li>Cairo and librsvg are the best in town.</li>
+<li>Cairo and librsvg are very modern libraries which became famous only in the past 3 years. Thus, GNU/Linux distributions do not always have recent versions and full capabilities.</li>
+<li>A <cite>static build</cite> does all the bindings to libraries at compile time, which hence removes specific versions dependencies. <em>(this method has many drawbacks but can help sometimes)</em></li>
+</ul>
+</div>
+<div class="section" id="the-program-svgconvert-c">
+<h2>The program : svgconvert.c</h2>
+<blockquote>
+<ul class="simple">
+<li>This program is a merge of Carl Worth's <a class="reference external" href="http://cgit.freedesktop.org/~cworth/svg2pdf/">svg2pdf</a> and <a class="reference external" href="http://cgit.freedesktop.org/~cworth/svg2png/">svg2png</a></li>
+</ul>
+</blockquote>
+<div class="highlight"><pre><span></span><span class="cm">/*</span>
+<span class="cm">* Copyright © 2005 Red Hat, Inc.</span>
+<span class="cm">* Copyright © 2006 Red Hat, Inc.</span>
+<span class="cm">* Copyright © 2007 Red Hat, Inc.</span>
+<span class="cm">*</span>
+<span class="cm">* Permission is hereby granted, free of charge, to any person</span>
+<span class="cm">* obtaining a copy of this software and associated documentation</span>
+<span class="cm">* files (the &quot;Software&quot;), to deal in the Software without</span>
+<span class="cm">* restriction, including without limitation the rights to use, copy,</span>
+<span class="cm">* modify, merge, publish, distribute, sublicense, and/or sell copies</span>
+<span class="cm">* of the Software, and to permit persons to whom the Software is</span>
+<span class="cm">* furnished to do so, subject to the following conditions:</span>
+<span class="cm">*</span>
+<span class="cm">* The above copyright notice and this permission notice shall be</span>
+<span class="cm">* included in all copies or substantial portions of the Software.</span>
+<span class="cm">*</span>
+<span class="cm">* THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND,</span>
+<span class="cm">* EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF</span>
+<span class="cm">* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND</span>
+<span class="cm">* NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS</span>
+<span class="cm">* BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN</span>
+<span class="cm">* ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN</span>
+<span class="cm">* CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span>
+<span class="cm">* SOFTWARE.</span>
+<span class="cm">*</span>
+<span class="cm">* Authors: Kristian Høgsberg &lt;krh@redhat.com&gt;</span>
+<span class="cm">* Carl Worth &lt;cworth@redhat.com&gt;</span>
+<span class="cm">* Behdad Esfahbod &lt;besfahbo@redhat.com&gt;</span>
+<span class="cm">* Mathieu Leplatre &lt;contact@mathieu-leplatre.info&gt;</span>
+<span class="cm">*/</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;glib/gprintf.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;librsvg/rsvg.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;librsvg/rsvg-cairo.h&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;cairo-pdf.h&gt;</span>
+
+<span class="cp">#define FAIL(msg) \</span>
+<span class="cp">do { fprintf (stderr, &quot;FAIL: %s\n&quot;, msg); exit (-1); } while (0)</span>
+
+<span class="cp">#define PIXELS_PER_POINT 1</span>
+
+<span class="cp">#define PDF 0</span>
+<span class="cp">#define PNG 1</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">GError</span><span class="w"> </span><span class="o">*</span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+<span class="w">    </span><span class="n">RsvgHandle</span><span class="w"> </span><span class="o">*</span><span class="n">handle</span><span class="p">;</span>
+<span class="w">    </span><span class="n">RsvgDimensionData</span><span class="w"> </span><span class="n">dim</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">;</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">filename</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">output_filename</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+<span class="w">    </span><span class="n">cairo_surface_t</span><span class="w"> </span><span class="o">*</span><span class="n">surface</span><span class="p">;</span>
+<span class="w">    </span><span class="n">cairo_t</span><span class="w"> </span><span class="o">*</span><span class="n">cr</span><span class="p">;</span>
+<span class="w">    </span><span class="n">cairo_status_t</span><span class="w"> </span><span class="n">status</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">mode</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">argc</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span>
+<span class="w">        </span><span class="n">FAIL</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;usage: svgconvert input_file.svg output_file&quot;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PDF</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">g_str_has_suffix</span><span class="w"> </span><span class="p">(</span><span class="n">g_ascii_strdown</span><span class="w"> </span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;.png&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PNG</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">g_type_init</span><span class="w"> </span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">rsvg_set_default_dpi</span><span class="w"> </span><span class="p">(</span><span class="mf">72.0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">handle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rsvg_handle_new_from_file</span><span class="w"> </span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">error</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">error</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span>
+<span class="w">        </span><span class="n">FAIL</span><span class="w"> </span><span class="p">(</span><span class="n">error</span><span class="o">-&gt;</span><span class="n">message</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">rsvg_handle_get_dimensions</span><span class="w"> </span><span class="p">(</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">dim</span><span class="p">);</span>
+<span class="w">    </span><span class="n">width</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dim</span><span class="p">.</span><span class="n">width</span><span class="p">;</span>
+<span class="w">    </span><span class="n">height</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dim</span><span class="p">.</span><span class="n">height</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mode</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PNG</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">surface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cairo_image_surface_create</span><span class="w"> </span><span class="p">(</span><span class="n">CAIRO_FORMAT_ARGB32</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">surface</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cairo_pdf_surface_create</span><span class="w"> </span><span class="p">(</span><span class="n">output_filename</span><span class="p">,</span><span class="w"> </span><span class="n">width</span><span class="p">,</span><span class="w"> </span><span class="n">height</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">cr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cairo_create</span><span class="w"> </span><span class="p">(</span><span class="n">surface</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">rsvg_handle_render_cairo</span><span class="w"> </span><span class="p">(</span><span class="n">handle</span><span class="p">,</span><span class="w"> </span><span class="n">cr</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cairo_status</span><span class="w"> </span><span class="p">(</span><span class="n">cr</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+<span class="w">        </span><span class="n">FAIL</span><span class="w"> </span><span class="p">(</span><span class="n">cairo_status_to_string</span><span class="w"> </span><span class="p">(</span><span class="n">status</span><span class="p">));</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">mode</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PNG</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">cairo_surface_write_to_png</span><span class="w"> </span><span class="p">(</span><span class="n">surface</span><span class="p">,</span><span class="w"> </span><span class="n">output_filename</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="n">cairo_destroy</span><span class="w"> </span><span class="p">(</span><span class="n">cr</span><span class="p">);</span>
+<span class="w">    </span><span class="n">cairo_surface_destroy</span><span class="w"> </span><span class="p">(</span><span class="n">surface</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="build-with-shared-librairies">
+<h2>Build with shared librairies</h2>
+<p>You would just do :</p>
+<div class="highlight"><pre><span></span>gcc<span class="w"> </span><span class="sb">`</span>pkg-config<span class="w"> </span>--cflags<span class="w"> </span>--libs<span class="w"> </span>librsvg-2.0<span class="w"> </span>cairo-pdf<span class="sb">`</span><span class="w"> </span>-o<span class="w"> </span>svgconvert<span class="w"> </span>svgconvert.c
+</pre></div>
+<p>which creates a binary of 9.0K.</p>
+</div>
+<div class="section" id="build-with-static-librairies">
+<h2>Build with static librairies</h2>
+<ul class="simple">
+<li>First install the development versions of the packages, to make sure you have all <strong>/usr/lib/*.a</strong> mentioned below.</li>
+<li>Use this Makefile, which creates a binary of 5.9M. It was tested on Ubuntu 8.04 which comes with Gnome 2.22, librsvg 2.22 and Cairo 1.6.0.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="nv">ALL</span><span class="o">=</span>svgconvert
+
+<span class="nv">MYCFLAGS</span><span class="o">=</span><span class="sb">`</span>pkg-config<span class="w"> </span>--cflags<span class="w"> </span>librsvg-2.0<span class="w"> </span>cairo-pdf<span class="sb">`</span>
+<span class="nv">LDFLAGS</span><span class="o">=</span><span class="sb">`</span>pkg-config<span class="w"> </span>--libs<span class="w"> </span>librsvg-2.0<span class="w"> </span>cairo-pdf<span class="w"> </span>freetype2<span class="w"> </span>fontconfig<span class="w"> </span>pango<span class="w"> </span>pangoft2<span class="w"> </span>pangocairo<span class="w">  </span>cairo-ft<span class="w"> </span>libthai<span class="w"> </span>datrie<span class="w"> </span>libgsf-1<span class="w"> </span>gnome-vfs-2.0<span class="w"> </span>libcroco-0.6<span class="w"> </span>libpcre<span class="w"> </span>pixman-1<span class="w"> </span>libpng<span class="w"> </span>libxml-2.0<span class="sb">`</span>
+<span class="nv">MYLDFLAGS</span><span class="o">=</span><span class="k">$(</span>LDFLAGS<span class="k">)</span><span class="w"> </span>/usr/lib/libgio-2.0.a<span class="w">  </span>/usr/lib/libglib-2.0.a<span class="w"> </span>/usr/lib/libselinux.a<span class="w"> </span>/usr/lib/libexpat.a<span class="w"> </span>/usr/lib/libfreetype.a<span class="w"> </span>/usr/lib/libbz2.a<span class="w"> </span>/usr/lib/libjpeg.a<span class="w"> </span>/usr/lib/libtiff.a<span class="w"> </span>/usr/lib/libbz2.a<span class="w"> </span>/usr/lib/libz.a<span class="w"> </span>/usr/lib/libm.a
+
+all:<span class="w"> </span><span class="k">$(</span>ALL<span class="k">)</span>
+
+%:<span class="w"> </span>%.c
+<span class="w">    </span><span class="k">$(</span>CC<span class="k">)</span><span class="w"> </span>$^<span class="w"> </span>-pthread<span class="w"> </span><span class="k">$(</span>MYCFLAGS<span class="k">)</span><span class="w"> </span>-static<span class="w"> </span><span class="k">$(</span>MYLDFLAGS<span class="k">)</span><span class="w"> </span>-o<span class="w"> </span><span class="nv">$@</span>
+
+clean:
+<span class="w">    </span>rm<span class="w"> </span>-f<span class="w"> </span><span class="k">$(</span>ALL<span class="k">)</span><span class="w"> </span>*.o
+</pre></div>
+<ul class="simple">
+<li>To check if <strong>pkg-config</strong> knows about a specific library :</li>
+</ul>
+<div class="highlight"><pre><span></span>$<span class="w"> </span>pkg-config<span class="w"> </span>--list-all<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>vfs
+gnome-vfs-sharp-2.0<span class="w">           </span>GnomeVfs<span class="w"> </span>-<span class="w"> </span>GnomeVfs
+gnome-vfs-2.0<span class="w">                 </span>gnome-vfs<span class="w"> </span>-<span class="w"> </span>The<span class="w"> </span>GNOME<span class="w"> </span>virtual<span class="w"> </span>file-system<span class="w"> </span>libraries
+gnome-vfsmm-2.6<span class="w">               </span>gnome-vfsmm<span class="w"> </span>-<span class="w"> </span>C++<span class="w"> </span>wrapper<span class="w"> </span><span class="k">for</span><span class="w"> </span>gnome-vfs
+gnome-vfs-module-2.0<span class="w">          </span>gnome-vfs-module<span class="w"> </span>-<span class="w"> </span>The<span class="w"> </span>GNOME<span class="w"> </span>virtual<span class="w"> </span>file-system<span class="w"> </span>module<span class="w"> </span>include<span class="w"> </span>info
+</pre></div>
+<ul class="simple">
+<li>To check if a library has a specific symbol, use the <strong>nm</strong> command :</li>
+</ul>
+<div class="highlight"><pre><span></span>$<span class="w"> </span>nm<span class="w"> </span>/usr/lib/libexpat.a<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>XML_SetStart
+000001c0<span class="w"> </span>T<span class="w"> </span>XML_SetStartCdataSectionHandler
+<span class="m">00000240</span><span class="w"> </span>T<span class="w"> </span>XML_SetStartDoctypeDeclHandler
+<span class="m">00000150</span><span class="w"> </span>T<span class="w"> </span>XML_SetStartElementHandler
+000002a0<span class="w"> </span>T<span class="w"> </span>XML_SetStartNamespaceDeclHandler
+</pre></div>
+</div>
+<div class="section" id="download">
+<h2>Download</h2>
+<ul class="simple">
+<li><a class="reference external" href="http://mathieu-leplatre.info/media/svgconvert-src.tar.gz">Source</a></li>
+<li><a class="reference external" href="http://mathieu-leplatre.info/media/svgconvert-bin.tar.gz">Binary</a></li>
+</ul>
+</div>
+<div class="section" id="references">
+<h2>References</h2>
+<ul class="simple">
+<li><a class="reference external" href="http://cairographics.org">http://cairographics.org</a></li>
+<li><a class="reference external" href="http://librsvg.sourceforge.net">http://librsvg.sourceforge.net</a></li>
+<li>Thanks for the precious help of <a class="reference external" href="http://www.cworth.org">Carl Worth</a> on <cite>#cairo</cite> at irc.freenode.net, Zugzwang and nvteighen on <a class="reference external" href="http://ubuntuforums.org">http://ubuntuforums.org</a></li>
+</ul>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/cairo.html">#cairo</a>,         <a href="https://blog.mathieu-leplatre.info/tag/svg.html">#svg</a>,         <a href="https://blog.mathieu-leplatre.info/tag/c.html">#C</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/static-build-of-cairo-and-librsvg.html';
+      this.page.identifier = 'static-build-of-cairo-and-librsvg';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

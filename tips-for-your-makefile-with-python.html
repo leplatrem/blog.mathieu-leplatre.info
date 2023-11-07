@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Tips for your Makefile with Python - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Tips for your Makefile with Python</h1>
+<time datetime="2021-01-22T00:00:00+01:00">Fri 22 January 2021</time></header>
+<article>
+    <p>Recently, while I was migrating old repos from TravisCI to Github Actions, I realized that several of them had wobbly Makefiles.</p>
+<p>I know that Makefiles are not super elegant, and that intrepid youngsters regularly come up with alternatives. But I find them super handful and powerful! Especially when they are well structured.</p>
+<div class="section" id="tips">
+<h2>Tips</h2>
+<div class="section" id="the-basics">
+<h3>The basics</h3>
+<p>Everything is based on dependencies and timestamps: if a dependency's timestamp is more recent than the target, then the rule is executed.</p>
+<p>For Python projects, the chain looks like this:</p>
+<ul class="simple">
+<li>Python → Virtualenv → Install packages → Run task (tests, lint)</li>
+</ul>
+<p>Which, in a <tt class="docutils literal">Makefile</tt> simply looks like this:</p>
+<div class="highlight"><pre><span></span><span class="nf">.venv/bin/python</span><span class="o">:</span>
+<span class="w">        </span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>.venv
+
+<span class="nf">.venv/.install.stamp</span><span class="o">:</span><span class="w"> </span>.<span class="n">venv</span>/<span class="n">bin</span>/<span class="n">python</span> <span class="n">requirements</span>.<span class="n">txt</span>
+<span class="w">        </span>.venv/bin/python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+<span class="w">        </span>touch<span class="w"> </span>.venv/.install.stamp
+
+<span class="nf">test</span><span class="o">:</span><span class="w"> </span>.<span class="n">venv</span>/.<span class="n">install</span>.<span class="n">stamp</span>
+<span class="w">        </span>.venv/bin/python<span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>tests/
+</pre></div>
+<p>Now, when you run <tt class="docutils literal">make test</tt> from a recently cloned repo, the whole chain is executed. But otherwise, the Python packages are installed only if your requirements file has changed since your last installation.</p>
+</div>
+<div class="section" id="use-variables">
+<h3>Use variables</h3>
+<p>In order to ease readability of dependencies, I find that using variables helps:</p>
+<div class="highlight"><pre><span></span><span class="nv">VENV</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>.venv
+<span class="nv">INSTALL_STAMP</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>/.install.stamp
+<span class="nv">PYTHON</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/python
+
+<span class="nf">$(PYTHON)</span><span class="o">:</span>
+<span class="w">        </span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>
+
+<span class="nf">$(INSTALL_STAMP)</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">PYTHON</span><span class="k">)</span> <span class="n">requirements</span>.<span class="n">txt</span>
+<span class="w">        </span><span class="k">$(</span>PYTHON<span class="k">)</span><span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+<span class="w">        </span>touch<span class="w"> </span><span class="k">$(</span>INSTALL_STAMP<span class="k">)</span>
+
+<span class="nf">test</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>PYTHON<span class="k">)</span><span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>./tests/
+</pre></div>
+</div>
+<div class="section" id="environment-variables-with-default">
+<h3>Environment variables with default</h3>
+<p>For example, instead of hardcoding the name of your virtualenv folder, you can read it from the current shell environment and use a default value:</p>
+<div class="highlight"><pre><span></span><span class="nv">VENV</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>shell<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$$</span><span class="o">{</span>VIRTUAL_ENV-.venv<span class="o">}</span><span class="k">)</span>
+</pre></div>
+<p>Basically, <tt class="docutils literal">echo <span class="pre">${VAR-val}</span></tt> will show the content of <tt class="docutils literal">$VAR</tt> and defaults to <tt class="docutils literal">val</tt> if undefined (and we double the <tt class="docutils literal">$</tt> for escaping).</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p><tt class="docutils literal">make</tt> allows you to pass variables and environment values from the command-line, but I always find it quite confusing to distinguish the two. I recommend to only use environment variables, and pass them as usual from command-line:</p>
+<div class="highlight"><pre><span></span><span class="nv">LOG_FORMAT</span><span class="o">=</span>json<span class="w"> </span>make<span class="w"> </span><span class="nb">test</span>
+</pre></div>
+<p>or:</p>
+<div class="last"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">LOG_FORMAT</span><span class="o">=</span>json
+make<span class="w"> </span><span class="nb">test</span>
+</pre></div>
+</div></div>
+</div>
+<div class="section" id="check-if-a-command-is-available">
+<h3>Check if a command is available</h3>
+<p>It's nice to give a little hint about a missing prerequisite. Most of the time there will be an official system package to be installed for the rest of the Makefile to be executed smoothly.</p>
+<div class="highlight"><pre><span></span><span class="nv">PY3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>shell<span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>python3<span class="w"> </span><span class="m">2</span>&gt;<span class="w"> </span>/dev/null<span class="k">)</span>
+
+<span class="nf">$(PYTHON)</span><span class="o">:</span>
+<span class="w">        </span>@if<span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="k">$(</span>PY3<span class="k">)</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;python3 could not be found. See https://docs.python.org/3/&quot;</span><span class="p">;</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="m">2</span><span class="p">;</span><span class="w"> </span><span class="k">fi</span>
+<span class="w">        </span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>
+</pre></div>
+<p><tt class="docutils literal">command <span class="pre">-v</span></tt> is roughly the equivalent of <tt class="docutils literal">which</tt>, but built-in your shell. It returns the executable path or nothing if not found.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <tt class="docutils literal">&#64;</tt> prefix will prevent the underlying command to be shown in the output log.</p>
+</div>
+</div>
+<div class="section" id="list-available-targets">
+<h3>List available targets</h3>
+<p>When running <tt class="docutils literal">make</tt> the <tt class="docutils literal">all</tt> target is implicitly called. We can tweak it and show some help:</p>
+<div class="highlight"><pre><span></span><span class="nv">.DEFAULT_GOAL</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">help</span>
+
+<span class="nf">help</span><span class="o">:</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;Please use &#39;make &lt;target&gt;&#39; where &lt;target&gt; is one of&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  install     install packages and prepare environment&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  format      reformat code&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  lint        run the code linters&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  test        run all the tests&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  clean       remove *.pyc files and __pycache__ directory&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;Check the Makefile to know exactly what each target is doing.&quot;</span>
+</pre></div>
+<p><a class="reference external" href="https://larlet.fr/david/">david</a> suggests to produce the above help summary using <a class="reference external" href="https://www.thapaliya.com/en/writings/well-documented-makefiles/">this trick</a>, that relies on <tt class="docutils literal">awk</tt> and comments on targets:</p>
+<div class="highlight"><pre><span></span><span class="nv">.DEFAULT_GOAL</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">help</span>
+
+<span class="nf">help</span><span class="o">:</span><span class="w">  </span><span class="c">## Display this help</span>
+<span class="w">        </span>@awk<span class="w"> </span><span class="s1">&#39;BEGIN {FS = &quot;:.*##&quot;; printf &quot;\nUsage:\n  make \033[36m\033[0m\n\nTargets:\n&quot;} /^[a-zA-Z_-]+:.*?##/ { printf &quot;\033[36m%-10s\033[0m %s\n&quot;, $$1, $$2 }&#39;</span><span class="w"> </span><span class="k">$(</span>MAKEFILE_LIST<span class="k">)</span>
+
+<span class="nf">deps</span><span class="o">:</span><span class="w">  </span><span class="c">## Check dependencies</span>
+<span class="w">        </span>...
+
+<span class="nf">clean</span><span class="o">:</span><span class="w"> </span><span class="c">## Cleanup the project folders</span>
+<span class="w">        </span>...
+
+<span class="nf">build</span><span class="o">:</span><span class="w"> </span><span class="n">clean</span> <span class="n">deps</span> <span class="c">## Build the project</span>
+<span class="w">        </span>...
+</pre></div>
+</div>
+<div class="section" id="do-you-think-it-s-phony">
+<h3>Do you think it's PHONY?</h3>
+<p>By default, <em>Make</em> assumes that the target of a rule is a file. If you have targets that do not produce files on disk (eg. <tt class="docutils literal">make test</tt> or <tt class="docutils literal">make clean</tt>) then mark them as <tt class="docutils literal">.PHONY</tt> (<em>fake</em> in English).</p>
+<p>Phony targets are never up-to-date and will always run when invoked, and even if there is a matching file on disk (eg. a file called <tt class="docutils literal">clean</tt>).</p>
+<div class="highlight"><pre><span></span><span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">clean</span> <span class="n">test</span>
+
+<span class="nf">clean</span><span class="o">:</span>
+<span class="w">        </span>find<span class="w"> </span>.<span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;__pycache__&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span><span class="o">{}</span><span class="p">;</span>
+<span class="w">        </span>rm<span class="w"> </span>-rf<span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>
+
+<span class="nf">test</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>PYTHON<span class="k">)</span><span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>./tests/
+</pre></div>
+<p><strong>edit</strong>: Instead of maintaining a list of phony targets on top, <a class="reference external" href="http://agopian.info/">magopian</a> and <a class="reference external" href="https://yohanboniface.me/">ybon</a> recommend to put it along each rule:</p>
+<div class="highlight"><pre><span></span><span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">clean</span>
+<span class="nf">clean</span><span class="o">:</span>
+<span class="w">        </span>rm<span class="w"> </span>-rf<span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">test</span>
+<span class="nf">test</span><span class="o">:</span><span class="w"> </span>...
+</pre></div>
+</div>
+<div class="section" id="multiple-targets">
+<h3>Multiple targets</h3>
+<p>While I was reading about the multiple PHONY lines, I learned that any target can be repeated multiple times, their dependencies are just «combined»:</p>
+<div class="highlight"><pre><span></span><span class="nf">$(INSTALL_STAMP)</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">PYTHON</span><span class="k">)</span> <span class="n">requirements</span>/<span class="n">dev</span>.<span class="n">txt</span>
+<span class="w">        </span><span class="k">$(</span>PYTHON<span class="k">)</span><span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements/dev.txt
+<span class="w">        </span>touch<span class="w"> </span><span class="k">$(</span>INSTALL_STAMP<span class="k">)</span>
+
+<span class="nf">$(INSTALL_STAMP)</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">PYTHON</span><span class="k">)</span> <span class="n">requirements</span>/<span class="n">app</span>.<span class="n">txt</span>
+<span class="w">        </span><span class="k">$(</span>PYTHON<span class="k">)</span><span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements/app.txt
+<span class="w">        </span>touch<span class="w"> </span><span class="k">$(</span>INSTALL_STAMP<span class="k">)</span>
+</pre></div>
+<p>Here, we won't reinstall all application's packages when just a <tt class="docutils literal">dev</tt> package has changed.</p>
+</div>
+</div>
+<div class="section" id="full-example-with-poetry">
+<h2>Full Example with Poetry</h2>
+<p>I gathered most of the above tips in a full working example with Poetry (<a class="reference external" href="https://github.com/mozilla-services/poucave/pull/752">original source</a>):</p>
+<div class="highlight"><pre><span></span><span class="nv">NAME</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>superproject
+<span class="nv">INSTALL_STAMP</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>.install.stamp
+<span class="nv">POETRY</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>shell<span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>poetry<span class="w"> </span><span class="m">2</span>&gt;<span class="w"> </span>/dev/null<span class="k">)</span>
+
+<span class="nv">.DEFAULT_GOAL</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">help</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">help</span>
+<span class="nf">help</span><span class="o">:</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;Please use &#39;make &lt;target&gt;&#39; where &lt;target&gt; is one of&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  install     install packages and prepare environment&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  clean       remove all temporary files&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  lint        run the code linters&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  format      reformat code&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;  test        run all the tests&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">        </span>@echo<span class="w"> </span><span class="s2">&quot;Check the Makefile to know exactly what each target is doing.&quot;</span>
+
+<span class="nf">install</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="nf">$(INSTALL_STAMP)</span><span class="o">:</span><span class="w"> </span><span class="n">pyproject</span>.<span class="n">toml</span> <span class="n">poetry</span>.<span class="n">lock</span>
+<span class="w">        </span>@if<span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Poetry could not be found. See https://python-poetry.org/docs/&quot;</span><span class="p">;</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="m">2</span><span class="p">;</span><span class="w"> </span><span class="k">fi</span>
+<span class="w">        </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span>install
+<span class="w">        </span>touch<span class="w"> </span><span class="k">$(</span>INSTALL_STAMP<span class="k">)</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">clean</span>
+<span class="nf">clean</span><span class="o">:</span>
+<span class="w">        </span>find<span class="w"> </span>.<span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;__pycache__&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span><span class="o">{}</span><span class="p">;</span>
+<span class="w">        </span>rm<span class="w"> </span>-rf<span class="w"> </span><span class="k">$(</span>INSTALL_STAMP<span class="k">)</span><span class="w"> </span>.coverage<span class="w"> </span>.mypy_cache
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">lint</span>
+<span class="nf">lint</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span>run<span class="w"> </span>isort<span class="w"> </span>--profile<span class="o">=</span>black<span class="w"> </span>--lines-after-imports<span class="o">=</span><span class="m">2</span><span class="w"> </span>--check-only<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span>run<span class="w"> </span>black<span class="w"> </span>--check<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span><span class="w"> </span>--diff
+<span class="w">        </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span>run<span class="w"> </span>flake8<span class="w"> </span>--ignore<span class="o">=</span>W503,E501<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span>run<span class="w"> </span>mypy<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span><span class="w"> </span>--ignore-missing-imports
+<span class="w">        </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span>run<span class="w"> </span>bandit<span class="w"> </span>-r<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span><span class="w"> </span>-s<span class="w"> </span>B608
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">format</span>
+<span class="nf">format</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span>run<span class="w"> </span>isort<span class="w"> </span>--profile<span class="o">=</span>black<span class="w"> </span>--lines-after-imports<span class="o">=</span><span class="m">2</span><span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span>run<span class="w"> </span>black<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">test</span>
+<span class="nf">test</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>POETRY<span class="k">)</span><span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>./tests/<span class="w"> </span>--cov-report<span class="w"> </span>term-missing<span class="w"> </span>--cov-fail-under<span class="w"> </span><span class="m">100</span><span class="w"> </span>--cov<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span>
+</pre></div>
+<p>With that Makefile, anyone with <tt class="docutils literal">make</tt>  and <tt class="docutils literal">poetry</tt> installed can hack on your project :)</p>
+<div class="section" id="multiple-python-versions">
+<h3>Multiple Python versions</h3>
+<p><tt class="docutils literal">make test</tt> will run the tests with the default Python version.</p>
+<p>In order to pick another Python version, to run the tests for example, simply rely on Poetry's features:</p>
+<pre class="literal-block">
+poetry env use 2.7
+make test
+</pre>
+</div>
+<div class="section" id="full-example-with-virtualenv">
+<h3>Full Example with Virtualenv</h3>
+<p>The equivalent with <tt class="docutils literal">virtualenv</tt>, which depends on <tt class="docutils literal">python3</tt> being available, and explicitly manages the creation of the <tt class="docutils literal">.venv</tt> folder.</p>
+<div class="highlight"><pre><span></span><span class="nv">NAME</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>superproject
+<span class="nv">VENV</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>shell<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$$</span><span class="o">{</span>VIRTUAL_ENV-.venv<span class="o">}</span><span class="k">)</span>
+<span class="nv">PY3</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>shell<span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>python3<span class="w"> </span><span class="m">2</span>&gt;<span class="w"> </span>/dev/null<span class="k">)</span>
+<span class="nv">PYTHON</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/python
+<span class="nv">INSTALL_STAMP</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>/.install.stamp
+
+
+<span class="nf">$(PYTHON)</span><span class="o">:</span>
+<span class="w">        </span>@if<span class="w"> </span><span class="o">[</span><span class="w"> </span>-z<span class="w"> </span><span class="k">$(</span>PY3<span class="k">)</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Python 3 could not be found.&quot;</span><span class="p">;</span><span class="w"> </span><span class="nb">exit</span><span class="w"> </span><span class="m">2</span><span class="p">;</span><span class="w"> </span><span class="k">fi</span>
+<span class="w">        </span><span class="k">$(</span>PY3<span class="k">)</span><span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>
+
+<span class="nf">install</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="nf">$(INSTALL_STAMP)</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">PYTHON</span><span class="k">)</span> <span class="n">requirements</span>.<span class="n">txt</span> <span class="n">constraints</span>.<span class="n">txt</span>
+<span class="w">        </span><span class="k">$(</span>PIP_INSTALL<span class="k">)</span><span class="w"> </span>-Ur<span class="w"> </span>requirements.txt<span class="w"> </span>-c<span class="w"> </span>constraints.txt
+<span class="w">        </span>touch<span class="w"> </span><span class="k">$(</span>INSTALL_STAMP<span class="k">)</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">clean</span>
+<span class="nf">clean</span><span class="o">:</span>
+<span class="w">        </span>find<span class="w"> </span>.<span class="w"> </span>-type<span class="w"> </span>d<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;__pycache__&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>rm<span class="w"> </span>-rf<span class="w"> </span><span class="o">{}</span><span class="p">;</span>
+<span class="w">        </span>rm<span class="w"> </span>-rf<span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span><span class="w"> </span><span class="k">$(</span>INSTALL_STAMP<span class="k">)</span><span class="w"> </span>.coverage<span class="w"> </span>.mypy_cache
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">lint</span>
+<span class="nf">lint</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/isort<span class="w"> </span>--profile<span class="o">=</span>black<span class="w"> </span>--lines-after-imports<span class="o">=</span><span class="m">2</span><span class="w"> </span>--check-only<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span><span class="w"> </span>--virtual-env<span class="o">=</span><span class="k">$(</span>VENV<span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/black<span class="w"> </span>--check<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span><span class="w"> </span>--diff
+<span class="w">        </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/flake8<span class="w"> </span>--ignore<span class="o">=</span>W503,E501<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/mypy<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span><span class="w"> </span>--ignore-missing-imports
+<span class="w">        </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/bandit<span class="w"> </span>-r<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span><span class="w"> </span>-s<span class="w"> </span>B608
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">format</span>
+<span class="nf">format</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/isort<span class="w"> </span>--profile<span class="o">=</span>black<span class="w"> </span>--lines-after-imports<span class="o">=</span><span class="m">2</span><span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span><span class="w"> </span>--virtual-env<span class="o">=</span><span class="k">$(</span>VENV<span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/black<span class="w"> </span>./tests/<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">test</span>
+<span class="nf">test</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">        </span><span class="k">$(</span>PYTHON<span class="k">)</span><span class="w"> </span>-m<span class="w"> </span>pytest<span class="w"> </span>./tests/<span class="w"> </span>--cov-report<span class="w"> </span>term-missing<span class="w"> </span>--cov-fail-under<span class="w"> </span><span class="m">100</span><span class="w"> </span>--cov<span class="w"> </span><span class="k">$(</span>NAME<span class="k">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="see-also">
+<h2>See Also</h2>
+<ul class="simple">
+<li><a class="reference external" href="https://tech.davis-hansson.com/p/make/">Your Makefiles are wrong</a></li>
+</ul>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/tips-for-your-makefile-with-python.html';
+      this.page.identifier = 'tips-for-your-makefile-with-python';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

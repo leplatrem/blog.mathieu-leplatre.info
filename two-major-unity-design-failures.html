@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Two major Unity design failures - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Two major Unity design failures</h1>
+<time datetime="2011-10-15T00:00:00+02:00">Sat 15 October 2011</time></header>
+<article>
+    <p>A great advantage of global menus is the ease of pointing them with the mouse.</p>
+<p>According to <a class="reference external" href="http://en.wikipedia.org/wiki/Fitts%27s_law">Fitts' law</a>,
+the time to point a target is function of its distance and size. By sticking
+the menus on the top part of the screen, the vertical dimension vanishes, since
+the user can just throw his mouse on top to reach them.</p>
+<p>Unfortunately, two major design problems in Unity prevents from completely
+turning global menus to account.</p>
+<div class="section" id="window-buttons-dead-edges">
+<h2>Window buttons dead edges</h2>
+<p>The user can not throw his mouse to the top-left corner to reach the close button,
+since the edges are not clickable.</p>
+<img alt="" src="/images/unity-deadzone.png" />
+<p><a class="reference external" href="https://bugs.launchpad.net/ubuntu/+source/unity/+bug/874980">A bug was registered on Launchpad</a> a couple of minutes before I wrote this
+post.</p>
+</div>
+<div class="section" id="menus-not-always-shown">
+<h2>Menus not always shown</h2>
+<img alt="" src="/images/unity-menu-hidden.gif" />
+<p>The problem is <a class="reference external" href="https://bugs.launchpad.net/ubuntu/+source/unity/+bug/701294">being discussed on Launchpad</a>.</p>
+<p>In my opinion, the current implementation is a terrible design :</p>
+<ul class="simple">
+<li>Lack of <em>afordance</em> : There is no obvious hint that a menu is available for the current application.</li>
+<li><em>Fitt's law</em> fail : The user can not throw his mouse to the desired menu since it becomes visible only when he reaches it.</li>
+</ul>
+<p>Fortunately, I am gesture and keyboard user (<a class="reference external" href="apt://easystroke">easystroke</a>, <tt class="docutils literal">Alt+F10</tt>, <tt class="docutils literal">Alt+F4</tt>)</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/ubuntu.html">#ubuntu</a>,         <a href="https://blog.mathieu-leplatre.info/tag/unity.html">#unity</a>,         <a href="https://blog.mathieu-leplatre.info/tag/fail.html">#fail</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/ux.html">Ux</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/two-major-unity-design-failures.html';
+      this.page.identifier = 'two-major-unity-design-failures';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

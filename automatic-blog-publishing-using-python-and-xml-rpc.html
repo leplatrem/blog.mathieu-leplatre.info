@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Automatic blog publishing using Python and XML-RPC - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Automatic blog publishing using Python and XML-RPC</h1>
+<time datetime="2008-12-01T13:37:00+01:00">Mon 01 December 2008</time></header>
+<article>
+    <p>The following piece of code collects links in a Pligg database (but could be any kind of source like RSS feed...) and automatically builds and publishes entries in a blog using XML-RPC.</p>
+<p>A small database class :</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DatabaseAPI</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">3306</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s2">&quot;root&quot;</span><span class="p">,</span> <span class="n">passwd</span><span class="o">=</span><span class="s2">&quot;root123&quot;</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;mysql&quot;</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">MySQLdb</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conn</span> <span class="o">=</span> <span class="n">MySQLdb</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">passwd</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">fetchall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sqlquery</span><span class="p">):</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">sqlquery</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+</pre></div>
+<p>A Blog publishing class :</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">BlogAPI</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">urlapi</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">xmlrpclib</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xmlrpclib</span> <span class="o">=</span> <span class="n">xmlrpclib</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">xmlrpclib</span><span class="o">.</span><span class="n">ServerProxy</span><span class="p">(</span> <span class="n">urlapi</span> <span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s2">&quot;Could not connect to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">url</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+
+    <span class="k">def</span> <span class="nf">newPost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">blogid</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="n">publish</span> <span class="o">=</span> <span class="kc">True</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="n">description</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;&lt;em&gt;empty entry&lt;/em&gt;&quot;</span>
+        <span class="n">post</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">post</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="n">post</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">metaWeblog</span><span class="o">.</span><span class="n">newPost</span><span class="p">(</span> <span class="n">blogid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="n">post</span><span class="p">,</span> <span class="n">publish</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">r</span>
+        <span class="k">except</span> <span class="bp">self</span><span class="o">.</span><span class="n">xmlrpclib</span><span class="o">.</span><span class="n">Fault</span><span class="p">,</span> <span class="n">fault</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="n">fault</span><span class="o">.</span><span class="n">faultString</span> <span class="p">)</span>
+</pre></div>
+<p>Build the SQL query : all entries of current week</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+<span class="n">agelimit</span> <span class="o">=</span> <span class="n">today</span> <span class="o">+</span> <span class="n">dt</span>
+<span class="n">stmt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">SELECT link_url, link_url_title</span>
+<span class="s2">FROM pligg_links</span>
+<span class="s2">WHERE link_status = &#39;published&#39; AND link_published_date &gt; &quot;</span><span class="si">%s</span><span class="s2">&quot;</span>
+<span class="s2">ORDER BY link_published_date DESC&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">agelimit</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y%m</span><span class="si">%d</span><span class="s2">000000&quot;</span><span class="p">)</span>
+</pre></div>
+<p>Put everything together :</p>
+<div class="highlight"><pre><span></span><span class="n">db</span> <span class="o">=</span> <span class="n">DatabaseAPI</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="n">passwd</span><span class="o">=</span><span class="s2">&quot;pass&quot;</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
+<span class="n">entries</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">fetchall</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+<span class="n">db</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+
+<span class="n">body</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;ul&gt;&quot;&quot;&quot;</span>
+<span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+    <span class="n">body</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    &lt;li&gt;&lt;a href=&quot;</span><span class="si">%s</span><span class="s2">&quot;&gt;</span><span class="si">%s</span><span class="s2">&lt;/a&gt;&lt;/li&gt;&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">entry</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">body</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;/ul&gt;&quot;&quot;&quot;</span>
+
+<span class="n">blog</span> <span class="o">=</span> <span class="n">BlogAPI</span><span class="p">(</span><span class="s2">&quot;http://yourblog/xmlrpc/&quot;</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;pass&quot;</span><span class="p">)</span>
+<span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Links week #</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">today</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%W&quot;</span><span class="p">)</span>
+<span class="n">blog</span><span class="o">.</span><span class="n">newPost</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+</pre></div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/xml-rpc.html">#xml-rpc</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/automatic-blog-publishing-using-python-and-xml-rpc.html';
+      this.page.identifier = 'automatic-blog-publishing-using-python-and-xml-rpc';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

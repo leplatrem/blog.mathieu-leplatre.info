@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Ajouter un sélecteur de couches (layer switcher) à polymaps - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Ajouter un sélecteur de couches (layer switcher) à polymaps</h1>
+<time datetime="2011-03-09T12:03:00+01:00">Wed 09 March 2011</time></header>
+<article>
+    <p>Je fais partie de ceux qui sont persuadés que <a class="reference external" href="http://polymaps.org/">polymaps</a> est tout à fait mature !
+Certes, il ne fournit pas autant de fonctionnalités et de connecteurs qu'OpenLayers,
+mais il ne semble pas que ce soit son objectif ! Il est léger et personnalisable à souhait !</p>
+<p>Pour le prouver, nous allons créer ici un sélecteur de couches pour polymaps.</p>
+<p>Javascript n'est pas mon langage de prédilection, encore moins pour faire
+de la programmation orientée objets.</p>
+<p>Voici ce que j'ai réussi à comprendre de l'héritage et la portée dans le modèle objet de polymaps :</p>
+<div class="highlight"><pre><span></span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">po</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">po</span><span class="p">.</span><span class="nx">classname</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">   </span><span class="kd">var</span><span class="w"> </span><span class="nx">self</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{},</span><span class="w">      </span><span class="c1">// new class or inheritance</span>
+<span class="w">        </span><span class="nx">member</span><span class="p">;</span><span class="w">         </span><span class="c1">// member variable</span>
+
+<span class="w">    </span><span class="kd">function</span><span class="w"> </span><span class="nx">privatemethod</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// [...]</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">self</span><span class="p">.</span><span class="nx">classmethod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">args</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// [...]</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">self</span><span class="p">;</span><span class="w">  </span><span class="c1">// allows to chain method calls</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">self</span><span class="p">;</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">})(</span><span class="nx">org</span><span class="p">.</span><span class="nx">polymaps</span><span class="p">);</span>
+</pre></div>
+<p>Pour faire ce sélecteur de couches, nous aurons besoin d'une classe disposant :</p>
+<ul class="simple">
+<li>de variables membres qui stockent la liste de couches disponibles (<tt class="docutils literal">layers</tt>) et la couche actuelle (<tt class="docutils literal">current</tt>)</li>
+<li>d'une méthode de classe qui bascule d'une couche à l'autre</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="nx">self</span><span class="p">.</span><span class="nx">switchto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">l</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">layers</span><span class="p">[</span><span class="nx">name</span><span class="p">];</span><span class="w">  </span><span class="c1">// find layer by name</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">l</span><span class="p">.</span><span class="nx">map</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">       </span><span class="nx">l</span><span class="p">.</span><span class="nx">visible</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span><span class="w">   </span><span class="c1">// if already loaded, make it visible</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">map</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">l</span><span class="p">);</span><span class="w">        </span><span class="c1">// else load it</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">current</span><span class="p">)</span><span class="w"> </span><span class="nx">current</span><span class="p">.</span><span class="nx">visible</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span><span class="w">  </span><span class="c1">// hide current</span>
+<span class="w">    </span><span class="nx">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">l</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<ul class="simple">
+<li>d'une méthode qui crée l'interface avec les radio buttons et qui les relie à la méthode précedente</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="nx">self</span><span class="p">.</span><span class="nx">container</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">elt</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">list</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// [...]</span>
+<span class="w">    </span><span class="c1">// For each layer, create a &lt;input&gt;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nx">layers</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">);</span>
+<span class="w">        </span><span class="nx">input</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;radio&#39;</span><span class="p">);</span>
+<span class="w">        </span><span class="nx">input</span><span class="p">.</span><span class="nx">setAttribute</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// [...]</span>
+<span class="w">        </span><span class="c1">// Link onChange event on radio</span>
+<span class="w">        </span><span class="nx">input</span><span class="p">.</span><span class="nx">onchange</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nx">self</span><span class="p">.</span><span class="nx">switchto</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">getAttribute</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">));</span>
+<span class="w">        </span><span class="p">};</span>
+<span class="w">        </span><span class="c1">// [...]</span>
+<span class="w">        </span><span class="nx">list</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">input</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">// [...]</span>
+<span class="w">    </span><span class="nx">elt</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">list</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="nx">self</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+<p>Maintenant il suffit de l'utiliser ! Voici un exemple simple avec deux couches :</p>
+<div class="highlight"><pre><span></span><span class="c1">// Create a normal map</span>
+<span class="nx">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">po</span><span class="p">.</span><span class="nx">mcmap</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">container</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;map&quot;</span><span class="p">).</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">po</span><span class="p">.</span><span class="nx">svg</span><span class="p">(</span><span class="s2">&quot;svg&quot;</span><span class="p">)))</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">po</span><span class="p">.</span><span class="nx">interact</span><span class="p">());</span>
+
+<span class="c1">// Define the layers</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">layers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;layer1&quot;</span><span class="w"> </span><span class="o">:</span>
+<span class="w">    </span><span class="nx">po</span><span class="p">.</span><span class="nx">image</span><span class="p">()</span>
+<span class="w">      </span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="nx">po</span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="s2">&quot;http://server1/{Z}/{X}/{Y}.png&quot;</span><span class="p">))</span>
+<span class="w">      </span><span class="p">.</span><span class="nx">id</span><span class="p">(</span><span class="s1">&#39;l1&#39;</span><span class="p">),</span>
+
+<span class="w">    </span><span class="s2">&quot;layer2&quot;</span><span class="w"> </span><span class="o">:</span>
+<span class="w">    </span><span class="nx">po</span><span class="p">.</span><span class="nx">image</span><span class="p">()</span>
+<span class="w">      </span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="nx">po</span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="s2">&quot;http://server2/{Z}/{X}/{Y}.png&quot;</span><span class="p">))</span>
+<span class="w">      </span><span class="p">.</span><span class="nx">id</span><span class="p">(</span><span class="s1">&#39;l2&#39;</span><span class="p">),</span>
+<span class="p">};</span>
+
+<span class="c1">// Add the default one</span>
+<span class="nx">map</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">layers</span><span class="p">[</span><span class="s2">&quot;layer1&quot;</span><span class="p">]);</span>
+
+<span class="c1">// Create the switcher</span>
+<span class="nx">po</span><span class="p">.</span><span class="nx">switcher</span><span class="p">(</span><span class="nx">map</span><span class="p">,</span><span class="w"> </span><span class="nx">layers</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nx">title</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Fond de carte&#39;</span><span class="p">})</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">container</span><span class="p">(</span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s2">&quot;layerswitcher&quot;</span><span class="p">));</span>
+</pre></div>
+<p>Et voilà ! Nous avons notre sélecteur de couches, avec un code html
+tout simple (<tt class="docutils literal">div</tt>, <tt class="docutils literal">input</tt>, <tt class="docutils literal">label</tt>), facile à styler en CSS,
+contrairement au <a class="reference external" href="http://pastebin.com/LQPBv6tZ">gros pavé généré par le *LayerSwitcher* d'OpenLayers</a>.</p>
+<img alt="" src="/images/polymaps-switcher.png" />
+<p>Pour accéder au code complet et l'améliorer : &quot;<a class="reference external" href="https://github.com/makinacorpus/polymaps-extensions">Fork me on GitHub</a>&quot; !</p>
+<p><em>Article original publié chez</em> <a class="reference external" href="http://www.makina-corpus.org/blog/ajouter-un-s%C3%A9lecteur-de-couches-layer-switcher-%C3%A0-polymaps">Makina Corpus</a></p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/polymaps.html">#polymaps</a>,         <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/ajouter-un-selecteur-de-couches-layer-switcher-a-polymaps-fr.html';
+      this.page.identifier = 'ajouter-un-selecteur-de-couches-layer-switcher-a-polymaps';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

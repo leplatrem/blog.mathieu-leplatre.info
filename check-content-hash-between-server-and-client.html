@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Check content hash between server and client - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Check content hash between server and client</h1>
+<time datetime="2019-04-29T00:00:00+02:00">Mon 29 April 2019</time></header>
+<article>
+    <p>In order to make sure that your remote content was fetched successfully by your client,
+we can use a bit of cryptography.</p>
+<p>A simple way is to compute a hash on the server, and let the client compare the
+hash for the content that was downloaded.</p>
+<div class="section" id="what-s-a-hash">
+<h2>What's a hash?</h2>
+<p>Given two pieces of data, a cryptographic hash function will return two different (fixed-length) values.</p>
+<p>The hash function should never return the same result for two different inputs, a.k.a «collision».</p>
+<p>In this article, we'll use SHA-256 (Secure Hash Algorithm, with a 256 bits output). Given any content, the function
+will return 256 bits (or 32 bytes). Each byte can be represented in hexadecimal (2 characters, from <tt class="docutils literal">00</tt> to <tt class="docutils literal">FF</tt>),
+and thus becomes a 64 characters string (a.k.a. «hex digest»).</p>
+<p>I really enjoyed watching <a class="reference external" href="https://www.youtube.com/watch?v=S9JGmA5_unY">How secure is 256 bit security?</a> by 3Blue1Brown. Note that in 2017, Google presented a <a class="reference external" href="https://security.googleblog.com/2017/02/announcing-first-sha1-collision.html">practical technique to break SHA1</a> (used in Git for example).</p>
+</div>
+<div class="section" id="on-the-server">
+<h2>On the server</h2>
+<p>In Python (as with most languages) it is straightforward:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">hashlib</span>
+
+<span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;Get up, stand up, don&#39;t give up the fight&quot;</span>  <span class="c1"># or ``file.read()``</span>
+
+<span class="n">hasher</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">()</span>
+<span class="n">hasher</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+<span class="nb">hash</span> <span class="o">=</span> <span class="n">hasher</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+
+<span class="c1"># &quot;04cb9657d1a1a34ccd4f30252a061c36e45b2a5afff86e4c91fa778fa70400eb&quot;</span>
+</pre></div>
+<p>Ideally you would deliver this string to the client somewhere in your application data,
+or in the HTTP response headers etc.</p>
+</div>
+<div class="section" id="on-the-client">
+<h2>On the client</h2>
+<p>In JavaScript, we can leverage the <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest">Crypto API</a>
+to compute the SHA-256 of some content.</p>
+<p>First, obtain the bytes array of the content.</p>
+<p>For a <tt class="docutils literal">String</tt>:</p>
+<div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Get up, stand up, don&#39;t give up the fight&quot;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">TextEncoder</span><span class="p">();</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">encoder</span><span class="p">.</span><span class="nx">encode</span><span class="p">(</span><span class="nx">text</span><span class="p">);</span>
+</pre></div>
+<p>Or for a URL:</p>
+<div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">resp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">buffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">resp</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">();</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="nx">buffer</span><span class="p">);</span>
+</pre></div>
+<p>And then compute the hash:</p>
+<div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">hashBuffer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">crypto</span><span class="p">.</span><span class="nx">subtle</span><span class="p">.</span><span class="nx">digest</span><span class="p">(</span><span class="s2">&quot;SHA-256&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">hashBytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="nx">hashBuffer</span><span class="p">);</span>
+
+<span class="c1">// hex digest of bytes</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">hash</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Array</span><span class="p">.</span><span class="kr">from</span><span class="p">(</span><span class="nx">hashBytes</span><span class="p">)</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">b</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">b</span><span class="p">.</span><span class="nx">toString</span><span class="p">(</span><span class="mf">16</span><span class="p">).</span><span class="nx">padStart</span><span class="p">(</span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">))</span>
+<span class="w">  </span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">);</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">hash</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nx">serverHash</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s2">&quot;Bad content&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="going-further">
+<h2>Going further</h2>
+<p>This hash verification is pretty solid to make sure that your data was downloaded and
+fetched successfully. However, it does not guarantee authenticity, since anybody
+can compute the SHA-256 function result without having any specific private key.</p>
+<p>In order to prevent <a class="reference external" href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">man-in-the-middle attacks</a>,
+where someone could alter the content and deliver the modified hash values to the client,
+you should use signatures. In this model, the server computes a hash using a private key, and the client
+verifies the hash using a public key.</p>
+<p>Usually, we use <a class="reference external" href="https://en.wikipedia.org/wiki/Elliptic_Curve_Digital_Signature_Algorithm">Elliptic Curve DSA</a> for that.</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/check-content-hash-between-server-and-client.html';
+      this.page.identifier = 'check-content-hash-between-server-and-client';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

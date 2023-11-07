@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>GeoDjango maps with Leaflet - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>GeoDjango maps with Leaflet</h1>
+<time datetime="2013-08-21T00:00:00+02:00">Wed 21 August 2013</time></header>
+<article>
+    <p>A short introduction to web mapping with Django, using two very simple
+applications: <a class="reference external" href="https://github.com/makinacorpus/django-leaflet">django-leaflet</a> and <a class="reference external" href="https://github.com/makinacorpus/django-geojson">django-geojson</a>, by <a class="reference external" href="http://makinacorpus.com">Makina Corpus</a>.</p>
+<p>We will build a map with all major weather stations of the world.</p>
+<div class="section" id="weather-stations">
+<h2>Weather stations</h2>
+<p>Each weather station has an id, a name and a position.</p>
+<p>As a GeoDjango model, it becomes :</p>
+<div class="highlight"><pre><span></span><span class="c1"># models.py</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.contrib.gis.db</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">gismodels</span>
+
+
+<span class="k">class</span> <span class="nc">WeatherStation</span><span class="p">(</span><span class="n">gismodels</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+
+    <span class="n">wmoid</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span><span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+
+    <span class="n">geom</span> <span class="o">=</span> <span class="n">gismodels</span><span class="o">.</span><span class="n">PointField</span><span class="p">()</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">gismodels</span><span class="o">.</span><span class="n">GeoManager</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+<div class="section" id="loading-actual-data">
+<h3>Loading actual data</h3>
+<p>The <a class="reference external" href="http://www.wmo.int">World Meteorological Organization</a> publishes a list of all major weather stations, in a <a class="reference external" href="ftp://ftp.wmo.ch/wmo-ddbs/VolA_New/">CSV format</a>.</p>
+<p>Unfortunately, this format is not very friendly (especially latitudes and longitudes) :</p>
+<pre class="literal-block">
+StationId   StationName         Latitude    Longitude ...
+60351       JIJEL- ACHOUAT      36 48 00N   05 53 00E
+...
+07630       TOULOUSE BLAGNAC    43 37 16N   01 22 44E
+...
+</pre>
+<p>We will convert coordinates <a class="reference external" href="http://en.wikipedia.org/wiki/Geographic_coordinate_conversion#Conversion_from_DMS_to_Decimal_Degree">from degres minutes seconds to decimal degrees</a>:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">dms2dec</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Degres Minutes Seconds to Decimal degres</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">degres</span><span class="p">,</span> <span class="n">minutes</span><span class="p">,</span> <span class="n">seconds</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">seconds</span><span class="p">,</span> <span class="n">direction</span> <span class="o">=</span> <span class="n">seconds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">seconds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">dec</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">degres</span><span class="p">)</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">minutes</span><span class="p">)</span><span class="o">/</span><span class="mi">60</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span><span class="o">/</span><span class="mi">3600</span>
+    <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="n">dec</span>
+    <span class="k">return</span> <span class="n">dec</span>
+</pre></div>
+<p>And create an instance of our model for each entry in the CSV :</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">django.contrib.gis.geos</span> <span class="kn">import</span> <span class="n">Point</span>
+
+<span class="kn">from</span> <span class="nn">webmap.models</span> <span class="kn">import</span> <span class="n">WeatherStation</span>
+
+
+<span class="n">csv_file</span> <span class="o">=</span> <span class="s1">&#39;Pub9volA130819x.flatfile.txt&#39;</span>
+
+<span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">csv_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">),</span> <span class="n">delimiter</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="n">lng</span> <span class="o">=</span> <span class="n">dms2dec</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;Longitude&#39;</span><span class="p">))</span>
+    <span class="n">lat</span> <span class="o">=</span> <span class="n">dms2dec</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;Latitude&#39;</span><span class="p">))</span>
+    <span class="n">wmoid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;StationId&#39;</span><span class="p">))</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;StationName&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+
+    <span class="n">WeatherStation</span><span class="p">(</span><span class="n">wmoid</span><span class="o">=</span><span class="n">wmoid</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">geom</span><span class="o">=</span><span class="n">Point</span><span class="p">(</span><span class="n">lng</span><span class="p">,</span> <span class="n">lat</span><span class="p">))</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+</pre></div>
+<p>Now, our table is full of records (~ 12000) !</p>
+<p>If you open it with graphical tools like QGis, it's stuffed !</p>
+<img alt="" class="align-center" src="/images/weather-stations-qgis.png" style="width: 100%;" />
+<p>( <em>If you want a script that converts this stations file into GeoJSON</em>, you can use <a class="reference external" href="https://gist.github.com/leplatrem/6294314">this piece of code</a>)</p>
+</div>
+</div>
+<div class="section" id="plot-on-map">
+<h2>Plot on map</h2>
+<p>With <em>django-leaflet</em>, after having added <tt class="docutils literal">leaflet</tt> to your <tt class="docutils literal">INSTALLED_APPS</tt>,
+you can insert maps in templates :</p>
+<div class="highlight"><pre><span></span>{% load leaflet_tags %}
+<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    {% leaflet_js %}
+    {% leaflet_css %}
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Weather Stations<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    {% leaflet_map &quot;main&quot; callback=&quot;main_map_init&quot; %}
+
+    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span><span class="p">&gt;</span>
+<span class="w">        </span><span class="kd">function</span><span class="w"> </span><span class="nx">main_map_init</span><span class="w"> </span><span class="p">(</span><span class="nx">map</span><span class="p">,</span><span class="w"> </span><span class="nx">options</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Use Leaflet API here</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+<p>A blank map shows up, with a basic OpenStreetMap background.</p>
+<div class="section" id="vectorial-data">
+<h3>Vectorial data</h3>
+<p>We now want to place markers for each weather station. For this, we use
+<em>django-geojson</em>, which provides a very simple base view :</p>
+<div class="highlight"><pre><span></span><span class="c1"># urls.py</span>
+
+<span class="kn">from</span> <span class="nn">djgeojson.views</span> <span class="kn">import</span> <span class="n">GeoJSONLayerView</span>
+
+<span class="kn">from</span> <span class="nn">webmap.models</span> <span class="kn">import</span> <span class="n">WeatherStation</span>
+
+
+<span class="n">urlpatterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+    <span class="n">url</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^data.geojson$&#39;</span><span class="p">,</span> <span class="n">GeoJSONLayerView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">WeatherStation</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+<p>We load this data in Ajax, and add it as map layer, in the initialization function left empty in the above snippet :</p>
+<div class="highlight"><pre><span></span><span class="kd">function</span><span class="w"> </span><span class="nx">main_map_init</span><span class="w"> </span><span class="p">(</span><span class="nx">map</span><span class="p">,</span><span class="w"> </span><span class="nx">options</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">dataurl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;{% url &quot;data&quot; %}&#39;</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Download GeoJSON via Ajax</span>
+<span class="w">    </span><span class="nx">$</span><span class="p">.</span><span class="nx">getJSON</span><span class="p">(</span><span class="nx">dataurl</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Add GeoJSON layer</span>
+<span class="w">        </span><span class="nx">L</span><span class="p">.</span><span class="nx">geoJson</span><span class="p">(</span><span class="nx">data</span><span class="p">).</span><span class="nx">addTo</span><span class="p">(</span><span class="nx">map</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="p">}</span>
+</pre></div>
+<p>The map shows up, and get filled with weather stations !</p>
+<img alt="" class="align-center" src="/images/weather-stations-leaflet.png" style="width: 100%;" />
+</div>
+</div>
+<div class="section" id="going-further">
+<h2>Going further...</h2>
+<p>This was a first introduction, but it applies to all kinds of goemetries (lines, polygons, ...).</p>
+<p>I <a class="reference external" href="http://github.com/leplatrem/django-leaflet-geojson">published the full project</a> if you want to start from an example.</p>
+<p>If you already feel comfortable with Django, there won't be any surprise : have a look at <em>Leaflet</em>, <em>django-leaflet</em> and <em>django-geojson</em> respective documentations in order to get an idea of the customizations you are offered...</p>
+<div class="section" id="performance">
+<h3>Performance</h3>
+<p>A map with more than 12 000 HTML objects is not going to be snappy.</p>
+<p>Hopefully, it won't be the case for your first applications !</p>
+<p>And fortunately, there are plently of different strategies to draw such an amount of data :</p>
+<ul class="simple">
+<li>Use <a class="reference external" href="https://github.com/Leaflet/Leaflet.markercluster">marker clusters</a> to reduce the number of elements on the map (<a class="reference external" href="https://github.com/leplatrem/django-leaflet-geojson/blob/master/Pub9volA130819x.geojson">see result here</a>) ;</li>
+<li>Draw circles instead of markers and switch to Canvas (see Leaflet documentation) ;</li>
+<li>Use <a class="reference external" href="https://github.com/glenrobertson/leaflet-tilelayer-geojson/">tiled geojson</a> ;</li>
+<li>Render tiles using Tilemill/Mapnik ;</li>
+<li>...</li>
+</ul>
+<p>It gives us a lot of topics to explore and blog about :)</p>
+</div>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/leaflet.html">#leaflet</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/geojson.html">#geojson</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/geodjango-maps-with-leaflet.html';
+      this.page.identifier = 'geodjango-maps-with-leaflet';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Your tests as your specs - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Your tests as your specs</h1>
+<time datetime="2015-04-17T00:00:00+02:00">Fri 17 April 2015</time></header>
+<article>
+    <p>At last, with all this surrounding pressure, you finally decided to write tests.
+Now, you always setup TravisCI to run when code change is submitted. You now feel
+confident when pull-requests come in, and soon your test suite code coverage will
+reach 100%.</p>
+<p>Let me be difficult to please here...</p>
+<img alt="" class="align-center" src="/images/tests-specs-nitpick.jpg" />
+<p>You can reach clean code heaven with one final little step: <strong>transform the tests
+suites into specifications</strong>!</p>
+<div class="section" id="bad-pattern">
+<h2>Bad pattern</h2>
+<p>In many Open Source projects, a great attention is paid to the quality of the
+code itself. It is quite often that some code is merged without the tests being
+exhaustively reviewed.</p>
+<p>In other words, it is not rare that the quality of the tests is not reflecting
+the quality of the application code.</p>
+<p>The most frequent pattern is that all tests are implemented in the same test case <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a>:</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">GameTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">game</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">game</span><span class="o">.</span><span class="n">played</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">game</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">game</span><span class="o">.</span><span class="n">played</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">game</span><span class="o">.</span><span class="n">player</span> <span class="o">=</span> <span class="s1">&#39;Jean-Louis&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">unicode</span><span class="p">(</span><span class="n">game</span><span class="p">),</span> <span class="s1">&#39;Jean-Louis (score: 4)&#39;</span><span class="p">)</span>
+
+        <span class="c1"># See bug #2780</span>
+        <span class="n">game</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">unicode</span><span class="p">(</span><span class="n">game</span><span class="p">),</span> <span class="s1">&#39;Jean-Louis&#39;</span><span class="p">)</span>
+</pre></div>
+<p>Writing tests like this has many drawbacks:</p>
+<ul class="simple">
+<li>One has to read the entire test to understand the expected behaviour of the code;</li>
+<li>If the test fails, it will be hard to find out what part of the code has failed precisely;</li>
+<li>Refactoring the code will probably mean to rewrite the entire test since instructions are
+inter-dependant;</li>
+<li>The <tt class="docutils literal">TestCase</tt> and <tt class="docutils literal">setUp()</tt> notions are underused.</li>
+</ul>
+</div>
+<div class="section" id="better-pattern">
+<h2>Better pattern</h2>
+<p>A simple way to improve the quality of the tests is to see them as specifications.
+After all, it makes sense, you add some code for a reason! The tests are not only
+here to prevent regressions, but also to explicit the expected behaviour of the application!</p>
+<p>I believe that many projects would take great benefits if following this approach <a class="footnote-reference" href="#footnote-2" id="footnote-reference-2">[2]</a>.</p>
+<div class="highlight"><pre><span></span><span class="c1"># test_game.py</span>
+
+<span class="k">class</span> <span class="nc">InitializationTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">test_default_played_status_is_false</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">played</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">UpdateTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span> <span class="o">=</span> <span class="n">Game</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">player</span> <span class="o">=</span> <span class="s1">&#39;Jean-Louis&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="mi">4</span>
+
+    <span class="k">def</span> <span class="nf">test_played_status_is_true_if_score_is_set</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">played</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_string_representation_is_player_with_score_if_played</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="p">),</span> <span class="s1">&#39;Jean-Louis (score: 4)&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_string_representation_is_only_player_if_not_played</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># See bug #2780</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="o">.</span><span class="n">score</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">unicode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">game</span><span class="p">),</span> <span class="s1">&#39;Jean-Louis&#39;</span><span class="p">)</span>
+</pre></div>
+<p>Writing tests like this has many advantages:</p>
+<ul class="simple">
+<li>Each case isolates a situation;</li>
+<li>Each test is an aspect of the specification;</li>
+<li>Each test is independant;</li>
+<li>The testing vocabulary is honored: we <em>setup</em> a <em>test case</em>;</li>
+<li>If a test fails, it is straightforward to understand what part of the spec
+was violated;</li>
+<li>Tests that were written when fixing bugs will explicit the expected behaviour
+for edge cases.</li>
+</ul>
+</div>
+<div class="section" id="reporting">
+<h2>Reporting</h2>
+<p>Now that we have explicited the specs, we will want to read them properly.</p>
+<p>One of things I like in JavaScript is <a class="reference external" href="http://mochajs.org">Mocha</a>. Appart
+from the nice API and the very rich feature set, its default test reporter is
+great, tt is colourful and structurally invites you to write tests as specs.</p>
+<img alt="" class="align-center" src="/images/tests-specs-mocha.png" />
+<p>In our project, we were using <a class="reference external" href="http://nose.readthedocs.org">nose</a>, so I
+decided to write a reporter that would produce the same output as Mocha.</p>
+<p>You can install and use it this way:</p>
+<pre class="literal-block">
+$ pip install nose-mocha-reporter
+
+$ nosetests --with-mocha-reporter yourpackage/
+</pre>
+<p>It will produce the following output:</p>
+<img alt="" class="align-center" src="/images/tests-specs-nose-reporter.png" />
+<p>It takes the tests suites and extract the names as readable strings:</p>
+<ul class="simple">
+<li><tt class="docutils literal">tests/core/test_game.py</tt> → <tt class="docutils literal">CORE GAME</tt></li>
+<li><tt class="docutils literal">class InitializationTest(TestCase)</tt> → <tt class="docutils literal">Initialization</tt></li>
+<li><tt class="docutils literal">def test_played_status_is_true_if_score_is_set</tt> → <tt class="docutils literal">Played status is true if score is set</tt></li>
+</ul>
+<p>It also mesures the execution time of each test in order highlight the slow ones.</p>
+<p>To conclude, this reporter has a pretty modest objective: remind you that <strong>the tests
+you write should be read as specifications</strong> <a class="footnote-reference" href="#footnote-3" id="footnote-reference-3">[3]</a>!</p>
+</div>
+<div class="section" id="special-thanks">
+<h2>Special thanks!</h2>
+<p>I'm very grateful to <a class="reference external" href="http://antoine.cezar.fr/">Antoine</a> and
+<a class="reference external" href="http://alexmarandon.com/">Alex</a> that showed me the light on
+this. Since they might not be conscious of the influence they had on me,
+I jump on the occasion to thank them loudly :)</p>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>See <a class="reference external" href="https://github.com/makinacorpus/Geotrek/blob/v0.33.4/geotrek/trekking/tests/test_models.py#L71-L99">a good example</a> that I wrote in the past</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="footnote-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-2">[2]</a></td><td>For example, <a class="reference external" href="https://github.com/mozilla-services/cliquet/blob/1.7.0/cliquet/tests/resource/test_record.py">see this code</a> I wrote later on.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="footnote-3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-3">[3]</a></td><td>To be honest, I haven't worked much with <a class="reference external" href="http://pytest.org">pytest</a>
+(<em>I probably should</em>), and I don't know its eco-system: there might
+something similar...</td></tr>
+</tbody>
+</table>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/opensource.html">#opensource</a>,         <a href="https://blog.mathieu-leplatre.info/tag/methodology.html">#methodology</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/your-tests-as-your-specs.html';
+      this.page.identifier = 'your-tests-as-your-specs';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

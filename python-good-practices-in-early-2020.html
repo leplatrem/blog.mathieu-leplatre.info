@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Python good practices in early 2020 - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Python good practices in early 2020</h1>
+<time datetime="2020-04-01T00:00:00+02:00">Wed 01 April 2020</time></header>
+<article>
+    <p>A great part of my job at Mozilla consists in maintaining the ecosystem of <a class="reference external" href="https://remote-settings.readthedocs.io">Firefox Remote Settings</a>, which is already a few years old.</p>
+<p>But recently I had the chance to spin up a new Python project (<a class="reference external" href="https://github.com/mozilla-services/poucave/">Poucave</a>), and that was a good opportunity to look at recent trends that I missed :) This article goes through some of the choices we made, knowing that almost everything is obviously debatable. By the way, depending on the vigour of the Python community, please note that the information may not age well and could be outdated when you read it :)</p>
+<div class="section" id="environment">
+<h2>Environment</h2>
+<p>Since we publish the app as a Docker container, we don't have to support multiple Python environments (eg. with <a class="reference external" href="https://tox.readthedocs.io">tox</a>). On the other hand, contributors may want to use <a class="reference external" href="https://github.com/pyenv/pyenv">Pyenv</a> to overcome the limitations of their operating system.</p>
+<p>I like to keep tooling minimalist, and I can't explain why, but I also enjoy limiting the list of configuration files in the project root folder.</p>
+<p>Probably because of my age, I'm familiar with <tt class="docutils literal">make</tt>. It's quite universal and popular. And using a single <a class="reference external" href="https://github.com/mozilla-services/poucave/blob/master/Makefile">Makefile</a> with the appropriate dependencies between targets, we can create the environment and run the application or the tests, by running only one make command.</p>
+<p>I was used to Virtualenv, Pip, and requirements files. Common practice consists in having <a class="reference external" href="https://github.com/mozilla-services/poucave/tree/v1.19.0/requirements">a folder with a requirements file by environment</a>, and a constraints file for reproducible builds. We also setup <a class="reference external" href="https://app.dependabot.com/">Dependabot</a> on the repo to make sure our dependencies are kept up to date.</p>
+<p>Now the cool kids use <a class="reference external" href="https://github.com/pipxproject/pipx">Pipx</a>, <a class="reference external" href="https://pipenv.pypa.io">Pipenv</a>, <a class="reference external" href="https://flit.readthedocs.io">Flit</a>, or <a class="reference external" href="https://python-poetry.org">Poetry</a>! Even if Poetry seemed to stand out, the debate was still virulent when the project was started, especially with regards to production installs and Docker integration. Therefore I didn't make any decision and remained conservative. I'd be happy to <a class="reference external" href="https://github.com/mozilla-services/poucave/issues/400">reconsider that choice</a>.</p>
+<pre class="literal-block">
+requirements/constraints.txt
+requirements/default.txt
+requirements/dev.txt
+</pre>
+<pre class="literal-block">
+# constraints.txt
+chardet==3.0.4 \
+    --hash=sha256:84ab92ed1c4d4f16916e05906b6b75a6c0fb5db821cc65e70cbd64a3e2a5eaae \
+    --hash=sha256:fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691
+...
+...
+</pre>
+<pre class="literal-block">
+# default.txt
+-c ./constraints.txt
+
+aiohttp==3.6.2 \
+    --hash=sha256:1e984191d1ec186881ffaed4581092ba04f7c61582a177b187d3a2f07ed9719e \
+    --hash=sha256:50aaad128e6ac62e7bf7bd1f0c0a24bc968a0c0590a726d5a955af193544bcec \
+...
+...
+</pre>
+<p>The <tt class="docutils literal">Makefile</tt> would look like this:</p>
+<div class="highlight"><pre><span></span><span class="nv">SOURCE</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>poucave
+<span class="nv">VENV</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>.venv
+<span class="nv">PYTHON</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/python3
+<span class="nv">INSTALL_STAMP</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>/.install.stamp
+
+<span class="nf">install</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+
+<span class="nf">$(INSTALL_STAMP)</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">PYTHON</span><span class="k">)</span> <span class="n">requirements</span>/<span class="n">default</span>.<span class="n">txt</span> <span class="n">requirements</span>/<span class="n">constraints</span>.<span class="n">txt</span>
+<span class="w">    </span><span class="k">$(</span>PIP_INSTALL<span class="k">)</span><span class="w"> </span>-Ur<span class="w"> </span>requirements/default.txt<span class="w"> </span>-c<span class="w"> </span>requirements/constraints.txt
+<span class="w">    </span>touch<span class="w"> </span><span class="k">$(</span>INSTALL_STAMP<span class="k">)</span>
+
+<span class="nf">$(PYTHON)</span><span class="o">:</span>
+<span class="w">    </span>virtualenv<span class="w"> </span>--python<span class="o">=</span>python3<span class="w"> </span><span class="k">$(</span>VENV<span class="k">)</span>
+
+<span class="nf">serve</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>:
+<span class="w">    </span><span class="nv">PYTHONPATH</span><span class="o">=</span>.<span class="w"> </span><span class="k">$(</span>PYTHON<span class="k">)</span><span class="w"> </span><span class="k">$(</span>SOURCE<span class="k">)</span>
+</pre></div>
+<p>When running <tt class="docutils literal">make serve</tt>, the virtualenv is created if missing, and the latest dependencies are installed only if outdated...</p>
+<p><strong>update</strong> As you can see we don't even bother «activating» the virtualenv. Therefore we don't really need tools like <a class="reference external" href="https://virtualenvwrapper.readthedocs.io">virtualenvwrapper</a> to switch between environments. That being said, I really enjoy having the <a class="reference external" href="https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/virtualenvwrapper">Oh My Zsh plugin for it</a> that automatically activates a related virtualenv when I jump in a folder that contains a <tt class="docutils literal">.venv</tt> folder :) Thanks <a class="reference external" href="https://twitter.com/Exirel/status/1245677611138899970">Florian</a> for the feedback ;)</p>
+<p>The CircleCI configuration file is as simple as:</p>
+<div class="highlight"><pre><span></span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">docker</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">circleci/python:3.8</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">checkout</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Code lint</span>
+<span class="w">          </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">make lint</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test</span>
+<span class="w">          </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">make tests</span>
+</pre></div>
+<p>You can also see how, using an <a class="reference external" href="https://github.com/mozilla-services/poucave/blob/9a102272071ade6ce1b7200707c0fbadc72a5cc1/Dockerfile#L34">ENTRYPOINT</a>, we can <a class="reference external" href="https://github.com/mozilla-services/poucave/blob/9a102272071ade6ce1b7200707c0fbadc72a5cc1/.circleci/config.yml#L34-L40">execute the tests from within the container</a> on Circle CI.</p>
+<p>We also have a setup that <a class="reference external" href="https://github.com/mozilla-services/poucave/blob/9a102272071ade6ce1b7200707c0fbadc72a5cc1/.circleci/config.yml#L48-L67">publishes our Docker container to https://hub.docker.com</a> automatically.</p>
+</div>
+<div class="section" id="code-quality">
+<h2>Code quality</h2>
+<p>Running <a class="reference external" href="https://black.readthedocs.io">black</a> to format the code is now a no-brainer. We added <a class="reference external" href="https://github.com/timothycrosley/isort">isort</a> to sort and organize imports automatically too.</p>
+<p>The working combination in one <tt class="docutils literal">Makefile</tt> target is:</p>
+<div class="highlight"><pre><span></span><span class="nf">format</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">    </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/isort<span class="w"> </span>--line-width<span class="o">=</span><span class="m">88</span><span class="w"> </span>--lines-after-imports<span class="o">=</span><span class="m">2</span><span class="w"> </span>-rc<span class="w"> </span><span class="k">$(</span>SOURCE<span class="k">)</span><span class="w"> </span>--virtual-env<span class="o">=</span><span class="k">$(</span>VENV<span class="k">)</span>
+<span class="w">    </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/black<span class="w"> </span><span class="k">$(</span>SOURCE<span class="k">)</span>
+</pre></div>
+<p>Again, to avoid having an extra configuration file for <em>isort</em> we used CLI arguments :)</p>
+<p>Since we want to verify code linting on the CI, we also have this <tt class="docutils literal">lint</tt> target, that additionnally runs <a class="reference external" href="https://pypi.org/project/flake8/">flake8</a> to detect unused imports or variables, and runs <a class="reference external" href="http://mypy-lang.org/">mypy</a> for type checking.</p>
+<div class="highlight"><pre><span></span><span class="nf">lint</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">    </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/isort<span class="w"> </span>--line-width<span class="o">=</span><span class="m">88</span><span class="w"> </span>--check-only<span class="w"> </span>--lines-after-imports<span class="o">=</span><span class="m">2</span><span class="w"> </span>-rc<span class="w"> </span><span class="k">$(</span>SOURCE<span class="k">)</span><span class="w"> </span>--virtual-env<span class="o">=</span><span class="k">$(</span>VENV<span class="k">)</span>
+<span class="w">    </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/black<span class="w"> </span>--check<span class="w"> </span><span class="k">$(</span>SOURCE<span class="k">)</span><span class="w"> </span>--diff
+<span class="w">    </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/flake8<span class="w"> </span><span class="k">$(</span>SOURCE<span class="k">)</span><span class="w"> </span>--ignore<span class="o">=</span>W503,E501
+<span class="w">    </span><span class="k">$(</span>VENV<span class="k">)</span>/bin/mypy<span class="w"> </span><span class="k">$(</span>SOURCE<span class="k">)</span><span class="w"> </span>--ignore-missing-imports
+</pre></div>
+<p>By the way, using type checking in your Python project is now pretty straightforward and enjoyable :)</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">params</span> <span class="k">else</span> <span class="p">[]</span>
+</pre></div>
+<p>Some plugins to guarantee the quality of your contributions exist for your favorite editor. And a commit-hook can also do the job:</p>
+<div class="highlight"><pre><span></span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;make format&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>.git/hooks/pre-commit
+</pre></div>
+<p>Check out <a class="reference external" href="https://pre-commit.com">pre-commit</a> or Rehan's <a class="reference external" href="https://github.com/rehandalal/therapist">therapist</a> for advanced commit hooks.</p>
+<p>Note that there are complementary linting tools out there:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://pypi.org/project/flake8-docstrings/">flake8-docstrings</a> or <a class="reference external" href="https://github.com/terrencepreilly/darglint">darglint</a> to validate your docstrings</li>
+<li><a class="reference external" href="https://github.com/wemake-services/wemake-python-styleguide#what-we-are-about">wemake-python-styleguide</a> for a very strict Python linter</li>
+<li><a class="reference external" href="https://bandit.readthedocs.io/en/latest/">bandit</a> to find common security issues</li>
+</ul>
+</div>
+<div class="section" id="tests">
+<h2>Tests</h2>
+<p>There's almost no debate about <a class="reference external" href="https://pytest.readthedocs.io">pytest</a> nowadays. To me, the most appealing feature is the <a class="reference external" href="https://docs.pytest.org/en/latest/fixture.html">fixtures decorator</a>, to keep your tests <a class="reference external" href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a>. It enables you to use dependency injection, object factories, connection setup, config changes...</p>
+<div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">api_client</span><span class="p">():</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">APIClient</span><span class="p">()</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">authenticate</span><span class="p">()</span>
+    <span class="k">yield</span> <span class="n">client</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">logout</span><span class="p">()</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">mock_responses</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">responses</span><span class="o">.</span><span class="n">RequestsMock</span><span class="p">()</span> <span class="k">as</span> <span class="n">rsps</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">rsps</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">make_response</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">_make_response</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">_make_response</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">test_api_get_gives_name</span><span class="p">(</span><span class="n">api_client</span><span class="p">,</span> <span class="n">mock_responses</span><span class="p">,</span> <span class="n">make_response</span><span class="p">):</span>
+    <span class="n">mock_responses</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">responses</span><span class="o">.</span><span class="n">GET</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">make_response</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">))</span>
+
+    <span class="n">resp</span> <span class="o">=</span> <span class="k">await</span> <span class="n">api_client</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+    <span class="k">assert</span> <span class="n">resp</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span>
+</pre></div>
+<p>The <a class="reference external" href="https://docs.pytest.org/en/latest/example/parametrize.html">parametrize feature</a> is also cool:</p>
+<div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">parametrize</span><span class="p">(</span>
+   <span class="p">(</span><span class="s2">&quot;n&quot;</span><span class="p">,</span> <span class="s2">&quot;expected&quot;</span><span class="p">),</span> <span class="p">[</span>
+       <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+       <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+       <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">xfail</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+       <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">xfail</span><span class="p">(</span><span class="n">reason</span><span class="o">=</span><span class="s2">&quot;some bug&quot;</span><span class="p">)((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+       <span class="n">pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">skipif</span><span class="p">(</span><span class="s2">&quot;sys.version_info &gt;= (3,0)&quot;</span><span class="p">)((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">)),</span>
+   <span class="p">]</span>
+<span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_increment</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">expected</span><span class="p">):</span>
+   <span class="k">assert</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">expected</span>
+</pre></div>
+<p>As usual, I like to have make the CI fail when code coverage isn't 100%. So <a class="reference external" href="https://github.com/pytest-dev/pytest-cov">pytest-cov</a> comes to the rescue:</p>
+<div class="highlight"><pre><span></span><span class="nf">tests</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">INSTALL_STAMP</span><span class="k">)</span>
+<span class="w">    </span><span class="nv">PYTHONPATH</span><span class="o">=</span>.<span class="w"> </span>.venv/bin/pytest<span class="w"> </span>tests<span class="w"> </span>--cov-report<span class="w"> </span>term-missing<span class="w"> </span>--cov-fail-under<span class="w"> </span><span class="m">100</span><span class="w"> </span>--cov<span class="w"> </span><span class="k">$(</span>SOURCE<span class="k">)</span>
+</pre></div>
+<p>Among the handy pytest extensions, I would mention:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/pytest-dev/pytest-mock/">pytest-mock</a> that provides <tt class="docutils literal">unittest.mock.patch</tt> as a <tt class="docutils literal">mocker</tt> fixture</li>
+<li><a class="reference external" href="https://github.com/ionelmc/pytest-benchmark/">pytest-benchmark</a> that provides a benchmark fixture to measure execution performance</li>
+<li><a class="reference external" href="https://github.com/joeyespo/pytest-watch">pytest-watch</a> for TDD</li>
+</ul>
+</div>
+<div class="section" id="executing-and-configuring">
+<h2>Executing and configuring</h2>
+<p>In order to execute the package directly from the command-line (eg. <tt class="docutils literal">python poucave</tt>), use the <tt class="docutils literal">poucave/__main__.py</tt> file:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">poucave.app</span> <span class="kn">import</span> <span class="n">main</span>
+
+<span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+</pre></div>
+<p>The most appreciated libraries for advanced CLI parameters seem to be <a class="reference external" href="https://click.palletsprojects.com">Click</a> (declarative) and <a class="reference external" href="https://github.com/google/python-fire">Fire</a> (automatic).</p>
+<p>For the Docker container, at Mozilla we follow our <a class="reference external" href="https://github.com/mozilla-services/Dockerflow">Dockerflow conventions</a>. This helps our operations team to treat all containers the same way, regardless of the implementation language etc.</p>
+<p>A good take away for any application deployment is to manage configuration through environment variables (recommended in <a class="reference external" href="https://12factor.net/config">12factor</a> too).</p>
+<p>We centralize all configuration values in a dedicated module <tt class="docutils literal">config.py</tt>, that reads variables from env.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">DEFAULT_TTL</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;DEFAULT_TTL&quot;</span><span class="p">,</span> <span class="mi">60</span><span class="p">))</span>
+
+<span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;LOG_LEVEL&quot;</span><span class="p">,</span> <span class="s2">&quot;INFO&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+<span class="n">LOGGING</span> <span class="o">=</span> <span class="p">{</span>
+   <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;handlers&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;console&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="n">LOG_LEVEL</span><span class="p">,</span>
+            <span class="o">...</span>
+           <span class="p">}</span>
+       <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>And then simply use it everywhere in the app:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="p">):</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">LOGGING</span><span class="p">)</span>
+    <span class="n">run</span><span class="p">(</span><span class="n">ttl</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_TTL</span><span class="p">)</span>
+</pre></div>
+<p>During tests, config values are changed using <tt class="docutils literal">mock</tt>:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">mock</span>
+
+<span class="k">def</span> <span class="nf">test_diagram_path</span><span class="p">():</span>
+    <span class="k">with</span> <span class="n">mock</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">object</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;DEFAULT_TTL&quot;</span><span class="p">,</span> <span class="s2">&quot;some.svg&quot;</span><span class="p">):</span>
+        <span class="n">main</span><span class="p">()</span>
+    <span class="o">...</span>
+</pre></div>
+<p>But environment can be changed too using the built-in <tt class="docutils literal">monkeypatch</tt> fixture:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">test_lower_ttl</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setenv</span><span class="p">(</span><span class="s2">&quot;DEFAULT_TTL&quot;</span><span class="p">,</span> <span class="s2">&quot;10&quot;</span><span class="p">)</span>
+
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+<p>If you want to allow reading configuration from a file (<tt class="docutils literal">.env</tt> or <tt class="docutils literal">.ini</tt>), or have complex default values, or type casting, you can use <a class="reference external" href="https://github.com/henriquebastos/python-decouple">python-decouple</a> and read configuration values through the provided helper:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">decouple</span> <span class="kn">import</span> <span class="n">config</span>
+
+<span class="n">DEBUG</span> <span class="o">=</span> <span class="n">config</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cast</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+<span class="n">HEADERS</span> <span class="o">=</span> <span class="n">config</span><span class="p">(</span><span class="s2">&quot;HEADERS&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">cast</span><span class="o">=</span><span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="a-web-app">
+<h2>A Web app</h2>
+<p>The project consisted in a minimalist API. There are plenty of candidates, but I wanted something ultra simple and leveraging <tt class="docutils literal">async</tt>/<tt class="docutils literal">await</tt>.</p>
+<p><a class="reference external" href="https://github.com/huge-success/sanic">Sanic</a> and <a class="reference external" href="https://fastapi.tiangolo.com">FastAPI</a> seemed to stand out, but since my project needed an async HTTP client too, I decided to go with <a class="reference external" href="https://docs.aiohttp.org/en/stable/web.html">aiohttp</a> which provides both server and client stuff. <a class="reference external" href="https://www.python-httpx.org">httpx</a> used in <em>Sanic</em> could have been a good choice too.</p>
+<p>The server code looks familiar:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">aiohttp</span> <span class="kn">import</span> <span class="n">web</span>
+
+<span class="n">routes</span> <span class="o">=</span> <span class="n">web</span><span class="o">.</span><span class="n">RouteTableDef</span><span class="p">()</span>
+
+<span class="nd">@routes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;hello&quot;</span><span class="p">:</span> <span class="s2">&quot;poucave&quot;</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">web</span><span class="o">.</span><span class="n">json_response</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">init_app</span><span class="p">(</span><span class="n">argv</span><span class="p">):</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">web</span><span class="o">.</span><span class="n">Application</span><span class="p">()</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">add_routes</span><span class="p">(</span><span class="n">routes</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">app</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="p">):</span>
+    <span class="n">web</span><span class="o">.</span><span class="n">run_app</span><span class="p">(</span><span class="n">init_app</span><span class="p">(</span><span class="n">argv</span><span class="p">))</span>
+</pre></div>
+<p>And to centralize the HTTP client parameters within the app, we have this wrapper:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">asynccontextmanager</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">AsyncGenerator</span>
+
+<span class="kn">import</span> <span class="nn">aiohttp</span>
+
+<span class="nd">@asynccontextmanager</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">ClientSession</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">AsyncGenerator</span><span class="p">[</span><span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+    <span class="n">timeout</span> <span class="o">=</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientTimeout</span><span class="p">(</span><span class="n">total</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">REQUESTS_TIMEOUT_SECONDS</span><span class="p">)</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;User-Agent&quot;</span><span class="p">:</span> <span class="s2">&quot;poucave&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">config</span><span class="o">.</span><span class="n">DEFAULT_REQUESTS_HEADERS</span><span class="p">}</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">(</span><span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">session</span>
+</pre></div>
+<p>And we use the <a class="reference external" href="https://github.com/litl/backoff/">backoff</a> library to manage retries:</p>
+<div class="highlight"><pre><span></span><span class="n">retry_decorator</span> <span class="o">=</span> <span class="n">backoff</span><span class="o">.</span><span class="n">on_exception</span><span class="p">(</span>
+    <span class="n">backoff</span><span class="o">.</span><span class="n">expo</span><span class="p">,</span>
+    <span class="p">(</span><span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientError</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">),</span>
+    <span class="n">max_tries</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">REQUESTS_MAX_RETRIES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># + 1 because REtries.</span>
+<span class="p">)</span>
+
+<span class="nd">@retry_decorator</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">fetch_json</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">ClientSession</span><span class="p">()</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+            <span class="k">return</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</pre></div>
+<p>In order to mock HTTP requests and responses in this setup, we use the <tt class="docutils literal">aiohttp_client</tt> fixture from <a class="reference external" href="https://github.com/aio-libs/pytest-aiohttp/">pytest-aiohttp</a> for the application part, and <a class="reference external" href="https://github.com/pnuckowski/aioresponses/">aioresponses</a> for the responses part:</p>
+<div class="highlight"><pre><span></span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">cli</span><span class="p">(</span><span class="n">aiohttp_client</span><span class="p">):</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">init_app</span><span class="p">()</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="n">aiohttp_client</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">mock_aioresponses</span><span class="p">(</span><span class="n">cli</span><span class="p">):</span>
+    <span class="n">test_server</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="n">cli</span><span class="o">.</span><span class="n">host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">cli</span><span class="o">.</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="k">with</span> <span class="n">aioresponses</span><span class="p">(</span><span class="n">passthrough</span><span class="o">=</span><span class="p">[</span><span class="n">test_server</span><span class="p">])</span> <span class="k">as</span> <span class="n">m</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">m</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">test_api_root_url</span><span class="p">(</span><span class="n">cli</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cli</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;app&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;poucave&quot;</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">test_api_fetches_info_from_source</span><span class="p">(</span><span class="n">cli</span><span class="p">,</span> <span class="n">mock_aioresponses</span><span class="p">):</span>
+    <span class="n">mock_aioresponses</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">SOURCE_URI</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">cli</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/check-source&quot;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="misc">
+<h2>Misc</h2>
+<p>Some libraries and tools worth checking out:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/crsmithdev/arrow/">Arrow</a> for better dates &amp; times for Python</li>
+<li><a class="reference external" href="https://github.com/samuelcolvin/pydantic">Pydantic</a> for data parsing and validation</li>
+<li><a class="reference external" href="https://www.attrs.org">attrs</a> for a smart alternative to named tuples</li>
+<li><a class="reference external" href="https://github.com/cgarciae/pypeln">Pypeln</a> for concurrent async pipelines</li>
+<li><a class="reference external" href="https://github.com/hawkowl/towncrier">towncrier</a> to automate CHANGELOG entries</li>
+<li><a class="reference external" href="https://www.uvicorn.org">uvicorn</a> for a performant ASGI server</li>
+</ul>
+<p><strong>update</strong>: Disclaimer: I haven't used all of them. I just saw them in several projects :)</p>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion</h2>
+<p>I hope you found this article interesting! And most importantly, that you'll have the opportunity to leverage all these tools in your projects :)</p>
+<p>If you think something in this article is utterly wrong, please shout out!</p>
+<p>Thanks <a class="reference external" href="https://github.com/areski">Areski</a> and <a class="reference external" href="https://github.com/glasserc">Ethan</a> for your early feedback!</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/python-good-practices-in-early-2020.html';
+      this.page.identifier = 'python-good-practices-in-early-2020';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

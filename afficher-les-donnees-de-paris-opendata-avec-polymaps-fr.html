@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Afficher les données de Paris OpenData avec polymaps - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Afficher les données de Paris OpenData avec polymaps</h1>
+<time datetime="2011-02-24T13:02:00+01:00">Thu 24 February 2011</time></header>
+<article>
+    <p>En ouvrant l'accès à un catalogue de données diverses (Équipements, bâti, arbres d'alignement, arrêtés municipaux, ...)
+l'initiative <a class="reference external" href="http://opendata.paris.fr">ParisData</a>, l'Open Data de la capitale, nous donne l'occasion de manipuler des données georéférencées.
+Notre objectif ici sera de les publier sur une page Web grâce à un outil simple et léger : <a class="reference external" href="http://polymaps.org">polymaps</a>.</p>
+<div class="section" id="transformation">
+<h2>Transformation</h2>
+<p>Le système de projection utilisé pour certaines données du catalogue est la <a class="reference external" href="http://en.wikipedia.org/wiki/Lambert_conformal_conic_projection">Lambert Conformal Conic</a> (NTF, EPSG 9802)</p>
+<p>Dans la mesure où nous voulons déployer quelquechose de très simple, nous n'avons pas l'intention de sortir la grosse artillerie habituelle (Serveur WMS, Mapserver, QGIS MapServer, ...), nous allons plutôt utiliser un fichier GeoJSON, en longitudes/latitudes WGS84 (EPSG:4326).</p>
+<p>Pour cela, la bibliothèque <a class="reference external" href="http://www.gdal.org">GDAL</a> nous offre tous les outils adéquates:</p>
+<ul class="simple">
+<li>Ouvrir le fichier shape (ESRI Shapefile) fourni par ParisData</li>
+<li>Reprojetter en EPSG:4326</li>
+<li>Choisir les données (attributaires) que nous allons conserver</li>
+<li>Exporter en GeoJSON</li>
+</ul>
+<p>Pour notre exemple, nous avons choisi les emplacements des <a class="reference external" href="http://opendata.paris.fr/opendata/jsp/site/Portal.jsp?document_id=57&amp;portlet_id=106">points de collecte de verre</a>.
+Parmis les champs fournis, nous choisissons de ne conserver que leur état (<tt class="docutils literal">Lb_Etat_E</tt>) et le nom de leur emplacement (<tt class="docutils literal">Emplacemnt</tt>).</p>
+<p>Comme python est notre language préféré, et que c'est toujours un plaisir de le montrer en action, voici la petite procédure qui fait tout ça :</p>
+<div class="highlight"><pre><span></span><span class="c1"># python gdal</span>
+<span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">ogr</span>
+<span class="kn">from</span> <span class="nn">osgeo</span> <span class="kn">import</span> <span class="n">osr</span>
+<span class="o">...</span>
+<span class="o">...</span>
+<span class="c1"># Ouvrir le répertoire contenant les shape</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">INPUT_FOLDER</span><span class="p">)</span>
+
+<span class="c1"># La projection de sortie</span>
+<span class="n">spatialRef</span> <span class="o">=</span> <span class="n">osr</span><span class="o">.</span><span class="n">SpatialReference</span><span class="p">()</span>
+<span class="n">spatialRef</span><span class="o">.</span><span class="n">ImportFromEPSG</span><span class="p">(</span><span class="mi">4326</span><span class="p">)</span>
+
+<span class="c1"># Le fichier de sortie</span>
+<span class="n">driver</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">GetDriverByName</span><span class="p">(</span><span class="s1">&#39;GeoJSON&#39;</span><span class="p">)</span>
+<span class="n">shape</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">CreateDataSource</span><span class="p">(</span><span class="n">OUTPUT_FILE</span><span class="p">)</span>
+
+<span class="c1"># Parcourir les couches</span>
+<span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">source</span><span class="p">:</span>
+    <span class="c1"># Reprojection originale -&gt; destination</span>
+    <span class="n">originalSpatialRef</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">GetSpatialRef</span><span class="p">()</span>
+    <span class="n">coordTransform</span> <span class="o">=</span> <span class="n">osr</span><span class="o">.</span><span class="n">CoordinateTransformation</span><span class="p">(</span><span class="n">originalSpatialRef</span><span class="p">,</span>
+                                                  <span class="n">spatialRef</span><span class="p">)</span>
+    <span class="c1"># Choix des champs des données</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">FeatureDefn</span><span class="p">()</span>
+    <span class="n">properties</span><span class="o">.</span><span class="n">AddFieldDefn</span><span class="p">(</span><span class="n">ogr</span><span class="o">.</span><span class="n">FieldDefn</span><span class="p">(</span><span class="s1">&#39;Etat&#39;</span><span class="p">))</span>
+    <span class="n">properties</span><span class="o">.</span><span class="n">AddFieldDefn</span><span class="p">(</span><span class="n">ogr</span><span class="o">.</span><span class="n">FieldDefn</span><span class="p">(</span><span class="s1">&#39;Emplacement&#39;</span><span class="p">))</span>
+
+    <span class="c1"># Créer la nouvelle couche GeoJSON</span>
+    <span class="n">newLayer</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">CreateLayer</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">GetName</span><span class="p">(),</span> <span class="n">spatialRef</span><span class="p">)</span>
+
+    <span class="c1"># Parcourir les features</span>
+    <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">:</span>
+        <span class="c1"># Créer la nouvelle feature</span>
+        <span class="n">newFeature</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+        <span class="c1"># Remplir les champs choisis</span>
+        <span class="n">newFeature</span><span class="o">.</span><span class="n">SetField</span><span class="p">(</span><span class="s1">&#39;Etat&#39;</span><span class="p">,</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetField</span><span class="p">(</span><span class="s1">&#39;Lb_Etat_E&#39;</span><span class="p">))</span>
+        <span class="n">newFeature</span><span class="o">.</span><span class="n">SetField</span><span class="p">(</span><span class="s1">&#39;Emplacement&#39;</span><span class="p">,</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetField</span><span class="p">(</span><span class="s1">&#39;Emplacemnt&#39;</span><span class="p">))</span>
+        <span class="c1"># Reprojetter la feature</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">feature</span><span class="o">.</span><span class="n">GetGeometryRef</span><span class="p">()</span>
+        <span class="n">geometry</span><span class="o">.</span><span class="n">Transform</span><span class="p">(</span><span class="n">coordTransform</span><span class="p">)</span>
+        <span class="c1"># Sauvegarder</span>
+        <span class="n">newFeature</span><span class="o">.</span><span class="n">SetGeometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+        <span class="n">newLayer</span><span class="o">.</span><span class="n">CreateFeature</span><span class="p">(</span><span class="n">newFeature</span><span class="p">)</span>
+        <span class="n">newFeature</span><span class="o">.</span><span class="n">Destroy</span><span class="p">()</span>
+</pre></div>
+<p>Nous obtenons en sortie un fichier GeoJSON avec les points en lat / long et les données 'Etat' et 'Emplacement'.</p>
+<div class="highlight"><pre><span></span><span class="p">...</span>
+<span class="p">{</span><span class="w"> </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;properties&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;Etat&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Actif&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Emplacement&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;37 CHATEAU D&#39;EAU ANGLE BOUCHARDON&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;geometry&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Point&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;coordinates&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mf">2.358920</span><span class="p">,</span><span class="w"> </span><span class="mf">48.871154</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="p">{</span><span class="w"> </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Feature&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;properties&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;Etat&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Actif&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Emplacement&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;13 place de la Nation&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="s2">&quot;geometry&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s2">&quot;type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Point&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;coordinates&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="mf">2.398154</span><span class="p">,</span><span class="w"> </span><span class="mf">48.848723</span><span class="w"> </span><span class="p">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="p">...</span>
+</pre></div>
+<p>Le fichier pèse 174Ko, mais lorsqu'Apache le servira il pèsera 20Ko (grâce à la compression gzip !)</p>
+</div>
+<div class="section" id="affichage">
+<h2>Affichage</h2>
+<p>Nous choisissons d'afficher ces données dans une page avec <a class="reference external" href="http://polymaps.org">polymaps</a>. Il s'agit
+d'un composant Javascript permettant de créer des cartes interactives.</p>
+<p>Les critères de comparaison avec OpenLayers (OL) sont:</p>
+<ul class="simple">
+<li>la légèreté (~30Ko, 10Ko en gzip!)</li>
+<li>la rapiditité d'exécution</li>
+<li>l'utilisation de GeoJSON et SVG (flexibilité et styles)</li>
+</ul>
+<p>Cependant, la couverture fonctionnelle n'est absolument pas comparable. Mais pour afficher une carte avec des points, c'est largement suffisant !</p>
+<p>On commence par un fond de carte: <a class="reference external" href="http://cloudmade.com/">Cloudmade</a>, dont les tuiles sont dessinées à partir d'<a class="reference external" href="http://www.openstreetmap.org/">OpenStreetMap</a>:</p>
+<div class="highlight"><pre><span></span><span class="nx">map</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">po</span><span class="p">.</span><span class="nx">image</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="nx">po</span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="s2">&quot;http://{S}tile.cloudmade.com&quot;</span>
+<span class="w">                  </span><span class="o">+</span><span class="w"> </span><span class="s2">&quot;/1a1b06b230af4efdbb989ea99e9841af&quot;</span>
+<span class="w">                  </span><span class="o">+</span><span class="w"> </span><span class="s2">&quot;/998/256/{Z}/{X}/{Y}.png&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">hosts</span><span class="p">([</span><span class="s2">&quot;a.&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;b.&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;c.&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">])));</span>
+</pre></div>
+<p>On ajoute ensuite nos données GeoJSON:</p>
+<div class="highlight"><pre><span></span><span class="nx">map</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">po</span><span class="p">.</span><span class="nx">geoJson</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="s1">&#39;collecteurs.json&#39;</span><span class="p">)</span>
+</pre></div>
+<p>Polymaps facilite la personnalisation du dessin en fonction des données. Ici, nous affichons en vert les collecteurs à l'état &quot;Actif&quot; et en rouge les autres.
+De même nous mettons leur &quot;Emplacement&quot; en tooltip (<tt class="docutils literal">svg:title</tt>, Firefox 4, Chrome, Opera 11).</p>
+<div class="highlight"><pre><span></span><span class="nx">map</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">po</span><span class="p">.</span><span class="nx">geoJson</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="s1">&#39;collecteurs.json&#39;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;load&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">po</span><span class="p">.</span><span class="nx">stylist</span><span class="p">()</span>
+<span class="w">                      </span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;fill&#39;</span><span class="p">,</span>
+<span class="w">                            </span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                 </span><span class="k">return</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">properties</span><span class="p">.</span><span class="nx">Etat</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">&#39;Actif&#39;</span><span class="w"> </span><span class="o">?</span>
+<span class="w">                                        </span><span class="s1">&#39;green&#39;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;red&#39;</span><span class="p">;</span>
+<span class="w">                            </span><span class="p">}))</span>
+<span class="w">                      </span><span class="p">.</span><span class="nx">title</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                                 </span><span class="k">return</span><span class="w"> </span><span class="nx">d</span><span class="p">.</span><span class="nx">properties</span><span class="p">.</span><span class="nx">Emplacement</span>
+<span class="w">                            </span><span class="p">}));</span>
+</pre></div>
+<img alt="" src="/images/parisdata-polymaps.jpg" />
+<p><a class="reference external" href="http://www.makina-corpus.org/demos/mle/parisdata-polymaps/">Accéder à la page de démonstration</a></p>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion</h2>
+<p>Finalement, l'étape la plus compliquée était de reprojetter les données.
+On regrettera donc que l'initiative ParisData les ait publié sous cette forme exotique.</p>
+<p>Comme le soulignait <a class="reference external" href="http://www.biologeek.com/2010/12/ce-nest-pas-la-taille-qui-compte/">David</a> : <em>Publieurs de données, concentrez vous sur la qualité, pas la taille, les développeurs vous remercieront !</em></p>
+<p>À noter également que nous avons choisi une approche privilégiant la légèreté. Or, plusieurs sources de données de ParisData sont volumineuses et ne pourraient pas être affichées en GeoJSON sans mettre à genoux le navigateur. Nous serions alors contraints de servir les données sous forme de tuiles...</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/polymaps.html">#polymaps</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/afficher-les-donnees-de-paris-opendata-avec-polymaps-fr.html';
+      this.page.identifier = 'afficher-les-donnees-de-paris-opendata-avec-polymaps';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

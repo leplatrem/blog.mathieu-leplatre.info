@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Deploy Django behind a reverse proxy - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Deploy Django behind a reverse proxy</h1>
+<time datetime="2011-04-19T00:00:00+02:00">Tue 19 April 2011</time></header>
+<article>
+    <p>By default, Django will assume that your root URL is the root (<cite>/</cite>) of your domain.</p>
+<p>Using a <a class="reference external" href="http://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a>, we can run multiple django instances on the same server, using the same domain. (<cite>http://server.org/site1/</cite>, <cite>http://server.org/site2/</cite>, ...)</p>
+<p>Many redirects of your application will then be broken (most notable is validation of login form). You can fix that by forcing the root URL in your settings</p>
+<pre class="literal-block">
+FORCE_SCRIPT_NAME = '/site1'
+</pre>
+<p>If you use <a class="reference external" href="https://github.com/dcramer/django-sentry">Sentry</a>, you'll also have to set</p>
+<pre class="literal-block">
+SENTRY_URL_PREFIX = '/site1'
+</pre>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/deployment.html">#deployment</a>,         <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/deploy-django-behind-a-reverse-proxy.html';
+      this.page.identifier = 'deploy-django-behind-a-reverse-proxy';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Merkopolo : a simple yet powerful starter kit for your Qt/C++ GIS application - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Merkopolo : a simple yet powerful starter kit for your Qt/C++ GIS application</h1>
+<time datetime="2012-01-26T11:30:00+01:00">Thu 26 January 2012</time></header>
+<article>
+    <p>Recently, while the whole world looks completely hyped up with Web applications,
+we chose to design and develop a desktop software in Qt/C++.</p>
+<p>Obviously, the choice was measured and justified ! We had to build a specific GIS application
+with complex interactions and huge amounts of data, for a limited number of users.</p>
+<p>Quickly, we spotted <a class="reference external" href="http://merkaartor.be/">Merkaartor</a>, one of <a class="reference external" href="http://wiki.openstreetmap.org/wiki/Editing">the official OpenStreetMap editors</a>,
+for its UI components and object model. And since we started to code, we never regretted this choice !</p>
+<p>C++ brings the power, Qt offers cross-platform and the compassion towards developers, and Merkaartor a lovely GIS flavour !</p>
+<p>We contributed to Merkaartor to give gits components a little bit of genericity, and
+released <a class="reference external" href="https://gitorious.org/merkopolo/merkopolo">Merkopolo</a>, a Qt project
+skeleton to handle dependencies and inclusion of base components.</p>
+<p>Here is what you immediately get once compiled :</p>
+<img alt="" src="/images/merkopolo-preview.png" />
+<p>Now you can start coding serious stuff on top, with the Merkaartor components stack :</p>
+<ul class="simple">
+<li>Complete feature model with free attributes (tags)</li>
+<li>Custom drawing styles</li>
+<li>A variety of layers types (Tiles, WMS, Spatialite, GeoTIFF, GDAL...)</li>
+<li>Base classes for mouse interactions on map objects</li>
+<li>A projection system (<em>libproj</em>)</li>
+<li>And even <a class="reference external" href="postgis-data-in-c-using-gdal-and-qt.html">draw geometries from PostGIS database</a> !</li>
+</ul>
+<p><a class="reference external" href="https://gitorious.org/merkopolo/merkopolo">Merkopolo is available on Gitorious</a>.</p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/c.html">#c++</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/qt.html">#qt</a>,         <a href="https://blog.mathieu-leplatre.info/tag/merkopolo.html">#merkopolo</a>,         <a href="https://blog.mathieu-leplatre.info/tag/merkartor.html">#merkartor</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/merkopolo-a-simple-yet-powerful-starter-kit-for-your-qtc-gis-application.html';
+      this.page.identifier = 'merkopolo-a-simple-yet-powerful-starter-kit-for-your-qtc-gis-application';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

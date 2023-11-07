@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>landez : tiles post-processing - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>landez : tiles post-processing</h1>
+<time datetime="2012-05-29T14:45:00+02:00">Tue 29 May 2012</time></header>
+<article>
+    <p>Some weeks ago, I started to refactor <a class="reference external" href="https://github.com/makinacorpus/landez">landez</a> (timidly).
+But smart caching and post-processing of WMS maps were expected in my last project, so it gave me
+a great boost : Landez 2.0 has landed ! :)</p>
+<p>The base code is much clearer, and a few new features came out ! Among them, the ability to
+apply image filters to your maps !</p>
+<div class="section" id="grayscale-conversion">
+<h2>Grayscale conversion</h2>
+<p>Not the funniest one of course, but quite handy to highlight map content !</p>
+<img alt="" src="/images/landez-grayscale.jpg" />
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">landez</span> <span class="kn">import</span> <span class="n">MBTilesBuilder</span>
+<span class="kn">from</span> <span class="nn">landez.filters</span> <span class="kn">import</span> <span class="n">GrayScale</span>
+
+<span class="n">overlay</span> <span class="o">=</span> <span class="n">MBTilesBuilder</span><span class="p">()</span>
+<span class="n">overlay</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="n">GrayScale</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="section" id="color-to-alpha">
+<h2>Color to Alpha</h2>
+<p>If the tiles you overlay are mainly white, they might make your background layer brighter.
+Therefore, adding a filter replacing white by transparent will nicely blend your
+top layer without lightening the global result :</p>
+<img alt="" src="/images/landez-overlay.jpg" />
+<img alt="" src="/images/landez-blend.jpg" />
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">landez</span> <span class="kn">import</span> <span class="n">TilesManager</span><span class="p">,</span> <span class="n">ImageExporter</span>
+<span class="kn">from</span> <span class="nn">landez.filters</span> <span class="kn">import</span> <span class="n">ColorToAlpha</span>
+
+<span class="n">overlay</span> <span class="o">=</span> <span class="n">TilesManager</span><span class="p">(</span><span class="n">tiles_url</span><span class="o">=</span><span class="s1">&#39;http://an.osm.mirror.org/</span><span class="si">{z}</span><span class="s1">/</span><span class="si">{x}</span><span class="s1">/</span><span class="si">{y}</span><span class="s1">.png&#39;</span><span class="p">)</span>
+<span class="n">overlay</span><span class="o">.</span><span class="n">add_filter</span><span class="p">(</span><span class="n">ColorToAlpha</span><span class="p">(</span><span class="s1">&#39;#ffffff&#39;</span><span class="p">))</span>
+
+<span class="n">orthophoto</span> <span class="o">=</span> <span class="n">ImageExporter</span><span class="p">(</span><span class="n">wms_server</span><span class="o">=</span><span class="s1">&#39;http://server/wms&#39;</span><span class="p">,</span>
+                           <span class="n">wms_layers</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;orthophoto&#39;</span><span class="p">])</span>
+<span class="n">orthophoto</span><span class="o">.</span><span class="n">add_layer</span><span class="p">(</span><span class="n">overlay</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="continuous-integration">
+<h2>Continuous Integration</h2>
+<p>A <a class="reference external" href="http://travis-ci.org/#!/makinacorpus/landez">Travis job</a> was setup and allows
+me to improve the testing strictness :)</p>
+<p>The Travis configuration has some kind of magic, just drop one file and enable the hook in your Github repo :</p>
+<pre class="literal-block">
+language: python
+python:
+  - 2.6
+  - 2.7
+install:
+  - pip install Pillow
+  - python setup.py develop
+script:  python -m landez.tests
+</pre>
+</div>
+<div class="section" id="next-steps">
+<h2>Next steps...</h2>
+<p>I hope to get the opportunity to develop new post-processing filters, as pretty as those
+<a class="reference external" href="http://mapbox.com/blog/tilemill-compositing-operations-preview/">coming-up in MapBox Tilemill</a> !</p>
+<p>PerryGeo wrote <a class="reference external" href="https://github.com/perrygeo/python-mbtiles">python-mbtiles</a>
+which might be a good candidate for low-level access of MBTiles content.
+I like the idea of a common python stack for reading and writing, it is not very clear to
+me <a class="reference external" href="https://github.com/mapbox/mbtiles-spec/wiki/Implementations">which one</a> will emerge as the best one though...</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/landez.html">#landez</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/landez-tiles-post-processing.html';
+      this.page.identifier = 'landez-tiles-post-processing';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

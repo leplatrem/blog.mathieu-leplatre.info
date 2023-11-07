@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>An equivalent of Django's select_related for ManyToMany and OneToMany relationships - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>An equivalent of Django's select_related for ManyToMany and OneToMany relationships</h1>
+<time datetime="2011-12-05T11:09:00+01:00">Mon 05 December 2011</time></header>
+<article>
+    <p><em>Original post at</em> <a class="reference external" href="http://makina-corpus.org">Makina Corpus</a></p>
+<p>Using an ORM simplifies and reduces greatly the amount of code to interact with databases.
+Nevertheless, it can easily hide database design defects or become a source of serious performance issues.</p>
+<div class="section" id="a-common-pitfall">
+<h2>A Common Pitfall</h2>
+<p>With Django, the most classic problem occurs while accessing objects relations attributes
+inside a loop. That's why QuerySet's method <tt class="docutils literal">select_related()</tt> exists :
+it will join specified relations so that access to their attributes does not hit the database.
+<a class="reference external" href="https://docs.djangoproject.com/en/dev/ref/models/querysets/#select-related">Refer to Django's documentation</a> for more information !</p>
+</div>
+<div class="section" id="one-to-many-and-many-to-many-relationships">
+<h2>One-To-Many and Many-To-Many Relationships</h2>
+<p><tt class="docutils literal">select_related()</tt> is not able to follow One-To-Many (<em>1-n</em>) and Many-To-Many (<em>n-n</em>) relationships.
+The Django team is currently working on <tt class="docutils literal">prefetch_related()</tt>. But before we can enjoy this
+future feature, we can implement an equivalent in python.</p>
+<p>With these models :</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Pizza</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Restaurant</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="n">pizzas</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ManyToManyField</span><span class="p">(</span><span class="n">Pizza</span><span class="p">,</span> <span class="n">through</span><span class="o">=</span><span class="s1">&#39;PizzaRestaurant&#39;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">PizzaRestaurant</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="n">pizza</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Pizza</span><span class="p">)</span>
+    <span class="n">restaurant</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">ForeignKey</span><span class="p">(</span><span class="n">Restaurant</span><span class="p">)</span>
+    <span class="n">price</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">()</span>
+</pre></div>
+<p>This loop will generate <em>1 + N</em> queries :</p>
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">restaurant</span> <span class="ow">in</span> <span class="n">Restaurant</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">pizza</span> <span class="ow">in</span> <span class="n">restaurant</span><span class="o">.</span><span class="n">pizzas</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+        <span class="nb">print</span> <span class="n">pizza</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+<p>Whereas this one will <strong>only</strong> generate <em>2</em> queries :</p>
+<div class="highlight"><pre><span></span><span class="c1"># Store relationships in a dict</span>
+<span class="n">byrestaurant</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">pr</span> <span class="ow">in</span> <span class="n">PizzaRestaurant</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">select_related</span><span class="p">(</span><span class="s1">&#39;restaurant&#39;</span><span class="p">,</span> <span class="s1">&#39;pizza&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="n">byrestaurant</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">restaurant</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">pizza</span><span class="p">)</span>
+<span class="c1"># Use stored lists</span>
+<span class="k">for</span> <span class="n">restaurant</span> <span class="ow">in</span> <span class="n">Restaurant</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">pizza</span> <span class="ow">in</span> <span class="n">byrestaurant</span><span class="p">[</span><span class="n">restaurant</span><span class="o">.</span><span class="n">id</span><span class="p">]:</span>
+        <span class="nb">print</span> <span class="n">pizza</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+<p>According to the amount of <em>N</em>, doing that trick in views can boost your pages !</p>
+<p>This is not perfect and elegant, but if it allows you to downsize the number of queries
+from several thousands to fifteen, like <a class="reference external" href="http://gitorious.org/memopol2-0/memopol2-0/merge_requests/18">it did on Memopol2</a>, you can think twice.</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/performance.html">#performance</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/django-selectrelated-manytomany.html';
+      this.page.identifier = 'django-selectrelated-manytomany';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

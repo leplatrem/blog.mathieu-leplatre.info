@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Javascript Beautifier in command-line (and in Geany editor) - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Javascript Beautifier in command-line (and in Geany editor)</h1>
+<time datetime="2011-02-01T10:20:00+01:00">Tue 01 February 2011</time></header>
+<article>
+    <p>Install a Javascript engine (like Mozilla Rhino)</p>
+<pre class="literal-block">
+sudo aptitude install rhino
+</pre>
+<p>Get the beautifier script (put it somewhere like <cite>~/.bin</cite>)</p>
+<pre class="literal-block">
+wget http://jsbeautifier.org/beautify.js
+</pre>
+<p>Add the following at the end of <cite>beautify.js</cite></p>
+<pre class="literal-block">
+print( js_beautify( readFile( arguments[0] )));
+</pre>
+<p>Create a shell script that will call it (like <cite>~/.bin/beautifyjs</cite>)</p>
+<pre class="literal-block">
+#!/bin/sh
+java -cp /usr/share/java/js.jar org.mozilla.javascript.tools.shell.Main ~/.bin/beautify.js $*
+</pre>
+<p>Make sure to set it executable</p>
+<pre class="literal-block">
+chmod +x ~/.bin/beautifyjs
+</pre>
+<div class="section" id="use-it-from-command-line">
+<h2>Use it from command-line</h2>
+<p>At least to check that it works !</p>
+<pre class="literal-block">
+~/.bin/beautifyjs /your/file.js
+</pre>
+</div>
+<div class="section" id="or-in-geany-editor">
+<h2>Or in Geany Editor</h2>
+<blockquote>
+<ul>
+<li><p class="first">Open a Javascript file</p>
+</li>
+<li><p class="first">Open menu <em>Build</em> &gt; <em>Define Build Commands</em></p>
+</li>
+<li><p class="first">Create a new entry (like <cite>beautify</cite>)</p>
+</li>
+<li><p class="first">In command, enter the following</p>
+<pre class="literal-block">
+~/.bin/beautifyjs %f &gt; /tmp/tmpfile.js &amp;&amp; geany /tmp/tmpfile.js
+</pre>
+</li>
+<li><p class="first">In working directory, enter <cite>%d</cite></p>
+</li>
+</ul>
+</blockquote>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/javascript-beautifier-in-command-line-and-in-geany-editor.html';
+      this.page.identifier = 'javascript-beautifier-in-command-line-and-in-geany-editor';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

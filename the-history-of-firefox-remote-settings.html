@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>The History of Firefox Remote Settings - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>The History of Firefox Remote Settings</h1>
+<time datetime="2020-10-19T00:00:00+02:00">Mon 19 October 2020</time></header>
+<article>
+    <p>When I started to write the first lines of this article, it was the last day of Ethan in our team. His departure marked the end of an era that I'll try to tell you about here.</p>
+<div class="section" id="prehistory-2014">
+<h2>Prehistory (~2014)</h2>
+<p>While I was working at <a class="reference external" href="https://makina-corpus.com">Makina Corpus</a>, we were regularly coming up with the same kind of architectures: a database, a REST API, and frontend/mobile stuff. Other teams were also starting to consider the idea of «headless CMS».</p>
+<p>I wanted to build a reusable backend, where you define your models in JSON and retrieve/store records.
+<a class="reference external" href="https://blog.notmyidea.org/">Alexis</a> and I wrote down some pseudo code at a DjangoCon and we started the <a class="reference external" href="https://github.com/spiral-project/daybed/">Daybed project</a>, using <a class="reference external" href="https://trypyramid.com/">Pyramid</a>. It became functional and I even talked about it at <a class="reference external" href="https://archive.fosdem.org/2015/schedule/event/daybed/">FOSDEM</a>.</p>
+<p>Alexis, <a class="reference external" href="https://devhub.io/developer/Natim">Rémy</a>, and <a class="reference external" href="https://ziade.org/">Tarek</a> were building Web APIs in the Cloud Services team at Mozilla, and there were needs to offer remote storage features to <a class="reference external" href="https://en.wikipedia.org/wiki/Firefox_OS">Firefox OS</a> app developers.</p>
+<p>I was hired onto their team and we were about to roll out our first app: a «reading list» service (à-la Pocket).</p>
+</div>
+<div class="section" id="neolithic-2015-2016">
+<h2>Neolithic (2015-2016)</h2>
+<p>The team had accumulated a lot of experience with Web APIs, and one thing was certain: we shouldn't start each project from scratch. Even though we had a secret plan (a reusable service), we couldn't justify starting with that.</p>
+<p>We gathered a lot of good practices and a handful tooling in one library: <a class="reference external" href="https://cliquet.readthedocs.io/en/latest/">Cliquet</a>. We hated the word «framework», but at least we wanted a standard way of building services (cf. <a class="reference external" href="https://mozilla-services.github.io/servicedenuages.fr/en/why-cliquet">introduction blog post</a> or <a class="reference external" href="https://mozilla-services.github.io/cliquet/talks/2015.07.pybcn/">talk at PyBCN</a>).</p>
+<img alt="" src="images/remote-settings-history-cliquet.png" />
+<p><em>Cliquet</em> had the notion of pluggable storage backends. And, because we had this vision of reusable services, we built a proof-of-concept where a service built with <em>Cliquet</em> would be storing its data in another service built with <em>Cliquet</em> 🤯 <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a>.</p>
+<p>Eventually, this storage service became <a class="reference external" href="https://github.com/Kinto/">Kinto</a>, and <em>Cliquet</em> became <tt class="docutils literal">kinto.core</tt>.</p>
+<p><a class="reference external" href="https://nicolas.perriault.net/">n1k0</a> and <a class="reference external" href="https://mathieu.agopian.info/">Magopian</a> joined the team, and built a nice offline-first SDK for Kinto. Plus a generic UI to CRUD records of any accessible Kinto server (kind of remote phpmyadmin). In order to generate forms from collections JSON schema, they released <a class="reference external" href="https://github.com/rjsf-team/react-jsonschema-form/">react-jsonschema-form</a> (which now has like 9k stars on Github!).</p>
+<p>This was an exciting time! Kinto was on <a class="reference external" href="https://news.ycombinator.com/item?id=10994736">Hacker</a> <a class="reference external" href="https://news.ycombinator.com/item?id=10733164">news</a>, and the number of Github stars was going up!</p>
+<p>At this time, there were many other challengers in the field of offline-first apps and backends as a service, and we were pretty close to them. <a class="reference external" href="https://michielbdejong.com/">Michiel de Jong</a>, the spec author of <a class="reference external" href="https://remotestorage.io/">Remote Storage</a>, joined Mozilla and was briefly in our team. <a class="reference external" href="https://arandomurl.com/">Dale Harvey</a> was already at Mozilla and was doing <a class="reference external" href="https://pouchdb.com/">PouchDB</a>. <a class="reference external" href="https://github.com/xbill82/">Luca Marchesini</a>, a Fullstack Fest friend, was also working on <a class="reference external" href="https://kuzzle.io/">Kuzzle</a>.</p>
+<p>But internally in the company — above Tarek (our manager) — we were not able to defend our vision very well. Mozilla didn't seem ready to explore the dangerous grounds of hosting user data, at least not beyond <em>Firefox Sync</em>. And meanwhile, <em>Kinto</em> was still being mentioned as the Mozilla response to Facebook Parse and Google Firebase (completely inaccurate of course, because Kinto was never an official Mozilla project).</p>
+<p>Luckily, shortly after, the <a class="reference external" href="https://wiki.mozilla.org/Firefox/Go_Faster">*Go Faster* initiative</a> was started, with the goal of shipping changes to Firefox faster than the current release cycle. If our system could synchronize user data between devices, then it could obviously do a uni-directional synchronization of read-only data from one admin to millions of clients. That's how we started to use <em>Kinto</em> to publish the malicious addons blocklist, the certificates revocation list, and some assets for Firefox Android, independently from release trains.</p>
+<p>The Kinto client SDK was now in Firefox, and hundreds of millions of clients were pulling data from our servers at <tt class="docutils literal"><span class="pre">https://firefox.settings.services.mozilla.com</span></tt>.</p>
+</div>
+<div class="section" id="antiquity-2016-2018">
+<h2>Antiquity (2016-2018)</h2>
+<p>We were contributing to Gecko in the <tt class="docutils literal"><span class="pre">mozilla-central</span></tt> repo, and that was not so common for a team in the Cloud Services org. Mercurial, old-style JS, C++, XPCOM... we were not comfortable at all.</p>
+<p><a class="reference external" href="http://betacantrips.com">Ethan</a> joined the team. He implemented the <tt class="docutils literal">chrome.storage</tt> Web Extension API using <em>Kinto</em>, and suddenly we were storing addons preferences of users (carefully encrypted on the client side of course).</p>
+<p><em>Kinto</em> now had <a class="reference external" href="https://mozilla-services.github.io/servicedenuages.fr/en/kinto-at-mozilla">several use-cases</a> within Firefox. However, clearly, we still hadn't reached any critical mass. It was just another arrow on diagrams.</p>
+<p>It was a boring and frustrating phase. Pushing the required configuration changes for each new use case. A lot of back and forth with the Ops for root objects manipulations. Responsibilities were limited.</p>
+<p>We knew we could do much more, any piece of configuration or JSON in the repository could be migrated to our system! We could use it for internationalization! But we were not good door-to-door salesmen. Feedback, positive or negative, was almost nonexistent.</p>
+<p>The revolutionary ideals of our initial team were fading away. We had to admit that we failed at promoting our vision of a user-facing storage backend (see <em>Thoughts</em> section). Self hosting, decentralized Web, Tor hidden services, were conversations at night around a drink, not in meeting rooms anymore. I'm pretty sure Mozilla even had a few projects running on Google Firebase at this time.</p>
+<p>At the end of that period, most members of the original team had left, disillusioned. Ethan and I were the last «Kinto guys» at Mozilla.</p>
+<div class="figure">
+<img alt="" src="images/remote-settings-history-3-contributors.png" />
+<p class="caption">Fortunately we had dependabot enabled on our repos so we don't look too lonely.</p>
+</div>
+</div>
+<div class="section" id="modern-age-2018-2020">
+<h2>Modern Age (2018-2020)</h2>
+<p>In December 2016, we made a list of all the sources where <em>Firefox</em> would pull data from. No spoiler, it was too long.</p>
+<p>Our goal was to unify several of these communication channels into one, and to start demanding a good reason to justify rolling out a new update source.</p>
+<p>For most use-cases in Firefox, the <em>Kinto</em> API was too low level, and doing too much. As an example, the certificate configuration for signature verification <a class="reference external" href="https://searchfox.org/mozilla-esr60/rev/02b4ae79b24aae2346b1338e2bf095a571192061/services/common/blocklist-clients.js#439-474">was unnecessarily complex</a>. And there was no official cookbook.</p>
+<p>Our new manager <a class="reference external" href="https://mostlygeek.com/">Benson</a> was defending the idea of <em>Remote Settings</em>. Two methods: <tt class="docutils literal">.get()</tt> and <tt class="docutils literal"><span class="pre">.on(&quot;sync&quot;,</span> <span class="pre">...)</span></tt>.
+New collections of records had to be self-service, because we were not going to be able to continue the manual onboarding.</p>
+<p>We had all the pieces in place to achieve that, it was mostly about improving developer experience. We refactored a number of things, added OAuth support, and Ethan integrated our clients and server with the <a class="reference external" href="https://github.com/mozilla-services/megaphone">broadcast service</a> for push notifications. We morphed the existing client integrations into a high level generic API, available for any component in Firefox. And on the server side, the original Kinto Admin had everything in its DNA to become the <em>Remote Settings Admin UI</em>.</p>
+<img alt="" src="images/remote-settings-history-kinto-admin.png" />
+<p>In December 2018, I presented <em>Remote Settings</em> in front of hundreds of Firefox developers! This felt energizing and great! On the other hand, I knew I was reaping the rewards of our team mates who had left.</p>
+<img alt="" src="images/remote-settings-history-sf-evergreen.png" />
+<p>We merged with the <em>SHIELD</em> team and were now part of the <em>Product Delivery</em> team. Now responsible of making off-train changes reliable and safe (ie. updates without reinstall).</p>
+<p>Since we were only pulling read-only data from the server, the whole offline bi-directional sync code was overkill and slightly inefficient. For the sake of simplicity, I got rid of the <em>Kinto offline</em> library in Firefox and replaced it with plain Gecko specific IndexedDB code. Way easier to reason about, especially for a future code reader who wouldn't have the back story.</p>
+<p>More and more critical components of Firefox, desktop or mobile, are now relying on <em>Remote Settings</em>. A/B testing, experiments metadata, user messages, features recommandations rules, list of password breaches for <a class="reference external" href="https://monitor.firefox.com/">Firefox Monitor</a>, password fields detection rules, localization packages, search partners configuration... &nbsp;All of them using our two methods API :)</p>
+<p>We could not have been more successful. <em>Remote Settings</em> had become <em>THE</em> standard way to ship data in Firefox outside release trains! Some of us sometimes still call it <em>Kinto</em>.</p>
+<p>In Summer 2020, there are approximately fifty collections on the server. The reliability of the pipeline is my main responibility, and to have a better overview of the whole thing, I mainly rely on two things: a unified client Telemetry, and a monitoring tool: <a class="reference external" href="https://github.com/mozilla-services/poucave/">Poucave</a>, that I'll present in another post.</p>
+</div>
+<div class="section" id="futurism-2021">
+<h2>Futurism (2021-)</h2>
+<p>Futurewise, the next obvious part is the Rust client, in order to have a unified experience across platforms, using a <a class="reference external" href="/leveraging-rust-in-python-and-javascript.html">~single code base</a> :)</p>
+<p>There was an initiative recently to unify our experimentation solutions between desktop, mobile, websites, and other products. During their study, they legitimately asked why use <em>Remote Settings</em> to ship experiments metadata, and not JSON files behind a CDN.</p>
+<p>The question is legitimate, and we could defend our pipeline because we have a validated security workflow, with VPN access, permissions management, some review and signoff features, push notifications, diff-based synchronization, content signature verification...</p>
+<p>Nevertheless, at the same time, more and more use-cases are server-to-server or have automated publication from scripts. And some even built their own UI.</p>
+<p>Maybe our <em>Remote Settings</em> service could be achieved with just something like a Git repo, static data, and a CDN in front.</p>
+<p>Clients pull blobs and content signatures from a URL, each use-case being responsible of parsing these binaries as JSON or using them as plain resources or files. Permissions setup could be achieved using protected branches and submodules in the repo. No more UI to maintain, the reviewing process would just happen upfront, before merging the pull-request. No more backend and database with records and fields, just a few scheduled tasks or commit hooks.</p>
+<p>A dumb pipe of static data, with complex workflows outside the system itself. A little bit <a class="reference external" href="/publish-your-pelican-blog-on-github-pages-via-travis-ci.html">like this blog</a> actually.</p>
+<p>Why not!</p>
+</div>
+<div class="section" id="thoughts">
+<h2>Thoughts</h2>
+<p>I hope this long article helped you understand how a long term project can evolve and mutate. I thought it would be interesting to see it from within a company like Mozilla, often mentioned in headlines.</p>
+<div class="section" id="what-made-the-success">
+<h3>What made the success?</h3>
+<p><em>Remote Settings</em> became a critical part of Firefox. Clearly, since it is leveraging only a subset of <em>Kinto</em>, the success can be largely attributed to the vision and efforts of our early team. We're still friends and I'm super proud of what we accomplished! Big up!</p>
+<p>We have the very early days in memory, when Tarek had managed to free some of our time so that we could build prototypes and demos. Later, Benson took over and embraced our vision. Both were advertising the idea of a reusable service within the company while we were busy coding!</p>
+<p>The patience of stakeholders who held our hand in order to land patches in Firefox massively contributed to the success. Special thanks to <a class="reference external" href="https://github.com/gijsk">Gijs</a>, <a class="reference external" href="https://github.com/linacambridge">Lina</a>, <a class="reference external" href="http://blog.queze.net/">Florian</a>, <a class="reference external" href="https://github.com/Standard8">Standard8</a>...</p>
+<p>I believe it is also important to highlight how important our first «customers» were to the growth and adoption of <em>Remote Settings</em>. The security/crypto teams and the <a class="reference external" href="https://wiki.mozilla.org/Firefox/Activity_Stream">Activity Stream</a> (now UJET) deserve much credit (<a class="reference external" href="https://github.com/computerist">mgoodwin</a>, <a class="reference external" href="https://github.com/ncloudioj">Nanj</a>, <a class="reference external" href="https://insufficient.coffee/about/">JCJ</a>, <a class="reference external" href="https://github.com/rlr">Ricky</a>, <a class="reference external" href="https://github.com/piatra">Andrei</a>...). Their advocacy for the solution and working closely with us to make it better made a big difference.</p>
+<p>Another factor is that we were consistently protecting the functional scope of the system. It is a data pipe: publish data on one side, reach the target audience reliably. It took a lot of effort to say «no», and keep the complexity trend downwards, instead of building dedicated features for specific use-cases.</p>
+<p>These previous two combined — motivated early adopters and product focus — were crucial in adoption. We were able to provide a good customer service because we had participated in the early integrations and implementations for other teams. When new use-cases were joining us, we <em>almost</em> had everything covered already.</p>
+<p>During our company meetings, we were making sure we would spend more time with people, and the least in front of computers. I don't cross the world to do what I can do from home! We had joyful moments and this happiness certainly contributed to the success :) Through the numerous use-cases, I got to know many teams in the company, and always worked in a fantastic atmosphere. I am happy to help, they seem happy with the solution, it is great!</p>
+</div>
+<div class="section" id="what-about-kinto">
+<h3>What about Kinto?</h3>
+<p>I don't want this article or section to sound like a retrospective of <em>Kinto</em> itself, but I think there are a few important things to underline.</p>
+<p>The <a class="reference external" href="https://github.com/Kinto/">Kinto organization</a> is relatively quiet, but we have users, and <a class="reference external" href="https://dstaley.com/">Dylan</a> is dedicating an amazing amount of energy on the project! A lot of engineers at Mozilla are going to benefit from his efforts to migrate the Admin UI to Bootstrap 4 (3 years after the PR was started 🤣)! Kudos!</p>
+<p>Nevertheless, we cannot deny that the <em>Kinto</em> community is not as flourishing as it used to be ;) And let's be clear: from the Mozilla standpoint, <em>Kinto</em> is just an implementation detail.</p>
+<p>If I win the lottery and leave (the positive version of the bus factor idea), there is no guarantee that the next pair of eyes taking a fresh look at the <em>Remote Settings</em> architecture or the <em>Kinto</em> code base will decide to keep it. In other words, as long as <em>Kinto</em> is used in <em>Remote Settings</em>, the project will be maintained and be taken care of.  Mozilla will continue to invest in <em>Kinto</em> as long as it has value and makes sense.</p>
+</div>
+<div class="section" id="what-if-i-had-to-do-it-over-again">
+<h3>What if I had to do it over again?</h3>
+<p>If someone would have come to us 5 years ago with the needs of a solution to update parts of Firefox without reinstall, what would we have done?</p>
+<p>If we wouldn't have been desperate to «sell» Kinto internally, would we have used a database as-a-service with a CRUD API?</p>
+<p>Alexis started <a class="reference external" href="http://getpelican.com/">Pelican</a> — a static blog generator — around 2011, 4 years before we were working on the first use-cases. I find it extremely ironic that the solution described in the <a class="reference external" href="#Futurism">Futurism</a> section would basically consist in applying the same principles to publish read-only data 🙃 <a class="footnote-reference" href="#footnote-2" id="footnote-reference-2">[2]</a></p>
+<p>The current approach also has a downside that I realized only very recently. Before, if someone wanted to contribute a new password recipe in Firefox, they would just have to add a line in the <tt class="docutils literal">.json</tt> and get their patch approved. Now the source of truth is the <em>Remote Settings</em> server. Adding a recipe means opening a ticket to request it, and a stakeholder to connect on the VPN and add it. If the source of truth was the repo, with jobs to publish data online for live updates, it would probably make more sense. Plus, it would save forks or the Thunderbird team to run <a class="reference external" href="https://thunderbird-settings.thunderbird.net/">their own Remote Settings instance</a>...</p>
+<p>In 2015, JSON was everywhere and a pretty natural choice. But we had to complement it with a notion of attachments for heavy content. Today, I would probably consider going full binary for everything. JSON was problematic for content signatures, since there are many ways to serialize it (Unicode strings and float numbers, <a class="reference external" href="https://github.com/gibson042/canonicaljson-spec/issues/5">the worse</a>!). Something like <a class="reference external" href="https://en.wikipedia.org/wiki/CBOR">CBOR</a> may have helped.</p>
+<p>Generally speaking — and here comes the self-flagellation part — I think that we could have done a better job if we would have studied more past research. As <a class="reference external" href="https://jlongster.com/How-I-Became-Better-Programmer">James Long wrote</a>, «<em>If you're excited about an idea, it's super tempting to sit down and immediately get going. But you shouldn't do that until you've done some cursory research about how people have solved it before.</em>». In our case, we could have considered using <a class="reference external" href="https://www.dotconferences.com/2019/12/james-long-crdts-for-mortals">CRDTs</a> to sync data, <a class="reference external" href="https://en.wikipedia.org/wiki/Merkle_tree">Merkle trees</a> for content signatures of partial diffs, or all the things available from the video games industry to update assets etc... and this is true for specifications too. I now think we made a big mistake when we decided to deviate from the Remote Storage spec while Michiel was in our team. Same with our custom Canonical JSON.</p>
+<p>With regards to <em>Kinto</em> itself, it shows that the idea itself does not have much value (<a class="reference external" href="/releasing-software-ideas.html">I wrote about that already</a>). <em>Kinto</em> was a very good idea, and we could develop it to a certain point. We were experienced with code, but our limits became the limits of the project: we were very unfit to pitch ideas and do product marketing.</p>
+<p>On the front of data sovereignity, great minds like Sir Tim Berners-Lee <a class="reference external" href="https://solidproject.org">are working on it</a>, and the need of a reusable backend for Web developers hasn't disappeared. <a class="reference external" href="https://appwrite.io/">Appwrite</a> and <a class="reference external" href="https://kuzzle.io/">kuzzle</a> (👏) seemed to be relevant open source solutions in 2020! I don't know about other projects like <a class="reference external" href="https://backendless.com/">https://backendless.com/</a> or <a class="reference external" href="http://hood.ie/">http://hood.ie/</a> though. Among the last challengers, <a class="reference external" href="http://postgrest.org/">PostgREST</a> and <a class="reference external" href="https://hasura.io/">Hasura</a> seem to be doing great.</p>
+<p>But hey, in the precise context of <em>Remote Settings</em>, these solutions may not have fit anyway!</p>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>Rémy reapplied a similar concept to build <a class="reference external" href="https://wiki.mozilla.org/Firefox_OS/Syncto">SyncTo</a>, a bridge from <em>Kinto</em> to <em>Firefox Sync</em> for <em>Firefox OS</em> developers.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="footnote-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-2">[2]</a></td><td>Ethan and n1k0 say that we had considered this idea. We can't recall why we discarded it. Maybe because we were too obscessed about selling Kinto internally? Or limitations of our signing infrastructure behind the VPN?</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/mozilla.html">#mozilla</a>,         <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/kinto.html">#kinto</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/the-history-of-firefox-remote-settings.html';
+      this.page.identifier = 'the-history-of-firefox-remote-settings';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>
