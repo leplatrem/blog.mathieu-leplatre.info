@@ -58,6 +58,9 @@ If the documentation repository is very well-maintained and organized, it would 
 
 AI and specialized language models can significantly improve searchability and relevance of information, making it easier for employees to find what they need quickly.
 
+- **Cost**: ⭐️⭐️⭐️⭐️ ☆
+- **Productivity**: ⭐️ ☆ ☆ ☆ ☆
+
 
 APIs: The Backbone of Autonomous Teams
 --------------------------------------
@@ -76,6 +79,9 @@ This is a great idea, that served as the foundations of AWS, and was probably on
 But concretely, how many companies did implement this concretely? Unless you're working at Google or Amazon, it's very likely that if you need a new sub-domain name for your app, you'll have to fill a Jira ticket 😏
 
 This approach requires excellent documentation and API versioning. And I don't know how offering self service APIs would work for non-technical employees, for which it may not be obvious to perform tasks programmatically.
+
+- **Cost**: ⭐️⭐️⭐️ ☆ ☆
+- **Productivity**: ⭐️⭐️ ☆ ☆ ☆
 
 
 GUI: Bridging the Gap for Non-Technical Users
@@ -99,6 +105,9 @@ These user interfaces are extremely expensive to build:
 
 They make sense if a lot of users interact very often with them, especially if they are non-technical, but in some situations they will generally cost a lot more than the value they bring. Bad user interfaces can also be very frustrating and counterproductive.
 
+- **Cost**: ⭐️⭐️⭐️⭐️⭐️
+- **Productivity**: ⭐️⭐️⭐️⭐️⭐️
+
 
 Efficient Interactions with Chat Bots
 -------------------------------------
@@ -117,6 +126,9 @@ In the context of self-service, we don't really need natural language. A list of
 Chat bots can walk us through a step-by-step journey, and would perfectly replace typical `multi-step forms <https://en.wikipedia.org/wiki/Wizard_(software)>`_. 
 
 Beyond basic Slack plugins and commands, I don't have too much experience with chat bots at work. I think we should do more with them, because compared to user interfaces, they are fairly easy and cheap to build. I did `one <https://github.com/leplatrem/ihatemoney-bot>`_ for Telegram years ago using a high level SDK, and it was fun to implement!
+
+- **Cost**: ⭐️⭐️⭐️ ☆ ☆
+- **Productivity**: ⭐️⭐️⭐️⭐️ ☆
 
 
 Files-Driven Workflows: Automation through CI/CD
@@ -143,6 +155,9 @@ Permissions management and security are also main concerns. If you give the powe
 Extensive linting is also highly recommended. A typo in a file, and you can end up replacing a resource with another without noticing! You can set up advanced solutions to execute dry runs or deploy temporary instances to give the reviewers better insights and more confidence in approving the changes.
 
 This approach has some limits if a lot of employees have to modify the same set of files (merge conflicts!), but there are workarounds, and in most cases, the frequency of changes to the same resource remains relatively low.
+
+- **Cost**: ⭐️⭐️⭐️ ☆ ☆
+- **Productivity**: ⭐️⭐️⭐️⭐️ ☆
 
 
 Do Less, Accomplish More
