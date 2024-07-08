@@ -2,17 +2,15 @@ About Self-Service
 ##################
 
 :tags: tips, methodology
-:date: 2022-01-05
+:date: 2024-07-08
 
-When I hear "self-service", the first thing that comes to my mind is a restaurant without waitstaff, where customers push their tray through a line of options, help themselves, and check out at the cashier, most likely a human that will double check and sum everything.
+When I hear *self-service*, I think of a restaurant where customers serve themselves, which minimizes wait times and maximizes efficiency. Similarly, in our software engineering team, self-service solutions empower other teams to get what they need without waiting for our assistance, leading to faster service and reduced context switching.
 
-In our team, we build internal services for other teams, and the more they can do on their own, the less they wait for us, the faster they are served, and the less we have to "switch context".
-
-This article presents some ideas and reflexions around the concept of *self service* in our little world of software.
+Let's explore what self-service means in our domain and how different approaches can be implemented to achieve it.
 
 
-What does self-service mean?
-----------------------------
+Redefining Self-Service in Software Teams
+-----------------------------------------
 
 What is not self-service? 
 
@@ -26,7 +24,7 @@ This is the usual experience at fast-foods. Latency at *Step 4* being reduced to
 
 In companies, you're very likely to face this process too, because only a few administrators have the necessary privileges to get you what you want. 
 
-Believe it or not, but I've seen projects where onboarding a new instance of a product consisted in waiting for engineers to modify the source code and then operators to redeploy the service and migrate the database schema. Days of work. Mostly coordination latency.
+Believe it or not, but I've seen projects where onboarding a new instance of a resource consisted in waiting for engineers to modify the source code and then operators to redeploy the service and migrate the database schema. Days of work. Mostly coordination latency.
 
 It may seem obvious, but ideally this is what we want:
 
@@ -36,23 +34,23 @@ It may seem obvious, but ideally this is what we want:
 
 Between *Step 2* and *Step 3*, there could be an additional approval step, which at most consists in a single action to reject or accept the request.  
 
-In practice, self-service is not so obvious to implement.
+In practice, self-service is not so obvious to implement, but the benefits are clear.
 
 
-Knowledge Base
---------------
+Level 0: Empowerment Through Knowledge
+--------------------------------------
 
 This is like level 0 of self service. RTFD.
 
 All procedures are documented in a company wiki, using FAQs, tutorials, cookbooks, in order to empower employees to find answers on their own.
 
-If the documentation repository is very well-maintained and organized, it would globally work. But from my experience, content is usually outdated and hard to find. It takes a real job (archivist or filing clerk) to build good documentation.
+If the documentation repository is very well-maintained and organized, it would globally work. But from my experience, content is usually outdated and hard to find. Searching via keywords on Confluence is clearly not a panacea. It takes a real job (archivist or filing clerk) to build good documentation.
 
-With AI and local/specialized/domain-specific language models, there could be a lot of improvements with regards to querying and leveraging knowledge bases. Searching via keywords on Confluence is clearly not a panacea.
+AI and specialized language models can significantly improve searchability and relevance of information, making it easier for employees to find what they need quickly.
 
 
-Self Service APIs
------------------
+APIs: The Backbone of Autonomous Teams
+--------------------------------------
 
 Around 2002, Jeff Bezos told his employees to build APIs in order to enable teams to independently access and utilize each other's services without needing direct inter-team communication or coordination.
 
@@ -65,8 +63,8 @@ But concretely, how many companies did implement this concretely? Unless you're 
 This approach requires excellent documentation and API versioning. And I don't know how offering self service APIs would work for non-technical employees, for which it may not be obvious to perform tasks programmatically.
 
 
-Graphical User Interfaces
--------------------------
+GUI: Bridging the Gap for Non-Technical Users
+---------------------------------------------
 
 At the other side of the spectrum: user interfaces. 
 
@@ -82,8 +80,8 @@ These user interfaces are extremely expensive to build:
 They make sense if a lot of users interact very often with it, especially if they are non-technical, but in some situations they will globally cost a lot more than the value they bring. Bad user interfaces can also be very frustrating and counter productive.
 
 
-Chat bots
----------
+Efficient Interactions with Chat Bots
+-------------------------------------
 
 In my daily life, I generally hate chats bots that pretend to be human. The other day, I received a Whatsapp bot message with some heath insurance details for someone else. Apparently this person's phone number had a typo, and I did my best to tell the remote machine that I had nothing to do with this, but there was no just way, it was not programmed for this situation apparently.
 
@@ -96,8 +94,8 @@ Chat bots can walk us through a step-by-step journey, and would perfectly replac
 Beyond basic Slack plugins and commands, I don't have too much experience with chat bots at work. I think we should do more with them, because compared to user interfaces, they are fairly easy and cheap to build. I did `one <https://github.com/leplatrem/ihatemoney-bot>`_ for Telegram years ago using a high level SDK, and it was fun to implement!
 
 
-Files Driven Workflows
-----------------------
+Files-Driven Workflows: Automation through CI/CD
+------------------------------------------------
 
 This has been my favorite in the last years: files on a Git repository with a CI/CD pipeline.
 
@@ -120,6 +118,4 @@ This approach has some limits if a lot of employees have to modify the same set 
 Do Less, Accomplish More
 ------------------------
 
-I would definitely encourage you to consider implementing self-service solutions in your teams and organizations in order to design yourself out of the service operations. As usual, start small and iterate, combine different approaches if need, and focus on providing users the flexibility and convenience they need while also freeing up your support time and focus on other tasks.
-
-As shown in this article, there are a lot of possible alternatives before investing a lot of resources in building complex Web user interfaces to enable self-service for your teams.
+Implementing self-service solutions can transform how your teams operate, leading to greater efficiency, reduced wait times, and more satisfied employees. As shown in this article, there are a lot of possible alternatives before investing a lot of resources in building complex Web user interfaces. Start small, iterate, and blend different approaches to create a self-service environment that not only empowers users but also allows your team to focus on high-impact tasks.
