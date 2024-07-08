@@ -157,4 +157,4 @@ Implementing self-service solutions can transform how your teams operate, leadin
 
 ------
 
-You may have noticed that the English in this article is somewhat better than in other articles on this website. This is because I used GenAI for proofreading and corrections, and, as you may have guessed, for illustrations too. This is the first time I've done this. The productivity benefits are attractive, but it doesn't mean I'll always use it from now on. I hope it didn't affect the reading experience too much.
+*You may have noticed that the English in this article is somewhat better than in other articles on this website. This is because I used GenAI (ChatGPT 4o to name it) for proofreading and corrections, and, as you may have guessed, for illustrations too. It doesn't mean I'll always use it in the future. I hope it didn't affect the reading experience too much.*
