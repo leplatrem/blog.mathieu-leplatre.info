@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Filesystem Watch with PyQt4 - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Filesystem Watch with PyQt4</h1>
+<time datetime="2009-08-14T13:37:00+02:00">Fri 14 August 2009</time></header>
+<article>
+    <p>I decided to write a generic program that can watch a folder or some files and run a command when changes occur.</p>
+<p>Most of the work is done by PyQt4's <cite>QFileSystemWatcher</cite>.</p>
+<div class="highlight"><pre><span></span><span class="n">qfsw</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QFileSystemWatcher</span><span class="p">()</span>
+<span class="n">qfsw</span><span class="o">.</span><span class="n">addPaths</span><span class="p">([</span><span class="n">path1</span><span class="p">,</span> <span class="n">file2</span> <span class="o">...</span> <span class="p">])</span>
+
+<span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">qfsw</span><span class="p">,</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;directoryChanged(QString)&quot;</span><span class="p">),</span><span class="n">function</span><span class="p">)</span>
+<span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">qfsw</span><span class="p">,</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;fileChanged(QString)&quot;</span><span class="p">),</span><span class="n">function</span><span class="p">)</span>
+</pre></div>
+<p>Here is the script</p>
+<div class="highlight"><pre><span></span><span class="c1"># !/usr/bin/env python</span>
+<span class="c1">#</span>
+<span class="c1"># Runs a command when a file system change occurs in specified list of paths.</span>
+<span class="c1">#</span>
+<span class="c1"># (c) Copyright 2008, Mathieu Leplatre,</span>
+<span class="c1">#</span>
+<span class="c1"># This software may be used and distributed according to the terms</span>
+<span class="c1"># of the GNU Public License, incorporated herein by reference.</span>
+
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">from</span> <span class="nn">optparse</span> <span class="kn">import</span> <span class="n">OptionParser</span>
+
+<span class="c1"># Parse command-line options</span>
+<span class="n">usage</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;Usage: %prog [options] COMMAND PATHS</span>
+<span class="s2">Run COMMAND when a file system change occurs in specified list of PATHS.</span>
+
+<span class="s2">COMMAND can contain &#39;</span><span class="si">%s</span><span class="s2">&#39; to refer changed file or directory.&quot;&quot;&quot;</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">(</span><span class="n">usage</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;%prog 1.0&quot;</span><span class="p">)</span>
+<span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Command</span>
+<span class="n">command</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1"># List of paths</span>
+<span class="n">paths</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+
+<span class="k">def</span> <span class="nf">onFileSystemChanged</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Callback when file or folder change</span>
+<span class="sd">    @param path : Changed path</span>
+<span class="sd">    @type  path : string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">command</span>
+    <span class="c1"># Execute command replacing %s with path:</span>
+    <span class="k">if</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">command</span><span class="p">:</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">command</span> <span class="o">%</span> <span class="n">path</span>
+    <span class="c1"># Run as different process</span>
+    <span class="nb">print</span> <span class="s2">&quot;Run &#39;</span><span class="si">%s</span><span class="s2">&#39;...&quot;</span> <span class="o">%</span> <span class="n">command</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">fork</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+
+    <span class="c1"># Set up file system watcher</span>
+    <span class="n">qfsw</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QFileSystemWatcher</span><span class="p">()</span>
+    <span class="n">qfsw</span><span class="o">.</span><span class="n">addPaths</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
+    <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">qfsw</span><span class="p">,</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;directoryChanged(QString)&quot;</span><span class="p">),</span><span class="n">onFileSystemChanged</span><span class="p">)</span>
+    <span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">qfsw</span><span class="p">,</span><span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;fileChanged(QString)&quot;</span><span class="p">),</span><span class="n">onFileSystemChanged</span><span class="p">)</span>
+
+    <span class="c1"># Allow program to be interrupted with Ctrl+C</span>
+    <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="n">signal</span><span class="o">.</span><span class="n">SIG_DFL</span><span class="p">)</span>
+
+    <span class="c1"># Qt Main loop</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/qt.html">#qt</a>,         <a href="https://blog.mathieu-leplatre.info/tag/pyqt4.html">#pyqt4</a>,         <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/filesystem-watch-with-pyqt4.html';
+      this.page.identifier = 'filesystem-watch-with-pyqt4';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>URL reverse en Javascript avec django - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>URL reverse en Javascript avec django</h1>
+<time datetime="2011-05-27T15:25:00+02:00">Fri 27 May 2011</time></header>
+<article>
+    <p><em>Article original publié chez</em> <a class="reference external" href="http://makina-corpus.org">Makina Corpus</a></p>
+<p>Un aspect fondamental de la philosophie django consiste à éviter toute sorte de redondance : <a class="reference external" href="https://docs.djangoproject.com/en/dev/misc/design-philosophies/">Don't Repeat Yourself</a>.</p>
+<p>La tentation est souvent trop belle, et respecter les fondamentaux s'avère parfois difficile ! C'est le cas de la réécriture d'URL en Javascript.</p>
+<p>Imaginons l'URL suivante définie dans <cite>urls.py</cite></p>
+<div class="highlight"><pre><span></span><span class="n">url</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^/plop/(?P&lt;x&gt;\d)/(?P&lt;y&gt;\d)$&#39;</span><span class="p">,</span> <span class="n">plopview</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;plop&quot;</span><span class="p">)</span>
+</pre></div>
+<p>Pour utiliser cette URL en Javascript avec des paramètres variables, on peut imaginer plusieurs approches.</p>
+<div class="section" id="j-aime-pas">
+<h2>J'aime pas</h2>
+<div class="highlight"><pre><span></span><span class="kd">var</span><span class="w"> </span><span class="nx">generic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;{% url &#39;plop&#39; 0 0 %}&quot;</span><span class="p">;</span>
+<span class="nx">generic</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s1">&#39;0/0&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">x</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="o">+</span><span class="nx">y</span><span class="p">);</span>
+</pre></div>
+<p>Pas DRY ! à cause des <cite>/</cite>.</p>
+<div class="highlight"><pre><span></span><span class="s2">&quot;{% url &#39;plop&#39; 0 0 %}&quot;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;../../&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;/&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">y</span><span class="p">;</span>
+</pre></div>
+<p>Pas DRY non plus !</p>
+<p>On peut aussi changer le pattern pour éviter les <cite>/</cite>.</p>
+<div class="highlight"><pre><span></span><span class="n">url</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^/plop/(?P&lt;x&gt;[\d]|x)/(?P&lt;y&gt;[\d]|y)$&#39;</span><span class="p">,</span> <span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;plop&quot;</span><span class="p">)</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="kd">var</span><span class="w"> </span><span class="nx">generic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;{% url &#39;toto&#39; &#39;x&#39; &#39;y&#39; %}&quot;</span><span class="p">;</span>
+<span class="nx">generic</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">x</span><span class="p">).</span><span class="nx">replace</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">y</span><span class="p">);</span>
+</pre></div>
+<p>C'est mieux, mais pas DRY ! à cause des <cite>x</cite>, <cite>y</cite>.</p>
+<p>On pourrait aussi imaginer une vue django qui ferait le <cite>reverse()</cite>. Mais cela multiplierait les aller-retours serveur, ce qui n'est pas toujours recommandé...</p>
+</div>
+<div class="section" id="la-bonne">
+<h2>La bonne</h2>
+<p>Il existe une application pour ça ! <a class="reference external" href="https://github.com/Dimitri-Gnidash/django-js-utils">django-js-utils</a></p>
+<p>Elle se charge de générer un fichier Javascript (<cite>settings.URLS_JS_GENERATED_FILE</cite>) grâce à une commande de gestion</p>
+<pre class="literal-block">
+python manage.js js_urls
+</pre>
+<p>Ensuite on utilise explicitement le fichier généré</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ MEDIA_URL }}/js/dutils.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;{{ MEDIA_URL }}/js/dutils.conf.urls.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+<p>Et on fait du vrai DRY !</p>
+<div class="highlight"><pre><span></span><span class="nx">dutils</span><span class="p">.</span><span class="nx">urls</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="s1">&#39;plop&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s1">&#39;x&#39;</span><span class="o">:</span><span class="w"> </span><span class="nx">x</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;y&#39;</span><span class="o">:</span><span class="w"> </span><span class="nx">y</span><span class="w"> </span><span class="p">})</span>
+</pre></div>
+<p>Gagné ! \o/</p>
+<p>Un inconvénient à noter tout de même : la liste de l'ensemble des URLs de l'application est accessible au public. Mais j'ai pas mieux ma pauvre dame !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/url-reverse-en-javascript-avec-django-fr.html';
+      this.page.identifier = 'url-reverse-en-javascript-avec-django';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Access a JSON webservice with Qt C++ - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Access a JSON webservice with Qt C++</h1>
+<time datetime="2011-12-16T17:00:00+01:00">Fri 16 December 2011</time></header>
+<article>
+    <p><em>Original post at</em> <a class="reference external" href="http://makina-corpus.org">Makina Corpus</a></p>
+<p>Webservices are everywhere ! There are relevant in many situations, and
+accessing them from your Qt C++ application is not an heresy.</p>
+<p>I will present here a very simple way to retrieve a JSON from a GET request.</p>
+<div class="section" id="http-requests">
+<h2>HTTP Requests</h2>
+<p>Using <a class="reference external" href="http://developer.qt.nokia.com/doc/qt-4.7/qnetworkaccessmanager.html">QNetworkAccessManager</a> is
+a piece of cake :</p>
+<div class="highlight"><pre><span></span><span class="n">QNetworkAccessManager</span><span class="w"> </span><span class="n">networkManager</span><span class="p">;</span>
+
+<span class="n">QUrl</span><span class="w"> </span><span class="n">url</span><span class="p">(</span><span class="s">&quot;http://gdata.youtube.com/feeds/api/standardfeeds/most_popular?v=2&amp;alt=json&quot;</span><span class="p">);</span>
+<span class="n">QNetworkRequest</span><span class="w"> </span><span class="n">request</span><span class="p">;</span>
+<span class="n">request</span><span class="p">.</span><span class="n">setUrl</span><span class="p">(</span><span class="n">url</span><span class="p">);</span>
+
+<span class="n">QNetworkReply</span><span class="o">*</span><span class="w"> </span><span class="n">currentReply</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">networkManager</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">request</span><span class="p">);</span><span class="w">  </span><span class="c1">// GET</span>
+</pre></div>
+<p>But, note that a slightly more generic approach would be to build the <tt class="docutils literal">QUrl</tt> from a parameters list :</p>
+<div class="highlight"><pre><span></span><span class="n">QUrl</span><span class="w"> </span><span class="n">url</span><span class="p">(</span><span class="s">&quot;http://gdata.youtube.com/feeds/api/standardfeeds/&quot;</span><span class="p">);</span>
+<span class="n">QString</span><span class="w"> </span><span class="n">method</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;most_popular&quot;</span><span class="p">;</span>
+<span class="n">url</span><span class="p">.</span><span class="n">setPath</span><span class="p">(</span><span class="n">QString</span><span class="p">(</span><span class="s">&quot;%1%2&quot;</span><span class="p">).</span><span class="n">arg</span><span class="p">(</span><span class="n">url</span><span class="p">.</span><span class="n">path</span><span class="p">()).</span><span class="n">arg</span><span class="p">(</span><span class="n">method</span><span class="p">));</span>
+
+<span class="n">QMap</span><span class="o">&lt;</span><span class="n">QString</span><span class="p">,</span><span class="w"> </span><span class="n">QVariant</span><span class="o">&gt;</span><span class="w"> </span><span class="n">params</span><span class="p">;</span>
+<span class="n">params</span><span class="p">[</span><span class="s">&quot;alt&quot;</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;json&quot;</span><span class="p">;</span>
+<span class="n">params</span><span class="p">[</span><span class="s">&quot;v&quot;</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;2&quot;</span><span class="p">;</span>
+
+<span class="n">foreach</span><span class="p">(</span><span class="n">QString</span><span class="w"> </span><span class="n">param</span><span class="p">,</span><span class="w"> </span><span class="n">params</span><span class="p">.</span><span class="n">keys</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">url</span><span class="p">.</span><span class="n">addQueryItem</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="w"> </span><span class="n">params</span><span class="p">[</span><span class="n">param</span><span class="p">].</span><span class="n">toString</span><span class="p">());</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="section" id="parsing-json">
+<h2>Parsing JSON</h2>
+<p>Get yourself a <em>slot</em> to parse the <tt class="docutils literal">QNetworkReply</tt> :</p>
+<div class="highlight"><pre><span></span><span class="n">connect</span><span class="p">(</span><span class="o">&amp;</span><span class="n">networkManager</span><span class="p">,</span><span class="w"> </span><span class="n">SIGNAL</span><span class="p">(</span><span class="n">finished</span><span class="p">(</span><span class="n">QNetworkReply</span><span class="o">*</span><span class="p">)),</span><span class="w"> </span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="n">SLOT</span><span class="p">(</span><span class="n">onResult</span><span class="p">(</span><span class="n">QNetworkReply</span><span class="o">*</span><span class="p">)));</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">YourClass::onResult</span><span class="p">(</span><span class="n">QNetworkReply</span><span class="o">*</span><span class="w"> </span><span class="n">reply</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">m_currentReply</span><span class="o">-&gt;</span><span class="n">error</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">QNetworkReply</span><span class="o">::</span><span class="n">NoError</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="p">;</span><span class="w">  </span><span class="c1">// ...only in a blog post</span>
+
+<span class="w">    </span><span class="n">QString</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">QString</span><span class="p">)</span><span class="w"> </span><span class="n">reply</span><span class="o">-&gt;</span><span class="n">readAll</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">QScriptEngine</span><span class="w"> </span><span class="n">engine</span><span class="p">;</span>
+<span class="w">    </span><span class="n">QScriptValue</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+
+<span class="w">    </span><span class="cm">/*</span>
+<span class="cm">      Google YouTube JSON looks like this :</span>
+
+<span class="cm">      {</span>
+<span class="cm">        &quot;version&quot;: &quot;1.0&quot;,</span>
+<span class="cm">        &quot;encoding&quot;: &quot;UTF-8&quot;,</span>
+<span class="cm">        &quot;feed&quot;: {</span>
+<span class="cm">          ..</span>
+<span class="cm">          ..</span>
+<span class="cm">          &quot;entry&quot;: [{</span>
+<span class="cm">            &quot;title&quot;: {</span>
+<span class="cm">                &quot;$t&quot;: &quot;Nickelback- When We Stand Together&quot;</span>
+<span class="cm">            },</span>
+<span class="cm">            &quot;content&quot;: {</span>
+<span class="cm">                &quot;type&quot;: &quot;application/x-shockwave-flash&quot;,</span>
+<span class="cm">                &quot;src&quot;: &quot;http://www.youtube.com/v/76vdvdll0Y?version=3&amp;f=standard&amp;app=youtube_gdata&quot;</span>
+<span class="cm">            },</span>
+<span class="cm">            &quot;yt$statistics&quot;: {</span>
+<span class="cm">                &quot;favoriteCount&quot;: &quot;29182&quot;,</span>
+<span class="cm">                &quot;viewCount&quot;: &quot;41513706&quot;</span>
+<span class="cm">            },</span>
+<span class="cm">            ...</span>
+<span class="cm">            ...</span>
+<span class="cm">          },</span>
+<span class="cm">          ...</span>
+<span class="cm">          ...</span>
+<span class="cm">          ]</span>
+<span class="cm">        }</span>
+<span class="cm">      }</span>
+<span class="cm">    */</span>
+
+<span class="w">    </span><span class="c1">// Now parse this JSON according to your needs !</span>
+<span class="w">    </span><span class="n">QScriptValue</span><span class="w"> </span><span class="n">entries</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">property</span><span class="p">(</span><span class="s">&quot;feed&quot;</span><span class="p">).</span><span class="n">property</span><span class="p">(</span><span class="s">&quot;entry&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">QScriptValueIterator</span><span class="w"> </span><span class="n">it</span><span class="p">(</span><span class="n">entries</span><span class="p">);</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="n">hasNext</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">it</span><span class="p">.</span><span class="n">next</span><span class="p">();</span>
+<span class="w">        </span><span class="n">QScriptValue</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="n">value</span><span class="p">();</span>
+
+<span class="w">        </span><span class="n">QString</span><span class="w"> </span><span class="n">link</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="n">property</span><span class="p">(</span><span class="s">&quot;content&quot;</span><span class="p">).</span><span class="n">property</span><span class="p">(</span><span class="s">&quot;src&quot;</span><span class="p">).</span><span class="n">toString</span><span class="p">();</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">viewCount</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">entry</span><span class="p">.</span><span class="n">property</span><span class="p">(</span><span class="s">&quot;yt$statistics&quot;</span><span class="p">).</span><span class="n">property</span><span class="p">(</span><span class="s">&quot;viewCount&quot;</span><span class="p">).</span><span class="n">toInteger</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Do something with those...</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>That's it :)</p>
+<p>If you want more complexity, and don't mind adding extra-dependencies, check out Tomasz Siekierda's <a class="reference external" href="http://gitorious.org/qwebservice">QtWebService</a> !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/c.html">#c++</a>,         <a href="https://blog.mathieu-leplatre.info/tag/qt.html">#qt</a>,         <a href="https://blog.mathieu-leplatre.info/tag/json.html">#json</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/access-a-json-webservice-with-qt-c.html';
+      this.page.identifier = 'access-a-json-webservice-with-qt-c';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

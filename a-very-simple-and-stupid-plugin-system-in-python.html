@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>A very Simple and Stupid plugin system in python - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>A very Simple and Stupid plugin system in python</h1>
+<time datetime="2011-09-02T00:00:00+02:00">Fri 02 September 2011</time></header>
+<article>
+    <p>Two convenience functions for listing and importing python modules :</p>
+<div class="highlight"><pre><span></span><span class="c1"># utils.py</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">def</span> <span class="nf">plugins_list</span><span class="p">(</span><span class="n">plugins_dirs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; List all python modules in specified plugins folders &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">plugins_dirs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">name</span>
+
+
+<span class="k">def</span> <span class="nf">import_plugins</span><span class="p">(</span><span class="n">plugins_dirs</span><span class="p">,</span> <span class="n">env</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Import modules into specified environment (symbol table) &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">plugins_list</span><span class="p">(</span><span class="n">plugins_dirs</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">env</span><span class="p">)</span>
+        <span class="n">env</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
+</pre></div>
+<p>And now use <tt class="docutils literal">import_plugins()</tt> wherever you need to use them !</p>
+<div class="highlight"><pre><span></span><span class="c1"># yourapp.py</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="n">import_plugins</span>
+
+<span class="n">plugins_dirs</span> <span class="o">=</span> <span class="s2">&quot;plugins/:module/plugins/&quot;</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">plugins_dirs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">pathsep</span><span class="p">))</span>
+
+<span class="n">import_plugins</span><span class="p">(</span><span class="n">plugins_dirs</span><span class="p">,</span> <span class="nb">globals</span><span class="p">())</span>
+</pre></div>
+<p>Note that in order to list all sub-classes of a specific one, you can use <a class="reference external" href="http://code.activestate.com/recipes/576949/">this
+recursive function</a>.</p>
+<p>That's all folks !</p>
+<p>It is very simple and very stupid, but useful :) You might now want to have
+a look at serious stuff like <a class="reference external" href="http://packages.python.org/Yapsy/">Yapsy</a> or
+<a class="reference external" href="http://packages.python.org/distribute/pkg_resources.html">PkgResouces</a>.</p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/a-very-simple-and-stupid-plugin-system-in-python.html';
+      this.page.identifier = 'a-very-simple-and-stupid-plugin-system-in-python';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Mathieu Leplatre - Personal</title><link href="https://blog.mathieu-leplatre.info/" rel="alternate"></link><link href="https://blog.mathieu-leplatre.info/feeds/personal.atom.xml" rel="self"></link><id>https://blog.mathieu-leplatre.info/</id><updated>2017-10-18T00:00:00+02:00</updated><entry><title>The Joy of Microhacks</title><link href="https://blog.mathieu-leplatre.info/the-joy-of-microhacks.html" rel="alternate"></link><published>2017-10-18T00:00:00+02:00</published><updated>2017-10-18T00:00:00+02:00</updated><author><name>Mathieu Leplatre</name></author><id>tag:blog.mathieu-leplatre.info,2017-10-18:/the-joy-of-microhacks.html</id><summary type="html">&lt;p&gt;Last September, I had the chance to attend the awesome &lt;a class="reference external" href="http://2017.fullstackfest.com/"&gt;Fullstack Fest conference&lt;/a&gt;, that takes place just accross my neighbourhood.&lt;/p&gt;
+&lt;p&gt;Like the year before, the content quality was very high. The last talk really resonated in me, and I felt like discoursing on its topic!&lt;/p&gt;
+&lt;div class="section" id="making-a-lot-of-things-ben-foxall"&gt;
+&lt;h2&gt;Making a lot of things …&lt;/h2&gt;&lt;/div&gt;</summary><content type="html">&lt;p&gt;Last September, I had the chance to attend the awesome &lt;a class="reference external" href="http://2017.fullstackfest.com/"&gt;Fullstack Fest conference&lt;/a&gt;, that takes place just accross my neighbourhood.&lt;/p&gt;
+&lt;p&gt;Like the year before, the content quality was very high. The last talk really resonated in me, and I felt like discoursing on its topic!&lt;/p&gt;
+&lt;div class="section" id="making-a-lot-of-things-ben-foxall"&gt;
+&lt;h2&gt;Making a lot of things — Ben Foxall&lt;/h2&gt;
+&lt;p&gt;When Ben appeared on stage, I realized we already met :) It took me a while to recall that he organized the button hack contest in 2016 — in which &lt;a class="reference external" href="https://twitter.com/pusher/status/774256560554016768"&gt;I won a funny BB8 robot&lt;/a&gt; with an hour of coding in JS :)&lt;/p&gt;
+&lt;p&gt;In his conference, Ben presents some ideas about explorative coding, where you don't plan anything long term. By getting rid of planning, you keep your expectations low, it is easier to get started, and most importantly, you can focus on the fun part: hacking.&lt;/p&gt;
+&lt;div class="align-center"&gt;
+  &lt;iframe width="560" height="315" src="https://www.youtube.com/embed/Pve8JoaTNqE" frameborder="0" allowfullscreen&gt;&lt;/iframe&gt;
+&lt;/div&gt;&lt;/div&gt;
+&lt;div class="section" id="my-relation-with-software-ideas"&gt;
+&lt;h2&gt;My relation with software ideas&lt;/h2&gt;
+&lt;p&gt;As I &lt;a class="reference external" href="https://blog.mathieu-leplatre.info/releasing-software-ideas.html"&gt;wrote 3 years ago&lt;/a&gt;, software ideas that constantly pop up in my mind become a kind of curse. I can't do everything, and I have trouble to admit it and let it go.&lt;/p&gt;
+&lt;p&gt;At the time of that article, I had decided to focus on 2 projects. They both became very successful, since one is now &lt;a class="reference external" href="http://subtivals.org"&gt;used worldwide&lt;/a&gt; by cinemas, theaters, cultural centers, schools, tv channels, production companies etc., and the other one &lt;a class="reference external" href="https://blog.mathieu-leplatre.info/a-year-at-mozilla.html"&gt;brought me to work with awesome people&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;But if I look back, I realize that having invested so much personal time to grow those two side projects also had terrible consequences — that I won't detail here.&lt;/p&gt;
+&lt;p&gt;I am too easily absorbed by software ideas and plans. I quickly feel accountable for things that should remain hobbies. Consequently, I sometimes end up neglecting my own needs.&lt;/p&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="" src="/images/microhacks-smeagol.jpg" style="width: 70%;" /&gt;
+&lt;p class="caption"&gt;Me in front of my latest project idea :)&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Anyway, I now have a lot more free time that I had 3 years ago. Still, I am truely certain that I don't want to have side projects anymore. Nor do I want to maintain open source libraries as an individual. And I also shut down the mutualized server I was running for self-hosting email, friends websites and stuff a while ago.&lt;/p&gt;
+&lt;p&gt;Finding the right balance, health, happiness, peace and harmony is hard enough! Especially with passion for your job.&lt;/p&gt;
+&lt;p&gt;It sounds obvious, but if I open my laptop at night or on a rainy Sunday, &lt;strong&gt;I wish it would be just fun&lt;/strong&gt;. Fun only: «otium», not «negotium» &lt;a class="footnote-reference" href="#footnote-1" id="footnote-reference-1"&gt;[1]&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="micro-hacks-to-the-rescue"&gt;
+&lt;h2&gt;Micro hacks to the rescue&lt;/h2&gt;
+&lt;p&gt;As the legends state, great ideas come up when you are in your bath, under an apple tree, or drawing on napkins in a bar. Basically when you are free from «obligations» :)&lt;/p&gt;
+&lt;p&gt;In my case, there are many tasks that are natural and painless at work, but that tend to become burden and clear away the fun at home as a hobby. Most notably triaging bug reports, hosting services, monitoring, designing user experience, defining road maps, fighting feature bloat, packaging and describing installation procedures, writing documentation, providing user support, having tests, supporting cross browser/platform, etc.&lt;/p&gt;
+&lt;p&gt;Also, like Ben stated in his conf, starting and finding time is hard. From a simple concept, I easily get lost in plans and features ideas, while riding my bike or under the shower. Then, I tell myself «&lt;em&gt;this project will absorb all my evenings for the next 6 months, ...naaa careful, forget it...&lt;/em&gt;».&lt;/p&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="" src="/images/microhacks-lifetime.png" /&gt;
+&lt;p class="caption"&gt;Lifetime of a microhack (right)&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;The main idea of micro-hacks is that you restrict the idea to the bare minimum, in order to &lt;strong&gt;only keep the fun part&lt;/strong&gt;: implementing a software idea. Ideally in a couple of hours!&lt;/p&gt;
+&lt;p&gt;You set a tiny goal, you code, you enjoy the result. Done.&lt;/p&gt;
+&lt;p&gt;Basically, you get rid of the boring/not fun parts that consume your free time and keep you away from having new ideas :)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="kill-it"&gt;
+&lt;h2&gt;Kill it!&lt;/h2&gt;
+&lt;p&gt;When an experiment or its result is fun, we want to share it.&lt;/p&gt;
+&lt;p&gt;At that point, the first reflex is to put it on Github. And that's when it is very tempting to make it look good, add a nice README, explain its goal, let the bug tracker open, tweet the link, and why not mentioning it in your resume after all!&lt;/p&gt;
+&lt;p&gt;But how do you feel if someone critizes the unoptimized way you handle mouse events? Or notices the lack of coding standards? Or if the code crashes with Firefox Nightly? And if someone wants to try it but can't install it on CentOS 4? Or if someone suggests that with Google authentication this project could be a life saver? What if your tiny piece of software ends up on Hackernews? What if (again) you'll think of turning it into a startup?&lt;/p&gt;
+&lt;p&gt;Micro hacks, we said: Code. Enjoy. &lt;strong&gt;Done&lt;/strong&gt;. Live in peace.&lt;/p&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="" src="/images/microhacks-theblob.jpg" style="width: 70%;" /&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="immortalize-your-hack"&gt;
+&lt;h2&gt;Immortalize your hack&lt;/h2&gt;
+&lt;p&gt;Sometimes the hack works in some specific conditions or setup (some connected Arduino, trial account on some API, a process in a &lt;tt class="docutils literal"&gt;screen&lt;/tt&gt; on your friend's server...). Also sometimes, it only works on some specific software version, some local fork, or relies on some symlinks hacks deep in your devbox OS. And that's perfectly fine!&lt;/p&gt;
+&lt;p&gt;Because it will require too much efforts to reproduce the same setup in a few days or weeks, and because you want to capture that moment where it just worked, just &lt;strong&gt;screenshot or screencast&lt;/strong&gt; whatever you obtained!&lt;/p&gt;
+&lt;p&gt;That is usually the most efficient way to share the fun! Plus, it will still be readable in 5 years if you mentioned it in your resume or among the side-projects on your website.&lt;/p&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="kinto-telegram-wall micro hack" src="/images/microhacks-kinto-telegram.jpg" /&gt;
+&lt;p class="caption"&gt;&lt;a class="reference external" href="https://github.com/leplatrem/kinto-telegram-wall"&gt;A microhack&lt;/a&gt; involving a Telegram bot with live updates on a Web page using Kinto.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="absence-without-leave"&gt;
+&lt;h2&gt;Absence without leave&lt;/h2&gt;
+&lt;p&gt;Artists who share stuff on &lt;a class="reference external" href="https://dribbble.com/"&gt;Dribbble&lt;/a&gt; won't give you the source files. But since the hacker culture is about sharing, and since the fun was about coding, publishing the source code online still makes sense of course.&lt;/p&gt;
+&lt;p&gt;But in order to get rid of any kind of sense of accountability, the README could only contain:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;the capture&lt;/li&gt;
+&lt;li&gt;a disclaimer («&lt;em&gt;I won't maintain this&lt;/em&gt;»)&lt;/li&gt;
+&lt;li&gt;a public domain / CC0 licence&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That way, you can safely share the link around, for those who wonder how it was done.&lt;/p&gt;
+&lt;p&gt;Also, using source control gives you the ability to go back in time. It can be very rewarding when expanding around an idea or learning a new technology — like &lt;a class="reference external" href="https://youtu.be/Pve8JoaTNqE?t=21m36s"&gt;Ben and his WebGL hacks&lt;/a&gt; — because we tend to forget how it used to look in the first place or how cool it felt when it first worked :)&lt;/p&gt;
+&lt;div class="figure align-center"&gt;
+&lt;img alt="disclaimer example" src="/images/microhacks-disclaimer.png" /&gt;
+&lt;p class="caption"&gt;Example of a screencast along with &lt;a class="reference external" href="https://github.com/almet/web2mp3"&gt;a disclaimer by &amp;#64;almet&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="self-promotion"&gt;
+&lt;h2&gt;Self promotion?&lt;/h2&gt;
+&lt;p&gt;It can be hard to be proud of our achievements. Probably because there is always something more impressive elsewhere. Or maybe because after too much time spent on something it is not so impressive anymore.&lt;/p&gt;
+&lt;p&gt;But I think it is important to show other developers ­— especially beginners — that everyone can be happy with tiny achievements.&lt;/p&gt;
+&lt;p&gt;Sharing the coolness of bringing an idea into life is always interesting to someone. Adding some quick description of how unexpected issues were overcome makes it even more pleasant. As an example, the most popular article of this blog is a 2011 post about reverting Git commits (possibly one of the shortest ones too).&lt;/p&gt;
+&lt;p&gt;Besides, when applying for a job, I tend to think that someone writing about learning and overcoming obstacles has a lot more value than some expert maintaining a very popular open source project during weekends, even if it takes 1000x less time and efforts.&lt;/p&gt;
+&lt;div class="align-center"&gt;
+  &lt;video src="/images/subtivals-remote.webm" width="500" controls&gt;
+    &lt;p&gt;Your browser does not support the video element &lt;/p&gt;
+  &lt;/video&gt;
+  &lt;p class="caption"&gt;A microhack in Subtivals to project subtitles on remote devices using Websockets.&lt;/p&gt;
+&lt;/div&gt;&lt;table class="docutils footnote" frame="void" id="footnote-1" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#footnote-reference-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;See also (in French): &lt;a class="reference external" href="http://www.brehault.net/textes/otium-et-negotium-dans-lindustrie-du-logiciel/"&gt;Otium et negotium dans l'industrie du logiciel&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+</content><category term="Personal"></category><category term="life"></category><category term="opensource"></category><category term="hack"></category></entry><entry><title>A year at Mozilla</title><link href="https://blog.mathieu-leplatre.info/a-year-at-mozilla.html" rel="alternate"></link><published>2016-05-05T14:10:00+02:00</published><updated>2016-05-05T14:10:00+02:00</updated><author><name>Mathieu Leplatre</name></author><id>tag:blog.mathieu-leplatre.info,2016-05-05:/a-year-at-mozilla.html</id><summary type="html">&lt;p&gt;When I started the draft of this article, I had spent a year at Mozilla. Now it
+has been a year and a half, but the post title would be less cool.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;tdlr; An amazing experience so far, a lot happened already. Working remotely is
+hard. Being pragmatic and satisfy …&lt;/strong&gt;&lt;/p&gt;</summary><content type="html">&lt;p&gt;When I started the draft of this article, I had spent a year at Mozilla. Now it
+has been a year and a half, but the post title would be less cool.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;tdlr; An amazing experience so far, a lot happened already. Working remotely is
+hard. Being pragmatic and satisfy everyone expectations is impossible.&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="section" id="the-transition"&gt;
+&lt;h2&gt;The transition&lt;/h2&gt;
+&lt;div class="section" id="barcelona"&gt;
+&lt;h3&gt;Barcelona&lt;/h3&gt;
+&lt;p&gt;The city is very pleasant, the weather is amazing — it never rains basically.&lt;/p&gt;
+&lt;p&gt;Being far from close friends is very hard. But I knew moving to Barcelona was
+not going to be a problem in itself since I speak Spanish and a little
+bit of Catalan.&lt;/p&gt;
+&lt;p&gt;I really enjoy the Mediterrean culture and gastronomy, and had a lot of
+interesting conversations and fascinating debates about politics, especially
+with regards to the Catalan independance.&lt;/p&gt;
+&lt;p&gt;Although the new mayor is making a lot of great infrastructure improvements
+for pushing the bicycles forward, it is still a very noisy and contaminated
+environment. Car drivers are still in velvet.&lt;/p&gt;
+&lt;img alt="" src="images/barcelona-giants.jpg" /&gt;
+&lt;/div&gt;
+&lt;div class="section" id="working-remotely"&gt;
+&lt;h3&gt;Working remotely&lt;/h3&gt;
+&lt;p&gt;Leaving the collocial office of Makina Corpus in Toulouse and working as
+a full remotee was definitely the most impacting life change.&lt;/p&gt;
+&lt;img alt="" src="images/twitter-quote-remote.png" /&gt;
+&lt;p&gt;From previous experencies as a freelancer, I was aware of my inabilty to
+keep a discipline when working from home.&lt;/p&gt;
+&lt;p&gt;Thanks to &lt;a class="reference external" href="https://twitter.com/areskib"&gt;Areski&lt;/a&gt; I &lt;a class="reference external" href="http://www.betahaus.es/mathieu-leplatre/"&gt;landed at Betahaus&lt;/a&gt;,
+probably the best place to work from! This building is full of awesome people
+from all around the world, working in very distinct areas, from journalism
+to wood craving through cartoonists and photographs.&lt;/p&gt;
+&lt;p&gt;Still, interacting on a daily basis with remote colleagues through video
+calls and IRC can sometimes be very frustrating. Especially when the Internet connection
+is flaky, when proprietary software suck badly on Linux (&lt;em&gt;I'm looking at you Vidyo&lt;/em&gt;)
+or when a cacophonous horde of motorcycles hijacks your microphone.&lt;/p&gt;
+&lt;p&gt;Timezones are also challenging :) Since Mozilla employees are spread around the world,
+it's not rare to extend the work day of a few hours in order to get in touch
+with colleagues! I can't complain, everything has been very flexible so far.&lt;/p&gt;
+&lt;p&gt;Favorably, Mozilla offers us the possibility to travel and meet regularly. We make
+our best to organize small workshops several times per quarter, in addition to the
+gatherings of the whole company twice a year. Those are super fun and extremely
+productive!&lt;/p&gt;
+&lt;img alt="" src="images/orlando-all-hands.jpg" /&gt;
+&lt;/div&gt;
+&lt;div class="section" id="maintaining-former-projects"&gt;
+&lt;h3&gt;Maintaining former projects&lt;/h3&gt;
+&lt;p&gt;As part of the transition, I had to withdraw from the several open-source projects
+&lt;a class="reference external" href="http://makina-corpus.com/blog/metier/2013/geotrek-histoire-dun-projet-libre"&gt;I maintained while at Makina Corpus&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Obviously, giving up on something you had cherished for years is delicate. Emotions
+come in the way.&lt;/p&gt;
+&lt;p&gt;Some projects were not receiving the love and attention they deserved and that made
+me sad. But I realized I couldn't continue to watch them all and suffered from not
+being able to provide thorough answers on issues and questions.&lt;/p&gt;
+&lt;p&gt;I begged for help or support several times along the year, and eventually I left them :|
+That's perhaps part of the open-source darwinism.&lt;/p&gt;
+&lt;p&gt;By the way, Janis' &lt;a class="reference external" href="https://jazzband.co"&gt;Jazzband project&lt;/a&gt; is awesome! Think about it
+instead of using the Github organization of your current company...&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="chocolate-factory"&gt;
+&lt;h3&gt;Chocolate factory&lt;/h3&gt;
+&lt;p&gt;Working for an organization that has a good image everywhere around the globe
+is quite rewarding of course (...a typical reaction: &lt;em&gt;«Oh really! I use it at home,
+Firefox is the best search engine to send emails on Facebook»&lt;/em&gt;).&lt;/p&gt;
+&lt;p&gt;I remember very well the feeling of pride when I first came to the Mozilla
+office in Paris. Impressed by its stairs covered with a giant fox logo, I felt like
+I wasn't up to the job!&lt;/p&gt;
+&lt;img alt="CC-BY-SA Robert Kaiser https://www.flickr.com/photos/kairo_at/22208348283/" src="images/mozilla-paris-stairs.jpg" /&gt;
+&lt;p&gt;The welcoming workmates there helped lowering the pressure quickly.
+By the way, special thanks to the teams in charge of the different
+offices, they are amazing! Being so spoiled sometimes makes me feel disconcerted!&lt;/p&gt;
+&lt;p&gt;After a year, I somehow got used to the idea. But I must admit that I still
+feel some pride when my 3 years old kid shouts out &lt;em&gt;«Daddy's wooooork!»&lt;/em&gt; as soon as he spots
+the browser logo :)&lt;/p&gt;
+&lt;p&gt;Still, the popular &lt;em&gt;impostor syndrome&lt;/em&gt; is on watch: my coworkers are the best engineers
+in the world! A lot of them have their name in the W3C standards, and some have
+their own Wikipedia page!&lt;/p&gt;
+&lt;!-- `Eric &lt;https://blog.mozilla.org/blog/2015/12/16/announcing-mozilla-fellow-eric-rescorla/&gt;`_ co-designed TLS, --&gt;
+&lt;!-- `Chris &lt;https://en.wikipedia.org/wiki/Chris_Montgomery&gt;`_ created Ogg/Vorbis, --&gt;
+&lt;!-- `Tim &lt;http://people.xiph.org/~tterribe/&gt;`_lead the Theora project, `Jack &lt;https://en.wikipedia.org/wiki/Jack_Moffitt&gt;`_ --&gt;
+&lt;!-- co-authored Icecast, `Ian's tools &lt;http://www.ianbicking.org/blog/2014/02/saying-goodbye-to-python.html&gt;`_ --&gt;
+&lt;!-- are used by millions of Python developers, `Ben &lt;http://www.groovie.org/&gt;`_ created the Pylons/Pyramid --&gt;
+&lt;!-- framework --&gt;
+&lt;/div&gt;
+&lt;div class="section" id="trolling-the-giants"&gt;
+&lt;h3&gt;Trolling the giants&lt;/h3&gt;
+&lt;p&gt;If you think Mozilla is just the editor of a declining browser, please take
+some time to read &lt;a class="reference external" href="https://blog.mozilla.org/blog/2015/12/08/the-power-of-mozilla/"&gt;the power of Mozilla&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;There are a lot of expectations towards the organization. Lots of affection, concern, hope,
+and disappointment obviously. This leads to very strong criticism and attacks, which
+sometimes seem rather unfair. When you look at the overall landscape, who is the enemy?&lt;/p&gt;
+&lt;img alt="" src="images/twitter-quote-reaction.png" /&gt;
+&lt;p&gt;Now that I am within the organization I understand what is at stake. Especially
+when considering the difference of size with the competitors (~100x). It does not
+mean I agree with every decision, but I grasp why concessions are necessary.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="storage-team"&gt;
+&lt;h2&gt;Storage team&lt;/h2&gt;
+&lt;p&gt;I could not have joined a more desirable team. Our history takes its roots a long
+time ago. We've known each others for years! &lt;a class="reference external" href="http://ziade.org"&gt;Tarek&lt;/a&gt;'s books about Python were major
+pieces while I was learning, &lt;a class="reference external" href="https://notmyidea.org"&gt;Alex&lt;/a&gt; was a trainee at Makina Corpus when I arrived
+there 6 years ago, &lt;a class="reference external" href="https://nicolas.perriault.net/"&gt;N1k0&lt;/a&gt; was one of the organizers of the fantastic &amp;quot;DjangoCong&amp;quot; 2012
+edition, &lt;a class="reference external" href="https://github.com/Natim"&gt;Natim&lt;/a&gt; and &lt;a class="reference external" href="http://mathieu.agopian.info"&gt;magopian&lt;/a&gt; were awesome comrades during DjangoCon Toulouse four years ago...&lt;/p&gt;
+&lt;p&gt;We are all aligned on the vision we have for decentralizing the Web, we work in the
+same timezone, we all speak French and we share the same taste for exquisite
+home-made food and beverages :)&lt;/p&gt;
+&lt;p&gt;I shall also mention &lt;a class="reference external" href="https://github.com/michielbdejong"&gt;Michiel&lt;/a&gt; and &lt;a class="reference external" href="https://github.com/glasserc"&gt;Ethan&lt;/a&gt;
+who joined the team recently!&lt;/p&gt;
+&lt;p&gt;By the way, check out &lt;a class="reference external" href="http://www.servicedenuages.fr/"&gt;our blog&lt;/a&gt;, in French and English.&lt;/p&gt;
+&lt;img alt="" src="images/london-team-selfie.jpg" /&gt;
+&lt;div class="section" id="organization"&gt;
+&lt;h3&gt;Organization&lt;/h3&gt;
+&lt;p&gt;Since we mostly work on backend stuff, we don't suffer too much from release agenda
+and marketing communication. The server can usually be upgraded transparently
+and our priorities reassessed depending of the present meteorology.&lt;/p&gt;
+&lt;p&gt;We have precise goals for the current quarter, but we are mostly self-organized.
+The open-source aspect of our work is an important property but the main purpose
+is still to serve internal needs. Everything we do to make Kinto a community project
+for example requires a lot of extra efforts and willpower.&lt;/p&gt;
+&lt;p&gt;Nevertheless, shipping features on the server-side is usually a lot easier than what
+other teams handle on the client-side: we treat with one operating system, deploy one main version,
+can introspect the server remotely and monitor internal details without too much pain.&lt;/p&gt;
+&lt;p&gt;We don't do much of agile ceremonials. Maybe because we work remotely. Also maybe because
+we haven't designated anyone as a proper product owner.&lt;/p&gt;
+&lt;img alt="" src="images/douarnenez-meeting.jpg" /&gt;
+&lt;/div&gt;
+&lt;div class="section" id="our-first-project"&gt;
+&lt;h3&gt;Our first project&lt;/h3&gt;
+&lt;p&gt;When I joined the team, &lt;a class="reference external" href="https://www.mozilla.org/en-US/firefox/hello/"&gt;Firefox Hello&lt;/a&gt;
+had just been put in production, and the team was responsible for the server part:
+&lt;a class="reference external" href="https://github.com/mozilla-services/loop-server"&gt;Loop server&lt;/a&gt;.
+The server handles Websockets and handshakes using NodeJS and Redis.
+Fixing bugs and implementing minor features was possibly the best opportunity
+for me to dig into this project.&lt;/p&gt;
+&lt;p&gt;One of the first goals that came up was to build &lt;a class="reference external" href="http://www.servicedenuages.fr/en/service-de-nuages"&gt;a readinglist service&lt;/a&gt;, a sort
+of alternative to Pocket. We succeeded in setting up a stack, deploying and scaling
+it quite rapidly, working sometimes late at night. Since we wanted to capitalize on all the efforts we had done
+(API design, scaling, ...) we created &lt;a class="reference external" href="http://www.servicedenuages.fr/en/why-cliquet"&gt;a toolkit called Cliquet&lt;/a&gt;.
+I could talk about it at &lt;a class="reference external" href="http://mozilla-services.github.io/cliquet/talks/2015.07.pybcn/"&gt;PyBCN&lt;/a&gt;
+and &lt;a class="reference external" href="http://mozilla-services.github.io/cliquet/talks/2015.10.pyconfr/"&gt;Pycon-FR&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We even hacked on &lt;a class="reference external" href="https://github.com/mozilla/readability"&gt;readability&lt;/a&gt;, a JavaScript library
+that transforms a webpage into plain text. Maybe you executed it already if you used the &lt;a class="reference external" href="https://support.mozilla.org/en-US/kb/firefox-reader-view-clutter-free-web-pages"&gt;Firefox Reader Mode&lt;/a&gt;.
+Before joining our team officially, N1k0 made a &lt;a class="reference external" href="https://github.com/mozilla-services/readinglist-client"&gt;full-Web version of a readinglist app&lt;/a&gt; :)&lt;/p&gt;
+&lt;p&gt;Unfortunately, the readinglist project was shutdown at the last moment. That was hard to take,
+and we had quite a hard time recovering from this disappointment.&lt;/p&gt;
+&lt;img alt="" src="images/big-chair.jpg" /&gt;
+&lt;/div&gt;
+&lt;div class="section" id="booting-kinto"&gt;
+&lt;h3&gt;Booting Kinto&lt;/h3&gt;
+&lt;p&gt;We revamped the readinglist server code and saw an opportunity to bring back our idea of &lt;a class="reference external" href="http://www.servicedenuages.fr/en/generic-storage-ecosystem"&gt;a generic remote storage&lt;/a&gt;.
+Our first concrete use-case was a prototype
+for a payment and subscription service, which became a pretext to implement a fine-grained
+permissions API into our newly born Kinto.&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt; On Fri 26 December 2014, Mathieu wrote:
+&amp;gt; [...]
+&amp;gt; Whether Daybed will become a true Mozilla project or not is totally
+&amp;gt; unclear.
+&amp;gt;
+&lt;/pre&gt;
+&lt;p&gt;Daybed never became a Mozilla project, but its concepts were all re-implemented
+in Kinto!&lt;/p&gt;
+&lt;p&gt;Last summer, Firefox OS had no way to synchronize bookmarks and browsing history
+accross devices. We built &lt;a class="reference external" href="https://github.com/Kinto/kinto.js"&gt;kinto.js&lt;/a&gt;, a JavaScript
+client for Kinto, focused on offline capabilities and records synchronization.
+Personally, I learned a lot from this project. N1k0 was leading us towards modern
+and elegant patterns in JavaScript, and we could get our hands dirty with IndexedDB.&lt;/p&gt;
+&lt;p&gt;As a side project I could spend some time on an offline-first Web app, &lt;a class="reference external" href="http://github.com/leplatrem/Routina/"&gt;Routina&lt;/a&gt;,
+for which we did &lt;a class="reference external" href="https://github.com/Kinto/kinto-react-boilerplate/"&gt;a Kinto+React boilerplate&lt;/a&gt;.&lt;/p&gt;
+&lt;img alt="" src="images/orlando-kinto-meeting.jpg" /&gt;
+&lt;p&gt;We saw an opportunity to spread Kinto within the organization with the &lt;a class="reference external" href="http://www.servicedenuages.fr/en/summer-perspectives"&gt;Go Faster initiative&lt;/a&gt;, which consists in shipping
+settings, content and features quicker that the 6-weeks release cycle.&lt;/p&gt;
+&lt;p&gt;We even &lt;a class="reference external" href="https://github.com/mozilla-services/servicedenuages.fr/blob/7a3edb700d46b41207a8df97b6341f184818732c/content/2016.02.localisation-service.md"&gt;did some experiments&lt;/a&gt;
+to have the &lt;a class="reference external" href="https://kinto-ota.dev.mozaws.net/attachments/demo.mp4"&gt;UI translations shipped asynchronously&lt;/a&gt;!&lt;/p&gt;
+&lt;p&gt;Kinto was &lt;a class="reference external" href="https://news.ycombinator.com/item?id=10733164"&gt;featured&lt;/a&gt;
+&lt;a class="reference external" href="https://news.ycombinator.com/item?id=10994736"&gt;twice&lt;/a&gt; on Hackernews, and referred as an alternative
+to Parse and Firebase! This was both exciting and stressful, especially because it was my
+first experience of heavy exposure — unlike Tarek, N1k0 or Alexis who had lead notorious
+open source projects before, and already knew the downsides ;)&lt;/p&gt;
+&lt;p&gt;The funny part was someone saying &lt;em&gt;«Google has Firebase, Apple has Cloudkit,
+Facebook has Parse, now Mozilla has Kinto»&lt;/em&gt;: how do we reply that we are only a few
+folks hacking cool stuff and that top-management is probably not even aware of it?&lt;/p&gt;
+&lt;img alt="" src="images/london-laptop-pocmo.jpg" /&gt;
+&lt;/div&gt;
+&lt;div class="section" id="coming-next"&gt;
+&lt;h3&gt;Coming next&lt;/h3&gt;
+&lt;p&gt;In 2016, we now have Kinto instances &lt;a class="reference external" href="https://firefox.settings.services.mozilla.com"&gt;running in production&lt;/a&gt;,
+and about to be used by millions of users to &lt;a class="reference external" href="http://www.servicedenuages.fr/kinto-file-attachment"&gt;deliver assets of Firefox mobile&lt;/a&gt;,
+or &lt;a class="reference external" href="http://www.servicedenuages.fr/en/data-signature"&gt;revoke SSL certificates&lt;/a&gt;.
+It was a great opportunity to grow the eco-system, with &lt;a class="reference external" href="https://github.com/Kinto/kinto-admin/"&gt;a Web admin UI&lt;/a&gt;
+for example!&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+&amp;gt; On Fri 26 December 2014, Mathieu wrote:
+&amp;gt; [...]
+&amp;gt; I'm not likely to hack the C++ codebase of Firefox/Gecko, even though I
+&amp;gt; could and would if it was necessary.
+&amp;gt;
+&lt;/pre&gt;
+&lt;p&gt;Well, here you go! In the last few months, I've spent a good proportion of my time
+contributing to Gecko. We want to replace the existing system based on a big XML file
+downloaded every day with a sweet diff-based synchronization of JSON (&lt;a class="reference external" href="http://ziade.org/2016/02/22/kinto-work-week-recap/"&gt;more info...&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;On top of that, Kinto could become the key component for the &lt;a class="reference external" href="https://github.com/Kinto/storage-sync"&gt;storage.sync API&lt;/a&gt;
+implementation in Gecko, which would bring the &lt;a class="reference external" href="http://arewewebextensionsyet.com"&gt;Web Extension compability table&lt;/a&gt; close
+to 100%. As Michiel (founder of &lt;a class="reference external" href="https://remotestorage.io/"&gt;remoteStorage&lt;/a&gt;) said: this is really exciting because it would offer a decentralized
+remote storage with encryption support to everybody — &lt;em&gt;contrary to the one offered by Google by the way&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;One of the next challenges will presumably be related to horizontal scaling for
+massive usage of writable instances. We could also imagine integrating
+&lt;a class="reference external" href="https://github.com/Kinto/kinto-webpush/"&gt;WebPush notifications&lt;/a&gt;
+which landed in Firefox 44 and Chrome 42.&lt;/p&gt;
+&lt;p&gt;Whether Kinto will replace the existing Sync server or not, it is completely uncertain
+and would require quite a big amount of work. Although that could make sense :)&lt;/p&gt;
+&lt;p&gt;Mozilla has a lot of exciting projects in the pipeline, like &lt;a class="reference external" href="https://github.com/servo/servo/"&gt;Servo&lt;/a&gt;
+or &lt;a class="reference external" href="https://github.com/mozilla/tofino"&gt;Tofino&lt;/a&gt;, which will gain visibility in the
+coming months, and could benefit from having a synchronized remote storage!&lt;/p&gt;
+&lt;img alt="" src="images/internet-for-good.jpg" style="width: 100%;" /&gt;
+&lt;div class="admonition note"&gt;
+&lt;p class="first admonition-title"&gt;Note&lt;/p&gt;
+&lt;p class="last"&gt;Thanks Ethan, Areski and Remy for proofreading this article and giving
+me early feedback!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</content><category term="Personal"></category><category term="life"></category><category term="mozilla"></category></entry><entry><title>Big life changes</title><link href="https://blog.mathieu-leplatre.info/big-life-changes.html" rel="alternate"></link><published>2014-12-26T14:10:00+01:00</published><updated>2014-12-26T14:10:00+01:00</updated><author><name>Mathieu Leplatre</name></author><id>tag:blog.mathieu-leplatre.info,2014-12-26:/big-life-changes.html</id><summary type="html">&lt;p&gt;So far I haven't written anything truely personal on this blog, but I was
+asked a lot of questions recently, and thought the answers might be worth a post :)&lt;/p&gt;
+&lt;p&gt;First of all, &lt;strong&gt;thank you very much all of you&lt;/strong&gt; for the massive amount of
+&lt;a class="reference external" href="https://twitter.com/leplatrem/status/542993732367556608"&gt;positive&lt;/a&gt; &lt;a class="reference external" href="https://www.linkedin.com/pulse/activities/mathieu-leplatre%2B0_1DkGqDxItMdaF_sJjg5h8J?trk=mp-reader-h"&gt;feedback&lt;/a&gt;
+regarding my new position …&lt;/p&gt;</summary><content type="html">&lt;p&gt;So far I haven't written anything truely personal on this blog, but I was
+asked a lot of questions recently, and thought the answers might be worth a post :)&lt;/p&gt;
+&lt;p&gt;First of all, &lt;strong&gt;thank you very much all of you&lt;/strong&gt; for the massive amount of
+&lt;a class="reference external" href="https://twitter.com/leplatrem/status/542993732367556608"&gt;positive&lt;/a&gt; &lt;a class="reference external" href="https://www.linkedin.com/pulse/activities/mathieu-leplatre%2B0_1DkGqDxItMdaF_sJjg5h8J?trk=mp-reader-h"&gt;feedback&lt;/a&gt;
+regarding my new position! Being taken on in the Cloud Services team at Mozilla is definitely very exciting!&lt;/p&gt;
+&lt;p&gt;But that is not the only upcoming change: we moved from Toulouse to Barcelona!
+Combining several big life changes in a very short period can be stimulating, but
+it's undoubtedly anxiety producing!&lt;/p&gt;
+&lt;div class="section" id="about-to-change"&gt;
+&lt;h2&gt;About to change&lt;/h2&gt;
+&lt;div class="section" id="where-i-live"&gt;
+&lt;h3&gt;Where I live...&lt;/h3&gt;
+&lt;p&gt;I arrived in Toulouse 10 years ago, but feel like it was yesterday. Even
+though it was not continuous because I lived in Middle-East and South America meanwhile,
+Toulouse became my world, with close friends and a lot of memories.&lt;/p&gt;
+&lt;p&gt;Barcelona is the hometown of my partner, and the kids already speak Catalan.&lt;/p&gt;
+&lt;p&gt;I believe I am prepared for this, ready to forget about many little details,
+like french bakeries and fresh tap water, but I can already forsee many positive
+aspects of living in a sunny coastal metropolis :)&lt;/p&gt;
+&lt;img alt="by MorBCN" src="/images/barcelona.jpg" /&gt;
+&lt;/div&gt;
+&lt;div class="section" id="who-i-work-for"&gt;
+&lt;h3&gt;Who I work for...&lt;/h3&gt;
+&lt;p&gt;More than 4 years ago, I left Météo France to join &lt;a class="reference external" href="http://makina-corpus.com"&gt;Makina Corpus&lt;/a&gt;,
+a small company dedicated to Free and Open Source Software.&lt;/p&gt;
+&lt;p&gt;As a developer, it feels like I was born there! I discovered the interactions
+with communities, the art and subtleties of maintening software in the open.&lt;/p&gt;
+&lt;p&gt;I could really take advantage of the freedom we had within the teams. The atmosphere
+was geeky and acquisition of knowledge was permanent! Being professional, about
+code quality, method, approach and taste for sharing, all comes from there.&lt;/p&gt;
+&lt;p&gt;It was hence hard to leave and tear that apart, since I certainly could have worked remotely from Barcelona. On top of that, &lt;a class="reference external" href="http://geotrek.fr"&gt;the main product&lt;/a&gt; I was working on is
+truely becoming a reference.&lt;/p&gt;
+&lt;p&gt;But the opportunity to join Mozilla represents a true aknowledgement and progression
+in the world of Open Source that one can't let pass by :) &lt;a class="footnote-reference" href="#footnote-1" id="footnote-reference-1"&gt;[1]&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="how-i-work"&gt;
+&lt;h3&gt;How I work...&lt;/h3&gt;
+&lt;p&gt;Mozilla has no offices in Barcelona yet, so I will be working remotely from
+a coworking space. Working at home is not my cup of tea: I'm addicted to cycling in
+the morning and self-discipline isn't one of my strong points anyway.&lt;/p&gt;
+&lt;p&gt;There are many (many) coworking spaces, and I was told there's a few other Mozillians
+down there... &lt;em&gt;to be continued&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;The Cloud Services team is spread around the world, and interacting with people
+on several timezones (from San Francisco to Melbourne) will be completely new to me!
+This represents a couple of challenges, but I feel confident since the interactions
+are mainly focused on software, with the usual tools like IRC, Trello, Github or Bugzilla.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="what-i-build"&gt;
+&lt;h3&gt;What I build...&lt;/h3&gt;
+&lt;p&gt;At Meteo-France or Makina Corpus, the fields of application were almost always
+very specific, and the number of simultaneous users was generally low. Most of
+the time, the challenges were about delivering some complex features, in a
+rather short period.&lt;/p&gt;
+&lt;p&gt;At Mozilla, scale and performance is the difficult task. I was used to take advantage
+of cache and optimizations techniques to handle long complex CPU-consuming processes,
+but now I will have to learn how to handle millions of small simple requests.&lt;/p&gt;
+&lt;p&gt;Likewise, authentication, cryptography and security aspects have never been crucial in my past
+experiences. But when you join an organization whose objective is to build solutions
+for a sustainable Open Web, data privacy is the key and nothing should be missed!&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="sweep-curiosity-away"&gt;
+&lt;h2&gt;Sweep curiosity away&lt;/h2&gt;
+&lt;p&gt;This part is a tentative to answer most questions I received so far :)&lt;/p&gt;
+&lt;img alt="" src="/images/firefox-wear-pride.jpg" /&gt;
+&lt;div class="section" id="what-was-the-recruiting-process"&gt;
+&lt;h3&gt;What was the recruiting process ?&lt;/h3&gt;
+&lt;p&gt;For almost two years, we have been hacking on &lt;a class="reference external" href="http://daybed.readthedocs.org"&gt;Daybed&lt;/a&gt; with
+Alexis and Remy, two members of the Cloud services team. We met several times,
+at various Python or Django conferences, and we let us understand that if
+a position would be available at Mozilla, we would be mutually delighted to work together!&lt;/p&gt;
+&lt;p&gt;At the end of the summer, we discussed it again, and the official recruitment
+process started! After several interviews, I received a proposition :)&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="oh-so-will-you-work-on-the-browser"&gt;
+&lt;h3&gt;Oh, so will you work on the browser ?&lt;/h3&gt;
+&lt;p&gt;Yes and no!&lt;/p&gt;
+&lt;p&gt;Yes, because most of the services deployed by the Cloud services team
+provide features to the Firefox browser (e.g. &lt;em&gt;Firefox Sync&lt;/em&gt;, &lt;em&gt;Firefox Hello&lt;/em&gt;, ...).&lt;/p&gt;
+&lt;p&gt;No, because I'm not likely to hack the C++ codebase of Firefox/Gecko, even though I
+could and would if it was necessary.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="what-will-do-in-the-cloud-services-team"&gt;
+&lt;h3&gt;What will do in the Cloud services team ?&lt;/h3&gt;
+&lt;p&gt;The team is in charge of various Open Source applications and libraries.&lt;/p&gt;
+&lt;p&gt;We basically build Web APIs that are used within Mozilla products. For the most famous:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Sync&lt;/li&gt;
+&lt;li&gt;Firefox Accounts&lt;/li&gt;
+&lt;li&gt;Location service&lt;/li&gt;
+&lt;li&gt;Marketplace&lt;/li&gt;
+&lt;li&gt;... &lt;a class="reference external" href="https://wiki.mozilla.org/CloudServices"&gt;and more&lt;/a&gt; !&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Personnaly, I will participate at the maintenance of Firefox Hello services,
+and start some new projects in regards to remote data storage, like bringing cloud features
+to the &lt;a class="reference external" href="https://support.mozilla.org/en-US/kb/how-to-use-reader-mode"&gt;reader mode&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Indirectly, I will of course bring some energy to the several underlying projects,
+such as &lt;a class="reference external" href="http://cornice.readthedocs.org"&gt;Cornice&lt;/a&gt; or &lt;a class="reference external" href="http://circus.readthedocs.org"&gt;Circus&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="how-does-mozilla-generate-revenue-to-pay-you"&gt;
+&lt;h3&gt;How does Mozilla generate revenue to pay you ?&lt;/h3&gt;
+&lt;p&gt;There are several entities: the Mozilla Project, founded in 1998 to resurrect
+Netscape; the Mozilla Foundation, a non-profit organization founded
+in 2003, and the Mozilla Corporation, a subsidiary founded in 2005, that handles
+the goals of the former.&lt;/p&gt;
+&lt;p&gt;Basically, I am an employee of the Mozilla Corporation, which &lt;a class="reference external" href="https://www.mozilla.org/en-US/foundation/annualreport/2013/faq/"&gt;earns money from the search feature in Firefox&lt;/a&gt;, thinly
+augmented with donations and grants.&lt;/p&gt;
+&lt;p&gt;The key is how the money is spent, and this is what makes the Mozilla Corporation &lt;strong&gt;unique&lt;/strong&gt;.
+Just read the &lt;a class="reference external" href="https://www.mozilla.org/en-US/mission/"&gt;Mozilla Manifesto&lt;/a&gt;: there is no other company in the world whose aim is to maintain the Web as a universal resource for the whole humanity!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="will-you-still-use-chromium"&gt;
+&lt;h3&gt;Will you still use Chromium ?&lt;/h3&gt;
+&lt;p&gt;I have been using Firefox since the 0.8 version, in early 2004. Before that I wasn't
+particularly attached to any browser on the market, even if Netscape and Mozilla
+were the ones I used most extensively at the University. From that date, I
+installed hundreds of Firefox, in many places of the world :)&lt;/p&gt;
+&lt;img alt="" src="/images/firefox-qatar-2006.jpg" /&gt;
+&lt;p&gt;I remember that I started to use Chromium to get the web version of Tweetdeck, in 2011.
+A few months later I was working on a JavaScript project with offline capabilities,
+bound to WebSQL, thus not supported by Firefox. Chromium hadn't become my main browser yet.
+The next year, we started a cartography application with huge vectorial datasets.
+Chromium was like ten times faster at rendering massive amounts of SVG. And with time,
+I became addicted to the Chrome dev tools, from profiling to inspecting pseudo-elements.
+Firefox was not my main browser anymore.&lt;/p&gt;
+&lt;p&gt;I've started to use it back for daily stuff a few months ago, to decontaminate
+myself before the big day :) And I must admit that I like it so far!
+The developper tools have improved greatly, and it does not feel sluggish at all!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="what-does-this-mean-for-daybed"&gt;
+&lt;h3&gt;What does this mean for Daybed ?&lt;/h3&gt;
+&lt;p&gt;Most Daybed contributors are now working together in the same team, and this is
+very exciting! Whether Daybed will become a true Mozilla project or not is totally
+unclear.&lt;/p&gt;
+&lt;p&gt;But it does not really matter, since the most important thing is the experience we've built
+together as a team on this project!&lt;/p&gt;
+&lt;p&gt;Daybed is still like a lab, where we can experiment stuff and build our vision of
+remote data storage.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Stay tuned!&lt;/em&gt;&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="footnote-1" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#footnote-reference-1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Hey come on! Founders of pip, virtualenv, Pylons, circus, pelican, ... are my new team mates!&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</content><category term="Personal"></category><category term="life"></category><category term="mozilla"></category></entry></feed>

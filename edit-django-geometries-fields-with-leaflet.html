@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Edit Django geometries fields with Leaflet - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Edit Django geometries fields with Leaflet</h1>
+<time datetime="2014-03-26T00:00:00+01:00">Wed 26 March 2014</time></header>
+<article>
+    <p>After the <a class="reference external" href="https://blog.mathieu-leplatre.info/geodjango-maps-with-leaflet.html">previous article</a>
+regarding Django, Leaflet and GeoJSON, I wanted to highlight
+the simplicity of GeoDjango geometries creation and edition with <a class="reference external" href="https://github.com/makinacorpus/django-leaflet">django-leaflet</a>.</p>
+<p>It relies on <a class="reference external" href="https://github.com/Leaflet/Leaflet.draw">Leaflet.draw</a> for user interactions.</p>
+<img alt="" src="/images/leaflet-form-widget.png" />
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">note:</th><td class="field-body">Until recently, it was restricted to Django 1.6+, but <a class="reference external" href="https://github.com/makinacorpus/django-leaflet/pull/63">Gaël contributed</a>
+a backport that allows Django 1.4.2+ users to have them too !</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="in-django-adminsite">
+<h2>In Django Adminsite</h2>
+<div class="section" id="given-a-geodjango-model-as-usual">
+<h3>Given a GeoDjango model as usual</h3>
+<div class="highlight"><pre><span></span><span class="c1"># models.py</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.contrib.gis.db</span> <span class="kn">import</span> <span class="n">models</span> <span class="k">as</span> <span class="n">gismodels</span>
+
+
+<span class="k">class</span> <span class="nc">MushroomSpot</span><span class="p">(</span><span class="n">gismodels</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
+    <span class="n">geom</span> <span class="o">=</span> <span class="n">gismodels</span><span class="o">.</span><span class="n">PolygonField</span><span class="p">()</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="n">gismodels</span><span class="o">.</span><span class="n">GeoManager</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+<div class="section" id="register-using-leaflet-geoadmin">
+<h3>Register using Leaflet GeoAdmin</h3>
+<p>It's as simple as :</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="kn">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">leaflet.admin</span> <span class="kn">import</span> <span class="n">LeafletGeoAdmin</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">MushroomSpot</span>
+
+
+<span class="n">admin</span><span class="o">.</span><span class="n">site</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">MushroomSpot</span><span class="p">,</span> <span class="n">LeafletGeoAdmin</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="in-forms-views">
+<h2>In forms views</h2>
+<div class="section" id="edition-view-usign-class-based-view">
+<h3>Edition view usign Class-Based View</h3>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">forms</span>
+<span class="kn">from</span> <span class="nn">django.views.generic</span> <span class="kn">import</span> <span class="n">UpdateView</span>
+<span class="kn">from</span> <span class="nn">leaflet.forms.widgets</span> <span class="kn">import</span> <span class="n">LeafletWidget</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">MushroomSpot</span>
+
+
+<span class="k">class</span> <span class="nc">MushroomSpotForm</span><span class="p">(</span><span class="n">forms</span><span class="o">.</span><span class="n">ModelForm</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">MushroomSpot</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;geom&#39;</span><span class="p">)</span>
+        <span class="n">widgets</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;geom&#39;</span><span class="p">:</span> <span class="n">LeafletWidget</span><span class="p">()}</span>
+
+
+<span class="k">class</span> <span class="nc">EditMushroomSpot</span><span class="p">(</span><span class="n">UpdateView</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">MushroomSpot</span>
+    <span class="n">form_class</span> <span class="o">=</span> <span class="n">MushroomSpotForm</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s1">&#39;form.html&#39;</span>
+</pre></div>
+</div>
+<div class="section" id="form-template-with-leaflet-tags">
+<h3>Form template with Leaflet tags</h3>
+<div class="highlight"><pre><span></span>{% load leaflet_tags %}
+<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    {% leaflet_js plugins=&quot;forms&quot; %}
+    {% leaflet_css plugins=&quot;forms&quot; %}
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Edit {{ object }}<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">form</span> <span class="na">method</span><span class="o">=</span><span class="s">&quot;POST&quot;</span><span class="p">&gt;</span>
+        {{ form }}
+        {% csrf_token %}
+        <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;submit&quot;</span><span class="p">/&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">form</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="going-further">
+<h2>Going further...</h2>
+<p>The Django form widget has <a class="reference external" href="https://github.com/makinacorpus/django-leaflet/blob/master/leaflet/forms/widgets.py">a couple of options</a>, that can tweak some aspects of
+the map (size, read-only, ...).</p>
+<p>But some advanced usage might require specific interactions or behaviour, beyond
+Django <a class="reference external" href="https://docs.djangoproject.com/en/1.6/ref/forms/fields/#creating-custom-fields">field</a> and <a class="reference external" href="https://docs.djangoproject.com/en/1.6/ref/forms/widgets/#base-widget-classes">widgets</a> customizations.</p>
+<div class="section" id="custom-field-javascript-component">
+<h3>Custom field JavaScript component</h3>
+<p>The frontend field component behaviour and initialization is also pluggable, and
+can be used to add extra controls, layers or whatever.</p>
+<div class="highlight"><pre><span></span><span class="nx">Custom</span><span class="p">.</span><span class="nx">GeometryField</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">GeometryField</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">addTo</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">map</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">L</span><span class="p">.</span><span class="nx">GeometryField</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">addTo</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span><span class="w"> </span><span class="nx">map</span><span class="p">);</span>
+
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">filecontrol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">map</span><span class="p">.</span><span class="nx">filecontrol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">Control</span><span class="p">.</span><span class="nx">fileLayerLoad</span><span class="p">();</span>
+<span class="w">        </span><span class="nx">map</span><span class="p">.</span><span class="nx">addControl</span><span class="p">(</span><span class="nx">filecontrol</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CustomLeafletWidget</span><span class="p">(</span><span class="n">LeafletWidget</span><span class="p">):</span>
+    <span class="n">geometry_field_class</span> <span class="o">=</span> <span class="s1">&#39;Custom.GeometryField&#39;</span>
+</pre></div>
+</div>
+<div class="section" id="custom-de-serialization-of-form-field-value">
+<h3>Custom de/serialization of form field value</h3>
+<p>The Javascript component for de/serializing fields value is pluggable, can be used to override
+the way the geometries are sent to the form.</p>
+<div class="highlight"><pre><span></span><span class="nx">Custom</span><span class="p">.</span><span class="nx">FieldStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">FieldStore</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">save</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">layer</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">this</span><span class="p">.</span><span class="nx">formfield</span><span class="p">.</span><span class="nx">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="s2">&quot;latlngs&quot;</span><span class="o">:</span><span class="w"> </span><span class="nx">layer</span><span class="p">.</span><span class="nx">getLatLngs</span><span class="p">()};</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CustomLeafletWidget</span><span class="p">(</span><span class="n">LeafletWidget</span><span class="p">):</span>
+    <span class="n">field_store_class</span> <span class="o">=</span> <span class="s1">&#39;Custom.FieldStore&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="help-us-improve-django-leaflet">
+<h2>Help us improve django-leaflet !</h2>
+<p>We built <em>django-leaflet</em> at <a class="reference external" href="http://makinacorpus.com">Makina Corpus</a>
+for some our Webmapping projects. It is used in production and gives
+us satisfaction in most use-cases.</p>
+<p>If our initial design does not match your needs, please tell us what you
+think !</p>
+<p>For example, personnally, I would like to remove the <cite>&lt;script&gt;</cite> tag in the <a class="reference external" href="https://github.com/makinacorpus/django-leaflet/blob/0.13.0/leaflet/templates/leaflet/_leaflet_map.html">map template</a>, and pass configuration entries through the DOM instead...</p>
+<p>...your turn !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/leaflet.html">#leaflet</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/geojson.html">#geojson</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/edit-django-geometries-fields-with-leaflet.html';
+      this.page.identifier = 'edit-django-geometries-fields-with-leaflet';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

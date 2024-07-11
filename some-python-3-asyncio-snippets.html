@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Some Python 3 asyncio snippets - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Some Python 3 asyncio snippets</h1>
+<time datetime="2017-08-31T00:00:00+02:00">Thu 31 August 2017</time></header>
+<article>
+    <p>Until recently, I had never taken the chance to get my hands dirty with <a class="reference external" href="https://docs.python.org/3/library/asyncio.html#module-asyncio">asyncio</a>. But now that our production stacks run Python 3.6, there is no false excuse.</p>
+<p>I had done a lot of JavaScript before — with promises and <tt class="docutils literal">async</tt>/<tt class="docutils literal">await</tt> syntax — but still, diving into the <a class="reference external" href="http://lucumr.pocoo.org/2016/10/30/i-dont-understand-asyncio/">many primitives of asyncio</a> was far from immediate. Task versus future? Wrapped coroutine? Concurrent futures?</p>
+<p>This article gathers some notes and snippets I wish I had up my sleeve before starting.</p>
+<p>If you see something that bugs you, please use the comments!</p>
+<img alt="" class="align-center" src="/images/async_juggling.jpg" />
+<div class="section" id="about-the-concepts">
+<h2>About the concepts</h2>
+<p>A <strong>coroutine</strong> is basically an async function. But hey, it is also used to describe the object returned an by async function when you don't <tt class="docutils literal">await</tt> it.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">async</span> <span class="k">def</span> <span class="nf">poll</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+<span class="o">...</span>     <span class="k">return</span> <span class="n">n</span>
+<span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">poll</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">&lt;</span><span class="n">coroutine</span> <span class="nb">object</span> <span class="n">poll</span> <span class="n">at</span> <span class="mh">0x7f0e37cfbe08</span><span class="o">&gt;</span>
+</pre></div>
+<p>Unlike promises in JavaScript, calling a coroutine does not start its code running. You have to schedule it manually, or simply <tt class="docutils literal">await</tt> it.</p>
+<p>You can only use the <tt class="docutils literal">await</tt> keyword from an async function. And there will always be a blocking call to <tt class="docutils literal">loop.run_until_complete()</tt> somewhere in the code.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="o">...</span>     <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">poll</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="o">...</span>     <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+<span class="mi">1</span>
+</pre></div>
+<p>A <strong>future</strong> is basically like a JavaScript promise — a placeholder for an initially unknown value. A <strong>task</strong> wraps a coroutine and its execution is scheduled in the event loop, and provides the future's interface. But you never instanciate it yourself. The API and documentation about futures and tasks are sometimes confusing about their distinction, so I just considered them synonyms so far.</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="n">poll</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="o">&lt;</span><span class="n">Task</span> <span class="n">pending</span> <span class="n">coro</span><span class="o">=&lt;</span><span class="n">poll</span><span class="p">()</span> <span class="n">running</span> <span class="n">at</span> <span class="o">&lt;</span><span class="n">stdin</span><span class="o">&gt;</span><span class="p">:</span><span class="mi">1</span><span class="o">&gt;&gt;</span>
+</pre></div>
+<p>The future/task object can be passed around. It has a state, a result and a potential exception. And you can await it:</p>
+<div class="highlight"><pre><span></span><span class="n">future</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="n">poll</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">future</span>
+</pre></div>
+</div>
+<div class="section" id="run-coroutines-in-parallel">
+<h2>Run coroutines in parallel</h2>
+<div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">long_task</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+<span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;aa&quot;</span><span class="p">]</span>
+<span class="n">futures</span> <span class="o">=</span> <span class="p">[</span><span class="n">long_task</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">]</span>
+<span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">futures</span><span class="p">)</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+</pre></div>
+<p>As a human™ I would have excepted the <tt class="docutils literal">asyncio.wait()</tt> function to run futures in parallel and return their results, but it doesn't exactly do that. It returns two lists of futures and you have to unwrap its value with <tt class="docutils literal">result()</tt>. And careful, the signature is not the same (a list of futures versus futures in <tt class="docutils literal">*args</tt>).</p>
+<div class="highlight"><pre><span></span><span class="n">futures</span> <span class="o">=</span> <span class="p">[</span><span class="n">long_task</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">]</span>
+<span class="n">done</span><span class="p">,</span> <span class="n">pending</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span> <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">done</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="section" id="run-blocking-code-in-parallel">
+<h2>Run blocking code in parallel</h2>
+<p>Blocking code can be executed accross a pool of threads or processes using <a class="reference external" href="https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.Executor">executors</a>.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">concurrent.futures</span>
+
+<span class="k">def</span> <span class="nf">long_task</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+<span class="n">executor</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;aa&quot;</span><span class="p">]</span>
+<span class="n">futures</span> <span class="o">=</span> <span class="p">[</span><span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="n">executor</span><span class="p">,</span> <span class="n">long_task</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">]</span>
+<span class="n">results</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">futures</span><span class="p">)</span>
+<span class="k">for</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="asynchronous-stream-from-file-like-objects">
+<h2>Asynchronous stream from file-like objects</h2>
+<p>Reading from a file or standard input like <tt class="docutils literal">sys.stdin</tt> is blocking. In order to treat them as asynchronuous streams of data, we leverage <tt class="docutils literal">asyncio.StreamReader()</tt> and expose them as <a class="reference external" href="https://www.python.org/dev/peps/pep-0525/">async generators</a>:</p>
+<div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">def</span> <span class="nf">stream_as_generator</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">stream</span><span class="p">):</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+    <span class="n">reader_protocol</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">StreamReaderProtocol</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">loop</span><span class="o">.</span><span class="n">connect_read_pipe</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">reader_protocol</span><span class="p">,</span> <span class="n">stream</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># EOF.</span>
+            <span class="k">break</span>
+        <span class="k">yield</span> <span class="n">line</span>
+</pre></div>
+<p>The generator is awaited with an <tt class="docutils literal">async for</tt>:</p>
+<div class="highlight"><pre><span></span><span class="k">async</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">stream_as_generator</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="process-data-stream-by-chunk-asynchronously">
+<h2>Process data stream by chunk asynchronously</h2>
+<div class="highlight"><pre><span></span><span class="k">async</span> <span class="n">parse_urls</span><span class="p">():</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">read_stuff</span><span class="p">():</span>
+        <span class="k">yield</span> <span class="n">u</span>
+
+<span class="k">async</span> <span class="n">download</span><span class="p">(</span><span class="n">urls</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="n">download</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+        <span class="k">while</span> <span class="s2">&quot;chunks to read&quot;</span><span class="p">:</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">yield</span> <span class="n">chunk</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">split_lines</span><span class="p">(</span><span class="n">stream</span><span class="p">):</span>
+    <span class="n">leftover</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">async</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">chunk_str</span> <span class="o">=</span> <span class="n">leftover</span> <span class="o">+</span> <span class="n">chunk_str</span>
+        <span class="n">chunk_str</span> <span class="o">=</span> <span class="n">chunk_str</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">leftover</span> <span class="o">=</span> <span class="n">lines</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">lines</span>
+
+<span class="n">urls_generator</span> <span class="o">=</span> <span class="n">parse_urls</span><span class="p">()</span>
+<span class="n">data_generator</span> <span class="o">=</span> <span class="n">download</span><span class="p">(</span><span class="n">urls_generator</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">split_lines</span><span class="p">(</span><span class="n">data_generator</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="mock-aiohttp-responses">
+<h2>Mock aiohttp responses</h2>
+<p>Suppose the following sample code using <a class="reference external" href="http://aiohttp.readthedocs.io/">aiohttp</a>:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">aiohttp</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">get_username</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">with</span> <span class="n">aiohttp</span><span class="o">.</span><span class="n">ClientSession</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span> <span class="k">as</span> <span class="n">session</span><span class="p">:</span>
+        <span class="k">async</span> <span class="k">with</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">SERVER_URL</span><span class="si">}</span><span class="s2">/profile&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">response</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">]</span>
+</pre></div>
+<p>We can test it using the amazing <a class="reference external" href="https://asynctest.readthedocs.io/">asynctest</a> and <a class="reference external" href="https://github.com/pnuckowski/aioresponses/">aioresponses</a> libraries:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asynctest</span>
+<span class="kn">from</span> <span class="nn">aioresponses</span> <span class="kn">import</span> <span class="n">aioresponses</span>
+
+
+<span class="k">class</span> <span class="nc">Test</span><span class="p">(</span><span class="n">asynctest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="n">remote_content</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;/profile&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="s2">&quot;Ada&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mocked</span> <span class="o">=</span> <span class="n">aioresponses</span><span class="p">()</span>
+        <span class="n">mocked</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">url</span><span class="p">,</span> <span class="n">payload</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_content</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">mocked</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SERVER_URL</span> <span class="o">+</span> <span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addCleanup</span><span class="p">(</span><span class="n">mocked</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">test_get_username</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_username</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">u</span> <span class="o">==</span> <span class="s2">&quot;Ada&quot;</span>
+</pre></div>
+</div>
+<div class="section" id="consume-queue-in-batches">
+<h2>Consume queue in batches</h2>
+<p>A producer feeds items into a queue, and consumers builds batches from them. When it takes too much time to fill a batch, it proceeds with the current one.</p>
+<p>By marking the tasks as done in the queue, we can await the queue and know when everything is processed.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">async_timeout</span>
+
+<span class="k">def</span> <span class="nf">markdone</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a callback that will mark `n` queue items done.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">done</span><span class="p">(</span><span class="n">task</span><span class="p">):</span>
+        <span class="p">[</span><span class="n">queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">task</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>  <span class="c1"># will raise exception if failed.</span>
+    <span class="k">return</span> <span class="n">done</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">consume</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">executor</span><span class="p">):</span>
+    <span class="k">while</span> <span class="s1">&#39;consumer is not cancelled&#39;</span><span class="p">:</span>
+        <span class="n">batch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">async_timeout</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="n">WAIT_TIMEOUT</span><span class="p">):</span>
+                <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">BATCH_SIZE</span><span class="p">:</span>
+                    <span class="c1"># Wait for new items.</span>
+                    <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                    <span class="n">batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="n">batch</span><span class="p">:</span>
+            <span class="n">task</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">(</span><span class="n">executor</span><span class="p">,</span> <span class="n">long_sync_task</span><span class="p">,</span> <span class="n">batch</span><span class="p">)</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">add_done_callback</span><span class="p">(</span><span class="n">markdone</span><span class="p">(</span><span class="n">queue</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)))</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">loop</span><span class="p">):</span>
+    <span class="n">executor</span> <span class="o">=</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">NB_THREADS</span><span class="p">)</span>
+
+    <span class="n">queue</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+
+    <span class="c1"># Schedule the consumer</span>
+    <span class="n">consumer_coro</span> <span class="o">=</span> <span class="n">consume</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">executor</span><span class="p">)</span>
+    <span class="n">consumer</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="n">consumer_coro</span><span class="p">)</span>
+
+    <span class="c1"># Run the producer and wait for completion</span>
+    <span class="k">await</span> <span class="n">produce</span><span class="p">(</span><span class="n">loop</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span>
+    <span class="c1"># Wait until the consumer is done consuming everything.</span>
+    <span class="k">await</span> <span class="n">queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+    <span class="c1"># The consumer is still awaiting for the producer, cancel it.</span>
+    <span class="n">consumer</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+</pre></div>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/asyncio.html">#asyncio</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/some-python-3-asyncio-snippets.html';
+      this.page.identifier = 'some-python-3-asyncio-snippets';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

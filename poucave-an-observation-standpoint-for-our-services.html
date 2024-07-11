@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Poucave, an observation standpoint for our services - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Poucave, an observation standpoint for our services</h1>
+<time datetime="2021-05-11T00:00:00+02:00">Tue 11 May 2021</time></header>
+<article>
+    <p>Most of us are relatively familiar with system monitoring: we monitor RAM, CPU, or disk usage over time and receive alerts when some thresholds are reached.</p>
+<p>But the quality of a whole service is rarely defined by the health of a single isolated server. Rather, it is the interactions between the parts that is often the source of problems.</p>
+<p>What about the consistency between the CDN cache and the origins? The last run of a scheduled task? Imminent expiration of your SSL certificates? The amount of clients side errors? The latency of critical HTTP endpoints? The number of pending pull-requests on your repositories?</p>
+<p>Poucave is a small web app that executes a series of domain specific checks for the parts and their interactions that make up our service.</p>
+<div class="section" id="where-did-we-start-from">
+<h2>Where did we start from?</h2>
+<p>Centuries ago, telescopes helped our ancestors to distinguish a single shining dot from a whole constellation. Yes, that's how far we started from!</p>
+<p>We used to consider our service healthy as long as operating system resources were still available and no HTTP 5XX error was served. This idea was implemented by introducing a <tt class="docutils literal">/__heartbeat__</tt> endpoint on each server, that executes some internal health checks and returns a <tt class="docutils literal">200 Ok</tt> if everything is fine and a <tt class="docutils literal">500 Internal Server Error</tt> if something is wrong. We made this <a class="reference external" href="https://github.com/mozilla-services/dockerflow">a requirement</a> for every deployed application, and were polling this HTTP endpoint from an external alerting service. Operators are paged if it keeps failing for a while.</p>
+<p>This served us well. But our service was integrated in a complex ecosystem, and making sure that it was 100% reliable took more than that. We had a CDN, push notifications, some scheduled tasks, data synchronization on clients, etc. Our heartbeat endpoints could be all green, but still, we sometimes had users reporting issues or inconsistencies.</p>
+<p>Enhancing the capacities of our heartbeat endpoint would break the separation of concerns. Apart from not being very robust, a system shouldn't be in charge of checking external components that are more related to the way it's deployed than its own functional scope. Concretely, verifying a database connection from the server hearbeart is fine, but not querying the clients Telemetry data.</p>
+<p>Discovering issues on your system because some users complain is never a great feeling. And less when subsequent investigations and troubleshooting are taking time and require a lot of knownledge about all sub-systems and their interactions.</p>
+<p>We needed to improve our ability to see. See the constellation of systems, instead of just a single one.</p>
+<img alt="Early depiction of a ‘Dutch telescope’ from the “Emblemata of zinne-werck” (Middelburg, 1624)" class="align-center" src="https://blog.mathieu-leplatre.info/images/poucave-emblemata-1624.jpg" />
+</div>
+<div class="section" id="what-do-we-need">
+<h2>What do we need?</h2>
+<p>We wanted to identify the root cause of incidents as fast as possible. For this, we needed to:</p>
+<ul class="simple">
+<li>see our service as whole, with all its sub-parts, including clients;</li>
+<li>document each part and interactions;</li>
+<li>monitor and be alerted on sub-part failures;</li>
+<li>track service reliability over time;</li>
+<li>capitalize knownledge about troubleshooting and past issue resolutions.</li>
+</ul>
+<p>Being able to see the problem as a whole would give more insights about the fix. We needed a solution to help us identify the root cause faster, and reassure our users.</p>
+<p>In order to include the clients behaviour, we could rely on the company real-time Telemetry platform. A couple of years ago, we unified the way our clients would report <a class="reference external" href="https://searchfox.org/mozilla-central/rev/0bcf81557b89e7757c44e25bb4bc7f4cb8619dc9/services/common/uptake-telemetry.js">uptake Telemetry</a> (success, up-to-date, network-error, certificate-error, etc.), and that is super useful to write generic checks about error rates for multiple different components.</p>
+<p>Since some parts of our service are only accesible via our VPN, like the signature infrastructure, an external ping service cannot reach them. This new tool would serve as a bridge between the two.</p>
+<p>Not every check has to necessarily be monitored by an alerting service. Some can just be indications for operators, or even never fail and just mash-up information from the underlying sub-parts.</p>
+</div>
+<div class="section" id="our-solution">
+<h2>Our solution</h2>
+<p>No rocket science. The same idea as our heartbeat endpoint but from an independant service, and infinitely extensible.</p>
+<p>A simple and stupid HTTP API, no backend, that starts from a configuration file where checks are listed:</p>
+<div class="highlight"><pre><span></span><span class="k">[checks.a-project.a-check]</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;Heartbeat of the public read-only instance.&quot;</span>
+<span class="n">module</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;checks.core.heartbeat&quot;</span>
+<span class="n">params</span><span class="p">.</span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://firefox.settings.services.mozilla.com/v1/__heartbeat__&quot;</span>
+</pre></div>
+<p>... and that exposes each execution via a dedicated endpoint <tt class="docutils literal">GET <span class="pre">/checks/{a-project}/{a-check}</span></tt>.</p>
+<p>The checks source code for our service becomes a repository of knowledge on how to operate and troubleshoot it.
+I decided to use Python, so that almost anybody could read or write the checks implementation.</p>
+<p>I chose a simple async framework, <a class="reference external" href="https://docs.aiohttp.org">aiohttp</a>, since most of the checks will pull information from external sources and do very little computation (I/0 bound). Nothing fancy really.</p>
+<p>And to follow the long tail of funny project names at Mozilla, I called it <em>Poucave</em> (/pu.kav/), french slang for «snitch».</p>
+<div class="figure align-center">
+<img alt="Example of diagram with overview" src="https://blog.mathieu-leplatre.info/images/poucave-overview.png" />
+<p class="caption">Example of live diagram. The SVG file is part of configuration.</p>
+</div>
+</div>
+<div class="section" id="examples">
+<h2>Examples</h2>
+<p>Just to present of few of <a class="reference external" href="https://github.com/mozilla-services/poucave/tree/main/checks/">the checks</a> that were implemented:</p>
+<ul class="simple">
+<li><tt class="docutils literal">checks.core.latency</tt> (<em>generic</em>): fails if the specified URL does not respond under a certain number of milliseconds.</li>
+<li><tt class="docutils literal">checks.core.maintenance</tt> (<em>generic</em>): takes a list of Github repositories as input, and fails in any of them has pull-requests who didn't receive activity in the last X days.</li>
+<li><tt class="docutils literal">checks.core.deployed_version</tt> (<em>generic</em>): fails while the deployed version does not match the latest tagged version on the specified Github repository.</li>
+</ul>
+<p>And then, we have more domain specific checks for <a class="reference external" href="https://remotesettings.readthedocs.io">Remote Settings</a>, like:</p>
+<ul class="simple">
+<li><tt class="docutils literal">checks.remotesettings.push_timestamp</tt>: fails if the timestamp of the published data does not match the one of our Push service</li>
+<li><tt class="docutils literal">checks.remotesettings.certification_expiration</tt>: fails if our certificates will expire soon</li>
+<li><tt class="docutils literal">checks.remotesettings.uptake_max_age</tt>: fails if the 75th percentile of clients receive only data after X seconds</li>
+<li><tt class="docutils literal">checks.remotesettings.uptake_error_rate</tt>: fails if the proportion of errors among reported statuses in Telemetry is above a certain threshold</li>
+</ul>
+<p>Adding new checks is a piece of cake, even from your own packages, as long as they are available in the <tt class="docutils literal">PYTHONPATH</tt>.</p>
+<div class="figure align-center">
+<img alt="Example of check details" src="https://blog.mathieu-leplatre.info/images/poucave-check-details.png" />
+<p class="caption">Example of check details.</p>
+</div>
+</div>
+<div class="section" id="check-history">
+<h2>Check History</h2>
+<p>If an issue in our service led twice to the same root cause, we would consider implementing a check for it.</p>
+<p>This allowed us to consolidate the reliability of our service over time, and also build a sort of memory for it.</p>
+<p>In order to facilitate troubleshooting, we added the ability to link each check with past issues from our Bugtracker.
+This way, when a check turns red, we can immediately access the history of its possible past failures, and read the related conversations and resolutions.</p>
+<p>For checks that return discrete values, like latency or age, we also wanted to track variations over time. Because this monitoring service had to remain simple, stupid, and reliable, I wanted to avoid introducing a storage dependency.</p>
+<p>All our applications output their logs to stdout as JSON. These application logs are then parsed and ingested elsewhere, so that we can plot them in Grafana. I decided to reuse that. Each check execution is logged, and can be presented in charts on dashboards.</p>
+<p>It was sometimes annoying to open Grafana just to take a look at a check recent behaviour. So we added the ability to see the history of a check directly in the UI. We came up with something super simple, the server pulls the last entries from the log database, returns them as JSON, and the UI plots them in a basic chart. For more advanced charts and querying, Grafana will always be better of course.</p>
+<div class="figure align-center">
+<img alt="Check history with linked bugs and graph of past values" src="https://blog.mathieu-leplatre.info/images/poucave-check-history.png" />
+<p class="caption">Check history with linked bugs and graph of past values.</p>
+</div>
+</div>
+<div class="section" id="after-a-few-months">
+<h2>After a few months...</h2>
+<p>This checks platform has served us very well!</p>
+<p>Only a small fraction of checks are monitored, and only the crucial ones wake our SREs at night.</p>
+<p>We still have false positives, notably on Telemetry. With help from our data science team, our queries and normalizations could certainly be improved.</p>
+<p>We had one major false negative. Fortunately the issue was raised by another system. We improved the check and now feel better.</p>
+<p>To conclude, I know with certainty that this little healthcheck application, with the live diagram, has changed the way we see and understand our services. Compared to linear problem solving, system thinking is complex. Seeing things as a whole and being able to understand interdependance and causal loops is really helpful. Everyone can now see all the moving pieces in one place, and can be reasonably reassured that the service is working well if checks are green, which also makes customer care easier for us.</p>
+<p>In addition to this success, several teams expressed their interest in adding their own checks or running their instance for their service :) If you too are interested in using it in your organization, go on! Nothing is hard-coded and adding your own checks and SVG diagram is fairly easy! Don't hesitate to get in touch of course.</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/mozilla.html">#mozilla</a>,         <a href="https://blog.mathieu-leplatre.info/tag/opensource.html">#opensource</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/poucave-an-observation-standpoint-for-our-services.html';
+      this.page.identifier = 'poucave-an-observation-standpoint-for-our-services';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

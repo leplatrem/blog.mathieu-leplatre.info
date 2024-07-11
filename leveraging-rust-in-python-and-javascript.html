@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Leveraging Rust in Python and JavaScript - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Leveraging Rust in Python and JavaScript</h1>
+<time datetime="2020-09-08T00:00:00+02:00">Tue 08 September 2020</time></header>
+<article>
+    <p>I had several opportunities to hack with Rust, but so far, besides <a class="reference external" href="https://github.com/mozilla/classify-client/">this very high loaded Web service</a> that runs in production, it was either on prototypes or on stuff that could have been implemented with any other language.</p>
+<p>Recently, we had a concrete use-case where Rust would be beneficial: share an implementation of a Canonical JSON serialization between the server in Python, and the clients in JavaScript, Swift, and Kotlin.</p>
+<p>In order to guarantee the integrity of data between the server and the clients, we use content signatures. Canonical JSON is just a variant of JSON where each value has a single, unambiguous serialized form. Having a predictable JSON serialization is essential to get repeatable hashes of encoded data and be able to verify digital signatures. Sharing the same code accross server and clients makes it more robust, especially when it comes to handling funny corner cases of floats or unicode.</p>
+<p>The <tt class="docutils literal">canonical_json</tt> <a class="reference external" href="https://crates.io/crates/canonical_json">crate</a> implements the serialization, using <a class="reference external" href="https://serde.rs/">Serde</a> and following <a class="reference external" href="https://github.com/gibson042/canonicaljson-spec">a spec</a>. It is fairly simple to use:</p>
+<div class="highlight"><pre><span></span><span class="k">use</span><span class="w"> </span><span class="n">serde_json</span><span class="p">::</span><span class="n">json</span><span class="p">;</span>
+<span class="k">use</span><span class="w"> </span><span class="n">canonical_json</span><span class="p">::</span><span class="n">ser</span><span class="p">::</span><span class="n">to_string</span><span class="p">;</span>
+
+<span class="k">fn</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="fm">println!</span><span class="p">(</span><span class="s">&quot;{}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">json</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;we ❤ Rust&quot;</span><span class="p">)));</span>
+<span class="p">}</span>
+<span class="c1">// &quot;we \u2665 Rust&quot;</span>
+</pre></div>
+<div class="section" id="python-bindings">
+<h2>Python bindings</h2>
+<p>Our first goal is to be able to call this Rust library from Python. And it should be transparent, run on Linux and Mac OS, as any other library:</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">canonicaljson</span>
+<span class="o">&gt;&gt;&gt;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">canonicaljson</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s2">&quot;héo&quot;</span><span class="p">:</span> <span class="mi">42</span><span class="p">})</span>
+<span class="s1">&#39;{&quot;h</span><span class="se">\\</span><span class="s1">u00e9o&quot;:42}&#39;</span>
+</pre></div>
+<p>Python is just a language, and has several implementations, Jython in Java, Pypy in Python, RustPython in Python... But what interests us here is the most common one: CPython, in C.</p>
+<p>The Rust code must be compiled as a shared library (<tt class="docutils literal">.so</tt> file), Python must <a class="reference external" href="https://docs.python.org/3/library/ctypes.html#loading-shared-libraries">load it</a> and then call the exported symbol (<tt class="docutils literal"><span class="pre">canonical_json::ser::to_string()</span></tt>).</p>
+<p>Since one side handles Python objects (eg. <tt class="docutils literal">dict</tt>) and the other side expects a Rust data type (cf. <tt class="docutils literal"><span class="pre">json!()</span></tt>), the whole challenge here will be to translate Python values in memory and pass them to Rust. Fortunately, in this modest use-case, we don't have to handle mutability or complex lifetimes, and the serializer just gives back a string in return. However, unlike most documented use-cases, the passed data is not «structured»: the input data can be any Python serializable object, and the destination in Rust is not a domain specific custom type, but the generic <tt class="docutils literal"><span class="pre">serde_json::json::Value</span></tt>.</p>
+<p>Using <a class="reference external" href="https://github.com/PyO3/PyO3">PyO3</a>, it is quite straightforward to start. The main principle consists in starting a library crate, that imports both <tt class="docutils literal">pyo3</tt> and <tt class="docutils literal">canonical_json</tt> dependencies. The Rust function will be exposed in the Python module using a high-level macros:</p>
+<div class="highlight"><pre><span></span><span class="cp">#[pymodule]</span>
+<span class="k">fn</span><span class="w"> </span><span class="nf">canonicaljson</span><span class="p">(</span><span class="n">_py</span><span class="p">:</span><span class="w"> </span><span class="nc">Python</span><span class="p">,</span><span class="w"> </span><span class="n">m</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">PyModule</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">PyResult</span><span class="o">&lt;</span><span class="p">()</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">m</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;__version__&quot;</span><span class="p">,</span><span class="w"> </span><span class="fm">env!</span><span class="p">(</span><span class="s">&quot;CARGO_PKG_VERSION&quot;</span><span class="p">))</span><span class="o">?</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">m</span><span class="p">.</span><span class="n">add_wrapped</span><span class="p">(</span><span class="n">wrap_pyfunction</span><span class="o">!</span><span class="p">(</span><span class="n">dumps</span><span class="p">))</span><span class="o">?</span><span class="p">;</span>
+
+<span class="w">    </span><span class="nb">Ok</span><span class="p">(())</span>
+<span class="p">}</span>
+
+<span class="cp">#[pyfunction]</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">dumps</span><span class="p">(</span><span class="n">py</span><span class="p">:</span><span class="w"> </span><span class="nc">Python</span><span class="p">,</span><span class="w"> </span><span class="n">obj</span><span class="p">:</span><span class="w"> </span><span class="nc">PyObject</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">PyResult</span><span class="o">&lt;</span><span class="n">PyObject</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Convert the Python object to a Serde value</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">python_to_serde</span><span class="p">(</span><span class="n">py</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">obj</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Call Canonical JSON serializer</span>
+<span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="n">to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">to_object</span><span class="p">(</span><span class="n">py</span><span class="p">)),</span>
+<span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">Err</span><span class="p">(</span><span class="n">PyErr</span><span class="p">::</span><span class="n">new</span><span class="p">::</span><span class="o">&lt;</span><span class="n">PyTypeError</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="o">&gt;</span><span class="p">(</span><span class="fm">format!</span><span class="p">(</span><span class="s">&quot;{:?}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">e</span><span class="p">))),</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">fn</span><span class="w"> </span><span class="nf">python_to_serde</span><span class="p">(</span><span class="n">py</span><span class="p">:</span><span class="w"> </span><span class="nc">Python</span><span class="p">,</span><span class="w"> </span><span class="n">obj</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">PyObject</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Result</span><span class="o">&lt;</span><span class="n">serde_json</span><span class="p">::</span><span class="n">Value</span><span class="p">,</span><span class="w"> </span><span class="n">PyCanonicalJSONError</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// ... See full implementation</span>
+<span class="w">    </span><span class="c1">// https://github.com/mozilla-services/python-canonicaljson-rs/blob/62599b24/src/lib.rs#L87-L167</span>
+<span class="p">}</span>
+</pre></div>
+<p>In order to convert a generic <tt class="docutils literal">PyObject</tt> into the generic <tt class="docutils literal"><span class="pre">serde_json::Value</span></tt>, we will first try to <a class="reference external" href="https://docs.rs/pyo3/0.11.1/pyo3/conversion/trait.FromPyObject.html#tymethod.extract">extract</a> the Rust equivalents of Python basic types (<tt class="docutils literal">String</tt>, <tt class="docutils literal">bool</tt>, <tt class="docutils literal">u64</tt>, ...) from this Python object reference, and simply <a class="reference external" href="https://docs.serde.rs/serde_json/value/fn.to_value.html">instantiate Serde values</a>. For other types, we try to <a class="reference external" href="https://docs.rs/pyo3/0.11.1/pyo3/struct.PyObject.html#method.cast_as">cast the reference</a> to Python object types (<tt class="docutils literal">PyDict</tt>, <tt class="docutils literal">PyList</tt>, <tt class="docutils literal">PyTuple</tt>, ...) in order to recursively convert them. The code was mostly inspired <a class="reference external" href="https://github.com/mre/hyperjson/">by Matthias Endler's hyperjson</a>. See <a class="reference external" href="https://github.com/mozilla-services/python-canonicaljson-rs/blob/62599b24/src/lib.rs#L87-L167">full implementation</a>.</p>
+<p>Using <a class="reference external" href="https://github.com/PyO3/maturin">maturin</a>, the above library crate can be built and published as a wheel on Pypi. Wheels save consumers from compiling the Rust part when installing the Python package, and Maturin takes care of packaging metadata etc.</p>
+<div class="highlight"><pre><span></span><span class="c1"># pyproject.toml</span>
+
+<span class="k">[build-system]</span>
+<span class="n">requires</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;maturin&quot;</span><span class="p">]</span>
+<span class="n">build-backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;maturin&quot;</span>
+
+<span class="k">[package.metadata.maturin]</span>
+<span class="n">classifier</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;Intended Audience :: Developers&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;Programming Language :: Python&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;Programming Language :: Rust&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+<p><tt class="docutils literal">maturin build</tt> and <tt class="docutils literal">maturin publish</tt> just worked as expected.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">To be honest I haven't battle tested the multiplatform part extensively since my dev box and our servers run Linux.</p>
+</div>
+</div>
+<div class="section" id="javascript-webassembly">
+<h2>JavaScript &amp; WebAssembly</h2>
+<p>WebAssembly (or Wasm) is a binary format that a virtual machine can execute directly, without having to parse and compile the source code.</p>
+<p>In the browser, a WebAssembly module is loaded as a Web page resource, and can be called transparently from JavaScript code.</p>
+<div class="highlight"><pre><span></span><span class="kd">const</span><span class="w"> </span><span class="nx">canonicaljson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="k">import</span><span class="p">(</span><span class="s2">&quot;./node_modules/canonicaljson-wasm/canonicaljson_wasm.js&quot;</span><span class="p">);</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">str</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">canonicaljson</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="s2">&quot;héo&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">42</span><span class="p">});</span>
+</pre></div>
+<p>To achieve this, instead of compiling Rust to binary code that can only be executed by a specific operating system or processor, we will compile it to this universal binary format, using <tt class="docutils literal"><span class="pre">wasm-bindgen</span></tt>.</p>
+<p>In order to expose our <tt class="docutils literal">canonical_json</tt> crate to Wasm, like for Python, we will have to create a library crate and to bind passed types. This binding crate will rely on <tt class="docutils literal"><span class="pre">wasm-bindgen</span></tt> and its <tt class="docutils literal"><span class="pre">serde-serialize</span></tt> feature, which does everything we need. Exposing functions and passing arbitrary data from JavaScript to Rust is relatively easy and well documented.</p>
+<p>In our example, the main code of the wrapping crate can look like this:</p>
+<div class="highlight"><pre><span></span><span class="k">use</span><span class="w"> </span><span class="n">wasm_bindgen</span><span class="p">::</span><span class="n">prelude</span><span class="p">::</span><span class="o">*</span><span class="p">;</span>
+<span class="k">use</span><span class="w"> </span><span class="n">canonical_json</span><span class="p">::</span><span class="n">ser</span><span class="p">::</span><span class="n">to_string</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">cj_to_string</span><span class="p">;</span>
+
+<span class="k">fn</span><span class="w"> </span><span class="nf">err_to_str</span><span class="p">(</span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="nc">impl</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">fmt</span><span class="p">::</span><span class="n">Display</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">JsValue</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">JsValue</span><span class="p">::</span><span class="n">from_str</span><span class="p">(</span><span class="o">&amp;</span><span class="n">x</span><span class="p">.</span><span class="n">to_string</span><span class="p">())</span>
+<span class="p">}</span>
+
+<span class="cp">#[wasm_bindgen]</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">stringify</span><span class="p">(</span><span class="n">val</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">JsValue</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">JsValue</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">serde_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">val</span><span class="p">.</span><span class="n">into_serde</span><span class="p">().</span><span class="n">map_err</span><span class="p">(</span><span class="n">err_to_str</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">JsValue</span><span class="p">::</span><span class="n">from_str</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cj_to_string</span><span class="p">(</span><span class="o">&amp;</span><span class="n">serde_value</span><span class="p">).</span><span class="n">unwrap</span><span class="p">())</span>
+<span class="p">}</span>
+</pre></div>
+<p>We build this crate using <a class="reference external" href="https://github.com/rustwasm/wasm-pack">wasm-pack</a>. It will generate the expected <tt class="docutils literal">.js</tt> module.</p>
+<p>I followed this <a class="reference external" href="https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_wasm">tutorial on MDN</a> to tie everything up in an <a class="reference external" href="https://leplatrem.github.io/canonicaljson-wasm/">ugly demo page</a> using Webpack.</p>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion</h2>
+<p>There's something super exciting in knowing that the same Rust code, robust and performant, can now be used both from Python and JavaScript. Kotlin and Swift should be similarly straightforward.</p>
+<p>Shipping bug fixes will now consist in releasing a new version of the serializer and bumping the dependency in the binding repos!</p>
+<p>Even if our use-case was relatively modest, there is a lot of repetitive boiler plate code between the original library and the binding crates. And that's why the Firefox Sync team started the <a class="reference external" href="https://github.com/rfk/uniffi-rs">uniffi-rs</a> prototype: define your types and exposed interfaces in an <a class="reference external" href="https://en.wikipedia.org/wiki/IDL_specification_language">IDL file</a>, and it will take care of all the boilerplate and piping. Unfortunately it does not support the loose type <tt class="docutils literal">Any</tt> yet, that was necessary for the input of our serializer.</p>
+<p>If the binding code remains trivial and featherweight, this idea of using Rust to share a codebase between several targets is a massive win!</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>,         <a href="https://blog.mathieu-leplatre.info/tag/rust.html">#rust</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/leveraging-rust-in-python-and-javascript.html';
+      this.page.identifier = 'leveraging-rust-in-python-and-javascript';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

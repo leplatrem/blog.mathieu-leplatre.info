@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Render your TileMill stylesheets with Landez - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Render your TileMill stylesheets with Landez</h1>
+<time datetime="2012-03-22T00:00:00+01:00">Thu 22 March 2012</time></header>
+<article>
+    <p><a class="reference external" href="http://mapbox.com/tilemill/">TileMill</a> is an amazing tool to design your map, and publish it.
+With <a class="reference external" href="http://pypi.python.org/pypi/landez">landez</a>, you can easily render it using python,
+or do <a class="reference external" href="/landez-introducing-new-features-of-our-tiles-toolbox.html">whatever comes with the API</a> !</p>
+<div class="section" id="from-tilemill-to-landez">
+<h2>From TileMill to Landez</h2>
+<p>Use Tilemill to design your map, and export the <a class="reference external" href="http://mapnik.org">Mapnik</a> XML stylesheet :</p>
+<img alt="" src="/images/tilemill-export-stylesheet.png" />
+<p>Then simply use <em>landez</em> with <tt class="docutils literal">stylefile</tt> argument :</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">landez</span> <span class="kn">import</span> <span class="n">MBTilesBuilder</span>
+
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+
+<span class="n">mb</span> <span class="o">=</span> <span class="n">MBTilesBuilder</span><span class="p">(</span><span class="n">stylefile</span><span class="o">=</span><span class="s2">&quot;Toulouse-Voirie.xml&quot;</span><span class="p">,</span>
+                    <span class="n">filepath</span><span class="o">=</span><span class="s2">&quot;toulouse-voirie.mbtiles&quot;</span><span class="p">)</span>
+<span class="n">mb</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="p">[</span><span class="mf">1.39</span><span class="p">,</span> <span class="mf">43.56</span><span class="p">,</span> <span class="mf">1.50</span><span class="p">,</span> <span class="mf">43.64</span><span class="p">],</span>
+                <span class="n">zoomlevels</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">18</span><span class="p">))</span>
+<span class="n">mb</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+<p>In the above example, a <em>MBTiles</em> file <tt class="docutils literal"><span class="pre">toulouse-voirie.mbtiles</span></tt> will be
+created with all rendered tiles. (<strong>Note:</strong> This won't render UTF-Grid tiles,
+since TileMill does not expose this part in the XML stylesheet.)</p>
+<p>If you don't have Mapnik2 installed, you might encounter rendering errors
+like : <tt class="docutils literal">AssertionError: Cannot render tiles without mapnik !</tt>.</p>
+</div>
+<div class="section" id="installation-of-mapnik-2">
+<h2>Installation of Mapnik 2</h2>
+<div class="section" id="mapnik2-packages-on-debian-ubuntu">
+<h3>Mapnik2 packages on Debian/Ubuntu</h3>
+<p>In Ubuntu Precise (12.04) or Debian Wheezy (7.0), it's a piece of cake,
+the package is available in the repos</p>
+<pre class="literal-block">
+sudo apt-get install python-mapnik2
+</pre>
+<p>In Ubuntu Maverick (10.10), Natty (11.04), Oneiric (11.10), it's quite easy,
+there is a PPA, from MapBox</p>
+<pre class="literal-block">
+sudo apt-add-repository ppa:developmentseed/mapbox
+sudo update
+sudo apt-get install python-mapnik2
+</pre>
+</div>
+<div class="section" id="mapnik2-and-python-bindings-from-sources">
+<h3>Mapnik2 and python bindings from sources</h3>
+<p>Welcome in the quicksands of installing Mapnik2 python bindings from sources !</p>
+<p><a class="reference external" href="https://github.com/cspanring">Christian Spanring</a> wrote a quick tutorial
+to <a class="reference external" href="https://gist.github.com/1314907">install it from sources on Ubuntu 10.04</a>.</p>
+<p>It might be a bit tricky to tweak this tutorial for your distribution. Hopefully, our
+colleague <a class="reference external" href="https://github.com/kiorky">Mathieu</a> has prepared a <a class="reference external" href="http://minitage.org">minitage's</a> &quot;<em>minilay</em>&quot; for it, <a class="reference external" href="http://pypi.python.org/pypi/mapnik2#minitage">just follow the few steps</a>
+to compile the whole stack.</p>
+</div>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tilemill.html">#tilemill</a>,         <a href="https://blog.mathieu-leplatre.info/tag/landez.html">#landez</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/howto.html">#howto</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/render-your-tilemill-stylesheets-with-landez.html';
+      this.page.identifier = 'render-your-tilemill-stylesheets-with-landez';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

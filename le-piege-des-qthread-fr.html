@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Le piège des QThread - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Le piège des QThread</h1>
+<time datetime="2011-09-01T11:09:00+02:00">Thu 01 September 2011</time></header>
+<article>
+    <p><em>Article original publié chez</em> <a class="reference external" href="http://www.makina-corpus.org/blog/le-pi%C3%A8ge-des-qthread">Makina Corpus</a></p>
+<p>Il y a de nombreux billets de blogs, posts sur des forums, tutoriaux,
+pages Wiki et autres, mais au final, à part le fameux <a class="reference external" href="http://labs.qt.nokia.com/2010/06/17/youre-doing-it-wrong/">&quot;You're doing it wrong&quot;</a>,
+qui peut paraître obscure au premier abord, je n'ai pas trouvé de résumé
+de l'attrape-nigaud que je vais illustrer ici.</p>
+<div class="section" id="le-piege">
+<h2>Le piège</h2>
+<p>Naturellement, quand on veut faire une thread, on a envie d'hériter de l'objet
+<a class="reference external" href="http://doc.qt.nokia.com/latest/qthread.html">QThread</a>. C'est ce qu'on fait avec le module <tt class="docutils literal">threading</tt> de python (en Java aussi il me semble).</p>
+<p>Voici ce qu'on écrit naturellement : <tt class="docutils literal">Objet</tt>, la classe qui file l'ordre et <tt class="docutils literal">Worker</tt>, une classe qui bosse dur en arrière plan. On connecte les signaux et on démarre !</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtCore</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">PyQt4.QtGui</span>  <span class="kn">import</span> <span class="n">QApplication</span>
+
+<span class="k">class</span> <span class="nc">Object</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">emitSignal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;aSignal()&quot;</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">Worker</span><span class="p">(</span><span class="n">QThread</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">aSlot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Slot is executed in thread : &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="p">()</span><span class="o">.</span><span class="n">currentThreadId</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;Main application thread is : &quot;</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">thread</span><span class="p">()</span><span class="o">.</span><span class="n">currentThreadId</span><span class="p">()</span>
+
+    <span class="n">worker</span> <span class="o">=</span> <span class="n">Worker</span><span class="p">()</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">Object</span><span class="p">()</span>
+    <span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;aSignal()&quot;</span><span class="p">),</span> <span class="n">worker</span><span class="o">.</span><span class="n">aSlot</span><span class="p">)</span>
+
+    <span class="n">worker</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">emitSignal</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;Done.&quot;</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+</pre></div>
+<p>Ici, comme le slot <tt class="docutils literal">aSlot()</tt> est défini dans la classe <tt class="docutils literal">Worker</tt>, qui hérite de <tt class="docutils literal">QThread</tt>, on
+pense naturellement qu'il va être exécuté en arrière-plan. Que nenni!</p>
+<div class="highlight"><pre><span></span>Main<span class="w"> </span>application<span class="w"> </span>thread<span class="w"> </span>is<span class="w"> </span>:<span class="w">  </span><span class="m">140068661352224</span>
+<span class="c1"># (... wait 1 sec ...)</span>
+Slot<span class="w"> </span>is<span class="w"> </span>executed<span class="w"> </span><span class="k">in</span><span class="w"> </span>thread<span class="w"> </span>:<span class="w">  </span><span class="m">140068661352224</span>
+Done.
+</pre></div>
+</div>
+<div class="section" id="la-solution">
+<h2>La solution</h2>
+<p>Un secret ? Les <tt class="docutils literal">QThread</tt> ne sont pas des threads. Elles enrobent l'execution d'une thread.</p>
+<p>L'appartenance (affinité) d'un objet à une thread détermine le <a class="reference external" href="http://doc.qt.nokia.com/latest/qt.html#ConnectionType-enum">type de connexion</a> <a class="reference external" href="http://doc.qt.nokia.com/latest/threads-qobject.html#signals-and-slots-across-threads">utilisé par défaut</a>, et par conséquent le comportement lors de l'execution des slots.</p>
+<p>Ce qu'il faut écrire : <tt class="docutils literal">Worker</tt> n'est plus une <tt class="docutils literal">QThread</tt>, on force son affinité dans une thread avec <tt class="docutils literal">moveToThread()</tt>.</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Object</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">emitSignal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;aSignal()&quot;</span><span class="p">))</span>
+
+<span class="k">class</span> <span class="nc">Worker</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">aSlot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="p">()</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s2">&quot;Slot is executed in thread : &quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="p">()</span><span class="o">.</span><span class="n">currentThreadId</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;Main application thread is : &quot;</span><span class="p">,</span> <span class="n">app</span><span class="o">.</span><span class="n">thread</span><span class="p">()</span><span class="o">.</span><span class="n">currentThreadId</span><span class="p">()</span>
+
+    <span class="n">worker</span> <span class="o">=</span> <span class="n">Worker</span><span class="p">()</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">Object</span><span class="p">()</span>
+
+    <span class="n">thread</span> <span class="o">=</span> <span class="n">QThread</span><span class="p">()</span>
+    <span class="n">worker</span><span class="o">.</span><span class="n">moveToThread</span><span class="p">(</span><span class="n">thread</span><span class="p">)</span>
+    <span class="n">QObject</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;aSignal()&quot;</span><span class="p">),</span> <span class="n">worker</span><span class="o">.</span><span class="n">aSlot</span><span class="p">)</span>
+
+    <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">emitSignal</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s2">&quot;Done.&quot;</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+</pre></div>
+<p>Désormais, l'exécution est bien asynchrone, comme on le souhaitait.</p>
+<div class="highlight"><pre><span></span>Main<span class="w"> </span>application<span class="w"> </span>thread<span class="w"> </span>is<span class="w"> </span>:<span class="w">  </span><span class="m">139961882056480</span>
+Done.
+<span class="c1"># (... wait 1 sec ...)</span>
+Slot<span class="w"> </span>is<span class="w"> </span>executed<span class="w"> </span><span class="k">in</span><span class="w"> </span>thread<span class="w"> </span>:<span class="w">  </span><span class="m">139961512900352</span>
+</pre></div>
+<p>Tout simplement ! Si j'avais lu mon article avant, je n'aurais pas perdu autant de temps à lire toutes ces docs ambiguës sur le Net.</p>
+<p><strong>Sources</strong>:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://developer.qt.nokia.com/wiki/Threads_Events_QObjects">Explications complètes</a></li>
+<li><a class="reference external" href="http://doc.qt.nokia.com/4.7-snapshot/thread-basics.html">Thread Basics</a> <em>(attention au piège)</em></li>
+</ul>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/qt.html">#qt</a>,         <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/le-piege-des-qthread-fr.html';
+      this.page.identifier = 'le-piege-des-qthread';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

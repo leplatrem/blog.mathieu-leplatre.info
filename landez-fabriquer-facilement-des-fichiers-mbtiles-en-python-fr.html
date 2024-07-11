@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>landez : fabriquer facilement des fichiers MBTiles en python - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>landez : fabriquer facilement des fichiers MBTiles en python</h1>
+<time datetime="2011-04-21T12:04:00+02:00">Thu 21 April 2011</time></header>
+<article>
+    <p><a class="reference external" href="http://www.makina-corpus.org/blog/integration-mbtiles-format-android">Une nouvelle fois</a>,
+Makina Corpus se rapproche du projet <a class="reference external" href="http://mapbox.com/">MapBox</a>, avec une contribution
+sur la librairie <a class="reference external" href="https://github.com/mapbox/mbutil/contributors">mbutil</a>, qui permet de fabriquer des fichiers MBTiles.</p>
+<p>Nous l'utilisons dans <a class="reference external" href="https://github.com/makinacorpus/landez">landez</a>, un outil qui permet
+de créer des fichiers MBTiles à partir de sites de tuiles externes ou de feuilles de styles Mapnik.</p>
+<p>Son utilisation est fort simple !</p>
+<p>Pour un service de tuiles externe :</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">landez</span> <span class="kn">import</span> <span class="n">MBTilesBuilder</span>
+
+<span class="c1"># downloads from Cloudmade by default, be careful with terms of usage  !</span>
+<span class="n">mb</span> <span class="o">=</span> <span class="n">MBTilesBuilder</span><span class="p">(</span><span class="n">remote</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="s2">&quot;dest.mbtiles&quot;</span><span class="p">)</span>
+
+<span class="n">mb</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">90.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">),</span>
+                <span class="n">zoomlevels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">mb</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+<p>Avec une feuille de style locale :</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">landez</span> <span class="kn">import</span> <span class="n">MBTilesBuilder</span>
+
+<span class="n">mb</span> <span class="o">=</span> <span class="n">MBTilesBuilder</span><span class="p">(</span><span class="n">stylefile</span><span class="o">=</span><span class="s2">&quot;yourstyle.xml&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="o">=</span><span class="s2">&quot;dest.mbtiles&quot;</span><span class="p">)</span>
+<span class="n">mb</span><span class="o">.</span><span class="n">add_coverage</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">90.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">180.0</span><span class="p">,</span> <span class="mf">180.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">),</span>
+                <span class="n">zoomlevels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">mb</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+<p>Une branche experimentale a été initiée pour travailler sur le multiprocessing
+afin de paralléliser au maximum la fabrication des tuiles en amont. Si cela vous intéresse, soyez les bienvenus !</p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/mapbox.html">#mapbox</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/landez.html">#landez</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/landez-fabriquer-facilement-des-fichiers-mbtiles-en-python-fr.html';
+      this.page.identifier = 'landez-fabriquer-facilement-des-fichiers-mbtiles-en-python';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

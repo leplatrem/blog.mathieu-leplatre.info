@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Une démo squelettique de python Flask CouchDB - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Une démo squelettique de python Flask CouchDB</h1>
+<time datetime="2011-10-11T11:30:00+02:00">Tue 11 October 2011</time></header>
+<article>
+    <p>Avec <tt class="docutils literal">Flask</tt> et <tt class="docutils literal">Couchdb</tt> (e.g. <a class="reference external" href="http://packages.python.org/Flask-CouchDB/">Flask-CouchDB</a>),
+on peut faire rapidement des trucs amusants, voire très utiles !</p>
+<p>Voici un <strong>squelette</strong> d'application, fonctionnel, qui stocke et récupère des objets crées à partir de posts HTTP.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">simplejson</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">request</span>
+<span class="kn">from</span> <span class="nn">couchdb.design</span> <span class="kn">import</span> <span class="n">ViewDefinition</span>
+<span class="kn">import</span> <span class="nn">flaskext.couchdb</span>
+
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">CouchDB permanent view</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">docs_by_author</span> <span class="o">=</span> <span class="n">ViewDefinition</span><span class="p">(</span><span class="s1">&#39;docs&#39;</span><span class="p">,</span> <span class="s1">&#39;byauthor&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;function(doc) { emit(doc.author, doc); }&#39;</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Retrieve docs</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&lt;author_id&gt;/docs&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">docs</span><span class="p">(</span><span class="n">author_id</span><span class="p">):</span>
+    <span class="n">docs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">docs_by_author</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">couch</span><span class="p">)[</span><span class="n">author_id</span><span class="p">]:</span>
+        <span class="n">docs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Add doc</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&lt;author_id&gt;/add&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">add_doc</span><span class="p">(</span><span class="n">author_id</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Build doc with posted values</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;author&#39;</span><span class="p">:</span> <span class="n">author_id</span> <span class="p">}</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">form</span><span class="p">)</span>
+        <span class="c1"># Insert into database</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">couch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">simplejson</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="n">state</span><span class="p">})</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Flask main</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+        <span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">COUCHDB_SERVER</span> <span class="o">=</span> <span class="s1">&#39;http://localhost:5984/&#39;</span><span class="p">,</span>
+        <span class="n">COUCHDB_DATABASE</span> <span class="o">=</span> <span class="s1">&#39;docsdemo&#39;</span>
+    <span class="p">)</span>
+    <span class="n">manager</span> <span class="o">=</span> <span class="n">flaskext</span><span class="o">.</span><span class="n">couchdb</span><span class="o">.</span><span class="n">CouchDBManager</span><span class="p">()</span>
+    <span class="n">manager</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">manager</span><span class="o">.</span><span class="n">add_viewdef</span><span class="p">(</span><span class="n">docs_by_author</span><span class="p">)</span>  <span class="c1"># Install the view</span>
+    <span class="n">manager</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+</pre></div>
+<p>J'ai déposé ce snippet sur <a class="reference external" href="https://gist.github.com/1277655">Gist</a> si besoin.</p>
+<p>On peut attaquer l'application avec <tt class="docutils literal">curl</tt> :</p>
+<div class="highlight"><pre><span></span>$<span class="w"> </span>curl<span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;title=Globalia&amp;year=2004&quot;</span><span class="w"> </span>http://0.0.0.0:5000/jc.rufin/add
+<span class="o">{</span><span class="s2">&quot;ok&quot;</span>:<span class="w"> </span>true<span class="o">}</span>
+$<span class="w"> </span>curl<span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;title=Red%20Brazil&amp;contest=goncourt&quot;</span><span class="w"> </span>http://0.0.0.0:5000/jc.rufin/add
+<span class="o">{</span><span class="s2">&quot;ok&quot;</span>:<span class="w"> </span>true<span class="o">}</span>
+
+$<span class="w"> </span>curl<span class="w"> </span>http://0.0.0.0:5000/jc.rufin/docs
+<span class="o">[{</span><span class="s2">&quot;title&quot;</span>:<span class="w"> </span><span class="o">[</span><span class="s2">&quot;Globalia&quot;</span><span class="o">]</span>,<span class="w"> </span><span class="s2">&quot;year&quot;</span>:<span class="w"> </span><span class="o">[</span><span class="s2">&quot;2004&quot;</span><span class="o">]</span>,<span class="w"> </span><span class="s2">&quot;author&quot;</span>:<span class="w"> </span><span class="s2">&quot;jc.rufin&quot;</span>,<span class="w"> </span><span class="s2">&quot;_rev&quot;</span>:<span class="w"> </span><span class="s2">&quot;1-3195...fbc8&quot;</span>,<span class="w"> </span><span class="s2">&quot;_id&quot;</span>:<span class="w"> </span><span class="s2">&quot;dec81d...1733c&quot;</span><span class="o">}</span>,
+<span class="o">{</span><span class="s2">&quot;title&quot;</span>:<span class="w"> </span><span class="o">[</span><span class="s2">&quot;Red Brazil&quot;</span><span class="o">]</span>,<span class="w"> </span><span class="s2">&quot;contest&quot;</span>:<span class="w"> </span><span class="o">[</span><span class="s2">&quot;goncourt&quot;</span><span class="o">]</span>,<span class="w"> </span><span class="s2">&quot;author&quot;</span>:<span class="w"> </span><span class="s2">&quot;jc.rufin&quot;</span>,<span class="w"> </span><span class="s2">&quot;_rev&quot;</span>:<span class="w"> </span><span class="s2">&quot;1-7b15...a9a2&quot;</span>,<span class="w"> </span><span class="s2">&quot;_id&quot;</span>:<span class="w"> </span><span class="s2">&quot;dec81dc...17c0c&quot;</span><span class="o">}]</span>
+</pre></div>
+<p>N'oubliez pas de colorier les cases à votre guise, sinon ce squelette ne sert à rien, le JSON étant déjà la langue maternelle de CouchDB.</p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/couchdb.html">#couchdb</a>,         <a href="https://blog.mathieu-leplatre.info/tag/flask.html">#flask</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/une-demo-squelettique-de-python-flask-couchdb-fr.html';
+      this.page.identifier = 'une-demo-squelettique-de-python-flask-couchdb';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

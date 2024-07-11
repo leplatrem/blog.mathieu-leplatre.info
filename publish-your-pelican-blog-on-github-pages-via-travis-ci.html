@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Publish your Pelican blog on Github pages via Travis-CI - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Publish your Pelican blog on Github pages via Travis-CI</h1>
+<time datetime="2014-01-09T12:25:00+01:00">Thu 09 January 2014</time></header>
+<article>
+    <p>This blog is powered by Pelican, and until recently I have rendered the HTML pages
+on my local machine and published them on a personal server via SSH.</p>
+<p>Most of the time, I used to forget pushing the raw files on Github. Therefore automatizing
+the publishing process based on commits looked like a good idea :)</p>
+<p>The strategy is :</p>
+<ul class="simple">
+<li>I write, commit and push articles in rST as usual ;</li>
+<li>Travis-CI detects changes ;</li>
+<li>It builds the HTML pages ;</li>
+<li>It pushes the content on the repo's <tt class="docutils literal"><span class="pre">gh-pages</span></tt> branch.</li>
+</ul>
+<p>Andrea Zonca <a class="reference external" href="http://zonca.github.io/2013/09/automatically-build-pelican-and-publish-to-github-pages.html">wrote something similar</a>
+with a very appealing title, but it was not very enlightening to me.
+I hope getting it done will be clear enough with this present article.</p>
+<div class="section" id="travis-ci-configuration">
+<h2>Travis-CI configuration</h2>
+<p>Just add a <tt class="docutils literal">.travis.yml</tt> file, like you would do for your unit-tests.</p>
+<div class="highlight"><pre><span></span>language: python
+branches:
+  only:
+  - master
+install:
+- pip install pelican ghp-import
+script:
+- make publish github
+</pre></div>
+<p>In order to avoid the blog to be updated by changes on the <tt class="docutils literal">draft</tt> branch,
+only commits of <tt class="docutils literal">master</tt> trigger updates.</p>
+</div>
+<div class="section" id="travis-authentication-on-github">
+<h2>Travis authentication on Github</h2>
+<p>Since it will push to the <tt class="docutils literal"><span class="pre">gh-pages</span></tt> branch of your repo, it has to authenticate on
+Github. For this, we use a <a class="reference external" href="https://github.com/blog/1270-easier-builds-and-deployments-using-git-over-https-and-oauth">OAuth token</a>,
+that can be created and revoked from the <a class="reference external" href="https://github.com/settings/applications">GitHub applications</a> page.</p>
+<p>In order to keep it secret with Travis, we use their Ruby application to
+encrypt it :</p>
+<pre class="literal-block">
+sudo apt-get install ruby1.9.1-dev build-essential
+sudo gem install travis
+
+travis encrypt GH_TOKEN=your_token
+</pre>
+<p>A new block will be added to <tt class="docutils literal">.travis.yml</tt>.</p>
+<div class="highlight"><pre><span></span>env:
+  global:
+    secure: NWjh6sCvmjuX...yWo=
+</pre></div>
+</div>
+<div class="section" id="push-on-github-pages">
+<h2>Push on Github pages</h2>
+<p>I modified the <tt class="docutils literal">Makefile</tt> provided in Pelican.</p>
+<p>It uses <em>ghp-import</em> to build the branch from the output folder and pushes quietly with force via HTTPS using the token variable.</p>
+<div class="highlight"><pre><span></span><span class="nf">github</span><span class="o">:</span><span class="w"> </span><span class="n">publish</span>
+
+<span class="w">  </span>ghp-import<span class="w"> </span>-n<span class="w"> </span><span class="k">$(</span>OUTPUTDIR<span class="k">)</span>
+<span class="w">  </span>@git<span class="w"> </span>push<span class="w"> </span>-fq<span class="w"> </span>https://<span class="si">${</span><span class="nv">GH_TOKEN</span><span class="si">}</span>@github.com/<span class="k">$(</span>TRAVIS_REPO_SLUG<span class="k">)</span>.git<span class="w"> </span>gh-pages<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+</pre></div>
+<p>Use leading <tt class="docutils literal">&#64;</tt> to remove command from output, thanks <a class="reference external" href="https://github.com/leplatrem/blog.mathieu-leplatre.info/issues/1">Ryan Peck</a>!</p>
+<p>Also disable pull request builds in Travis to prevent the blog being updated by a pull request (thanks <a class="reference external" href="https://github.com/leplatrem/blog.mathieu-leplatre.info/pull/2">Andrew Aitken</a> !).</p>
+<img alt="" src="/images/travis-pull-request.png" />
+</div>
+<div class="section" id="custom-domain">
+<h2>Custom domain</h2>
+<p>Github expects a <tt class="docutils literal">CNAME</tt> file. Pelican provides a simple way to create it using <em>extra paths</em>,
+controlled via settings :</p>
+<div class="highlight"><pre><span></span><span class="n">STATIC_PATHS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;images&#39;</span><span class="p">,</span> <span class="s1">&#39;extra/CNAME&#39;</span><span class="p">]</span>
+<span class="n">EXTRA_PATH_METADATA</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;extra/CNAME&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="s1">&#39;CNAME&#39;</span><span class="p">},}</span>
+</pre></div>
+<p>If any doubt, just have a look the <a class="reference external" href="https://github.com/leplatrem/blog.mathieu-leplatre.info">repository of this blog</a>...</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/pelican.html">#pelican</a>,         <a href="https://blog.mathieu-leplatre.info/tag/github.html">#github</a>,         <a href="https://blog.mathieu-leplatre.info/tag/travis.html">#travis</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/sys.html">Sys</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/publish-your-pelican-blog-on-github-pages-via-travis-ci.html';
+      this.page.identifier = 'publish-your-pelican-blog-on-github-pages-via-travis-ci';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

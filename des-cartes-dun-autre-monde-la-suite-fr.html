@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Des cartes d'un autre monde, la suite - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Des cartes d'un autre monde, la suite</h1>
+<time datetime="2012-04-18T00:00:00+02:00">Wed 18 April 2012</time></header>
+<article>
+    <div class="section" id="bravo-aux-organisateurs">
+<h2>Bravo aux organisateurs !</h2>
+<p>L'édition 2012 des rencontres Django-fr a mis la barre très haut ! Ce fut un plaisir
+de retrouver, ou rencontrer, autant de gens sympathiques et intéressants dans un cadre
+aussi agréable :)</p>
+<p>Comme l'a souligné Olivier <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a>, cela va bien au delà de la techno qui fédère la communauté ;
+les membres partagent aussi un esprit, une vision, des approches, qui transpassent
+l'outil ! Agilité, pragmatisme, KISS, DRY, PEP20...</p>
+<p>Au menu, les problématiques de scaling étaient prédominantes, Django propulse des sites à
+gros volume, comme <em>Liberation.fr</em>, <em>20minutes.fr</em>, <em>Mozilla</em>, <em>Autolib</em>, représentés
+pendant ces rencontres, mais aussi <em>Instagram</em>, <em>Lanyrd</em>, <em>Disqus</em>... autant d'expériences à partager!
+Ce fut aussi un honneur d'accueillir deux invités nord-américains, python Lords chez <em>Heroku</em>.</p>
+<p>Cette année, je présentais une approche à contre-courant pour publier des données
+cartographiques sur le Web :</p>
+<blockquote>
+“ Comment publier des données cartographiques, aussi simplement qu'on
+publie une image ? Il existe un monde où Django expose lui-même des
+cartes interactives, sans déployer l'artillerie habituelle !
+Une approche à contre-courant se prêtant parfaitement à la mise en
+valeur quasi-immédiate d'informations geographiques, comme celles
+libérées par votre ville ! ”</blockquote>
+<iframe src="http://www.slideshare.net/slideshow/embed_code/12698176" width="560" height="432" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe><p><strong>Pour résumer</strong> : éloignons-nous de l'OGC (WMS, WFS,...) quand il s'agit
+juste de publier une carte sur une page Web.</p>
+</div>
+<div class="section" id="comment-rafraichir-les-cartes">
+<h2>Comment rafraîchir les cartes ?</h2>
+<p>Je reprends une citation remontée par <em>twidi</em> :</p>
+<blockquote>
+“ There are only two hard things in Computer Science: cache invalidation and naming things ”
+-- Phil Karlton</blockquote>
+<p>Selon la fréquence de rafraichissement de vos données, plusieurs stratégies sont
+envisageables. Surtout qu'il est rare que l'ensemble de la carte nécessite d'être actualisé.</p>
+<div class="section" id="en-generant-les-tuiles-en-temps-reel">
+<h3>En générant les tuiles en temps réel</h3>
+<p>Comme l'expliquait Young Yahn <a class="footnote-reference" href="#footnote-2" id="footnote-reference-2">[2]</a>, générer des tuiles en temps réel demande
+d'avoir une architecture assez trappue et cela s'avère stressant à administrer.</p>
+<p>Cependant c'est possible avec des outils comme <em>tilelive</em> ou <em>renderd</em> (Apache <em>mod_tile</em>).</p>
+</div>
+<div class="section" id="avec-une-tache-planifiee">
+<h3>Avec une tâche planifiée</h3>
+<p>Il faut trouver le compromis entre le temps de fabrication de la carte et la fréquence
+de rafraichissement des données source.</p>
+<p>S'il s'agit de minutes, rafraichir la carte toutes les heures semble envisageable. La plupart du
+temps, une fois par jour suffira.</p>
+<p>Il existe plusieurs outils, comme <a class="reference external" href="/render-your-tilemill-stylesheets-with-landez.html">landez</a>,
+pour regénérer à intervales réguliers votre carte issue de <em>Tilemill</em>.</p>
+</div>
+<div class="section" id="a-la-seconde">
+<h3>À la seconde</h3>
+<p>Pour suivre une flotte de bateaux ou de véhicules, il faut que les éléments soient
+déplacés en temps réel sur la carte.</p>
+<p>Il y a plusieurs outils très efficaces qui se reposent sur les Websockets. J'avais
+fait l'application <a class="reference external" href="/des-cartes-collaboratives-avec-livetitude-fr.html">Livetitude</a>,
+<a class="reference external" href="http://vivid-warrior-6693.herokuapp.com">disponible en ligne</a>, qui permet
+d'éditer à plusieurs une carte de marqueurs, grace à <em>Pusher</em>.</p>
+<p>La bibliothèque <em>Sharejs</em>, issue du projet défunt Google Wave, permettrait d'aller
+plus loin en faisant de l'édition collaborative d'attributs de géométries.</p>
+</div>
+<div class="section" id="en-fonction-de-filtres-ou-formulaires">
+<h3>En fonction de filtres ou formulaires</h3>
+<p>Pour redessiner la carte en fonction de filtres, sur des attributs par exemple, l'utilisation
+du format GeoJSON s'avère assez efficace.</p>
+<p>Votre serveur reçoit le formulaire, construit le jeu de données, et renvoie les
+résultats (<em>Features = geometries + attributs</em>).</p>
+<p>Cette approche peut s'avérer délicate selon la taille des jeux de données. Plusieurs
+ruses existent afin de limiter le volume (ex: généralisation progressive selon la zone affichée)</p>
+</div>
+</div>
+<div class="section" id="carte-a-echelle-unique">
+<h2>Carte à échelle unique</h2>
+<p>Parfois, pour certaines cartes, une seule vue suffit ! Nul besoin de zoomer, puisque le
+phénomène intervient à une échelle en particulier !</p>
+<p>Pensez aux cartes des journaux ! Et vous serez séduits par l'excellent <em>Kartograph</em>,
+qui permet de publier des cartes sublimes facilement. Le SVG est manipulable en Javascript,
+et permet d'ajouter des évènements sur les zones.</p>
+<p>Martin Dewulf a publié <a class="reference external" href="http://migrationsmap.net">une jolie carte interactive à partir de données ouvertes</a>.
+Le résultat est très convaincaint, et sort de l'ordinaire.</p>
+</div>
+<div class="section" id="requiem-pour-les-trolls">
+<h2>Requiem pour les trolls</h2>
+<p>La citation au début de la présentation, issue de <em>#whereconf</em>, était volontairement
+provocatrice. Mais de nombreux acteurs du Web et de la cartographie rejoignent
+cette idée. Par exemple, entre temps, Sean Gillies a réitéré :</p>
+<blockquote>
+“ How many MapBox and CartoDB like products would there be today if the
+Open Source GIS community hadn't gone on a decade long WxS wander? “
+-- &#64;sgillies, 2012</blockquote>
+<div class="section" id="oriente-communication">
+<h3>Orienté communication</h3>
+<p>En 12 minutes, c'est très difficile de présenter tous les aspects, inconvénients
+et avantages d'une approche à contre-courant !</p>
+<p>J'ai présenté le besoin plus simple de la cartographie sur le Web :</p>
+<ul class="simple">
+<li>j'ai des données à caractère géographique ;</li>
+<li>je veux les afficher sur une page Web avec une carte interactive.</li>
+</ul>
+<p>Le cas le plus simple, mais en même temps le plus répandu !</p>
+</div>
+<div class="section" id="pas-toujours-d-alternatives-a-l-ogc">
+<h3>Pas toujours d'alternatives à l'OGC</h3>
+<p>Dans certains contextes, les protocoles OGC sont indispensables :</p>
+<ul class="simple">
+<li>interroperabilité entre systèmes hétérogènes sans médiation préalable (<em>serveurs externes, logiciels propriétaires, etc.</em>);</li>
+<li>catalogage sémantique et syndication des jeux de données (<em>INSPIRE</em>)</li>
+<li>construction d'une plateforme IDS</li>
+</ul>
+<p><em>OpenLayers</em> est la seule bibliothèque javascript qui a les reins assez solides pour
+s'intégrer dans ces environnements.</p>
+</div>
+<div class="section" id="savoir-oublier-le-web">
+<h3>Savoir oublier le Web</h3>
+<p>Il faut savoir juger la pertinence d'une application Web. Dans certaines situations,
+le Web n'est pas la seule solution pour faire du client-server en multi-utilisateurs.</p>
+<p>L'année dernière par exemple, nous avons développé une application collaborative
+pour manipuler des tronçons routiers. Nous avons <a class="reference external" href="/merkopolo-a-simple-yet-powerful-starter-kit-for-your-qtc-gis-application.html">choisi C++/Qt</a>,
+avec PostGIS et des <a class="reference external" href="/access-a-json-webservice-with-qt-c.html">webservices JSON</a>,
+parce que c'est ce qui se prêtait le mieux au besoin ! La même chose en <em>ExtJS</em> aurait
+été catastrophique !</p>
+<iframe width="560" height="315" src="http://www.youtube.com/embed/7NPQo54NbJ8" frameborder="0" allowfullscreen></iframe><table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td><a class="reference external" href="https://twitter.com/#!/oloynet/status/192295759431995393">oloynet</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="footnote-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-2">[2]</a></td><td><a class="reference external" href="http://mapbox.com/blog/rendering-the-world/">Rendering the World, FOSS4G NA, 2012</a></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/web.html">#web</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/livetitude.html">#livetitude</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/des-cartes-dun-autre-monde-la-suite-fr.html';
+      this.page.identifier = 'des-cartes-dun-autre-monde-la-suite';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

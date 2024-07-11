@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Afficher des pictogrammes avec polymaps - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Afficher des pictogrammes avec polymaps</h1>
+<time datetime="2011-02-28T17:02:00+01:00">Mon 28 February 2011</time></header>
+<article>
+    <p>En reprenant l'exemple de l'<a class="reference external" href="http://www.makina-corpus.org/blog/afficher-les-donn%C3%A9es-de-paris-opendata-avec-polymaps">épisode précédent avec polymaps</a>, nous allons maintenant afficher des pictogrammes sur les points.</p>
+<p>On conserve la couche GeoJSON en utilisant un <a class="reference external" href="http://fr.wikipedia.org/wiki/Fonction_de_rappel">callback</a> pour l'évènement <tt class="docutils literal">load</tt>.</p>
+<div class="highlight"><pre><span></span><span class="nx">map</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">po</span><span class="p">.</span><span class="nx">geoJson</span><span class="p">()</span>
+<span class="w">          </span><span class="p">.</span><span class="nx">url</span><span class="p">(</span><span class="s1">&#39;collecteurs.json&#39;</span><span class="p">)</span>
+<span class="w">          </span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;load&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">load</span><span class="p">));</span>
+</pre></div>
+<p>Dans la fonction <tt class="docutils literal">load()</tt>, nous allons remplacer les cercles dessinés par défaut par des pictogrammes en manipulant les éléments de la page (<a class="reference external" href="http://fr.wikipedia.org/wiki/Document_Object_Model">DOM</a>).
+Nous utilisons ici la variable <tt class="docutils literal">n$</tt>, qui provient du miniscript <tt class="docutils literal">nns.js</tt> livré dans l'archive <em>polymaps</em> et qui facilite la manipulation du DOM (le vénérable <a class="reference external" href="http://jquery.com/">jquery</a> ferait aussi l'affaire)</p>
+<div class="highlight"><pre><span></span><span class="kd">function</span><span class="w"> </span><span class="nx">load</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">ICONSIZE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">16</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// Parcourir les features de la carte</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">var</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">features</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span><span class="w"> </span><span class="nx">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">circle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">n$</span><span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">features</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">element</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">circle</span><span class="p">.</span><span class="nx">parent</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">attributes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">e</span><span class="p">.</span><span class="nx">features</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">data</span><span class="p">.</span><span class="nx">properties</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// Ajouter et positionner le pictogramme</span>
+<span class="w">        </span><span class="c1">// (à partir de la position du cercle)</span>
+<span class="w">        </span><span class="nx">img</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">root</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s2">&quot;svg:image&quot;</span><span class="p">)</span>
+<span class="w">             </span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;width&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">ICONSIZE</span><span class="p">)</span>
+<span class="w">             </span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">ICONSIZE</span><span class="p">)</span>
+<span class="w">             </span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">circle</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;transform&#39;</span><span class="p">)</span>
+<span class="w">                            </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39; translate(-&#39;</span><span class="o">+</span><span class="p">(</span><span class="nx">ICONSIZE</span><span class="o">/</span><span class="mf">2</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;,&#39;</span>
+<span class="w">                                       </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="p">(</span><span class="nx">ICONSIZE</span><span class="o">/</span><span class="mf">2</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// Enlever le cercle original</span>
+<span class="w">        </span><span class="nx">root</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="nx">circle</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// Définir le chemin du pictogramme à utiliser</span>
+<span class="w">        </span><span class="c1">// en fonction de l&#39;attribut</span>
+<span class="w">        </span><span class="nx">img</span><span class="p">.</span><span class="nx">attr</span><span class="p">(</span><span class="s1">&#39;xlink:href&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">attributes</span><span class="p">.</span><span class="nx">Etat</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">&#39;Actif&#39;</span><span class="w"> </span><span class="o">?</span>
+<span class="w">                               </span><span class="s1">&#39;actif.svg&#39;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;inactif.svg&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<img alt="" src="/images/polymaps-pictogrammes.jpg" />
+<p><em>© City of Paris, ODBL, CloudMade, OpenStreetMap contributors, CCBYSA</em></p>
+<p>Ici, nous avons utilisé des pictogrammes SVG, mais le même code fonctionne avec des /images PNG ou JPG...</p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>,         <a href="https://blog.mathieu-leplatre.info/tag/polymaps.html">#polymaps</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/afficher-des-pictogrammes-avec-polymaps-fr.html';
+      this.page.identifier = 'afficher-des-pictogrammes-avec-polymaps';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

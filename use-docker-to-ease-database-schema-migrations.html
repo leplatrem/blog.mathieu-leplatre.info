@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Use Docker to ease database schema migrations - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Use Docker to ease database schema migrations</h1>
+<time datetime="2014-11-06T00:00:00+01:00">Thu 06 November 2014</time></header>
+<article>
+    <p><a class="reference external" href="https://www.docker.com/">Docker</a> is very versatile, and can fulfill many (<em>many</em>) different
+use-cases. You've probably heard of it to put applications in production.</p>
+<p>Even though I wrote quite a few <em>Dockerfiles</em> to package and ship Web apps,
+what has convinced me most is running database backends during development :)</p>
+<p>For example, when you work with relational databases, and develop features in different
+branches, it can be very painful to reset your divergent schemas each time you switch branch.
+(<em>like with Django South, or 1.7</em>).</p>
+<p>Likewise, if you want to replay data imports, migrations, on different database schemas,
+or with various PostgreSQL versions etc.</p>
+<p>In this article, I will show how to use the <tt class="docutils literal">commit</tt> feature of <em>Docker</em> to
+solve these issues.</p>
+<div class="section" id="run-postgresql-in-docker">
+<h2>Run PostgreSQL in Docker</h2>
+<p>First, you should choose an image in the <a class="reference external" href="https://registry.hub.docker.com/">Docker index</a>.</p>
+<p>Once you've chosen the one that fits your needs, pull an image is as easy as:</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>docker<span class="w"> </span>pull<span class="w"> </span>helmi03/docker-postgis
+</pre></div>
+<p>Then you can run it as a deamon, on <tt class="docutils literal">localhost:5432</tt>:</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">5432</span>:5432<span class="w"> </span>helmi03/docker-postgis
+</pre></div>
+<p>Congratulations, you have a PostGIS container running. Log-in as superuser with <em>docker/docker</em>.</p>
+<p>You can see its identifier with <tt class="docutils literal">sudo docker ps</tt>, and stop it using <tt class="docutils literal">sudo docker stop &lt;ID&gt;</tt>.</p>
+</div>
+<div class="section" id="commit">
+<h2>Commit</h2>
+<p>The killer feature of <em>Docker</em> is its incremental filesystem, which allows to
+tag and commit the states of containers.</p>
+<p>For example, once you've created an empty database in your container, you will
+save its state :</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>docker<span class="w"> </span>commit<span class="w"> </span>&lt;ID&gt;<span class="w"> </span>postgis-empty
+</pre></div>
+<p>Then, for example, you will initialize your database tables for one of your applications,
+create users, etc. You commit !</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>docker<span class="w"> </span>commit<span class="w"> </span>&lt;ID&gt;<span class="w"> </span>geotrek-0.28-empty
+</pre></div>
+<p>Loaded data into the database ? Commit !</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>docker<span class="w"> </span>commit<span class="w"> </span>&lt;ID&gt;<span class="w"> </span>geotrek-0.28-demo
+</pre></div>
+<p>Now, that you've performed a series of commits, you can stop and re-run the container
+at a previous state! <em>Docker</em> is the git of virtual machines!</p>
+<p>See the list of your tags with <tt class="docutils literal">sudo docker images</tt>:</p>
+<div class="highlight"><pre><span></span>$<span class="w"> </span>sudo<span class="w"> </span>docker<span class="w"> </span>images
+REPOSITORY<span class="w">                    </span>TAG<span class="w">        </span>IMAGE<span class="w"> </span>ID<span class="w">        </span>CREATED<span class="w">        </span>VIRTUAL<span class="w"> </span>SIZE
+geotrek-0.28-demo<span class="w">             </span>latest<span class="w">     </span>48f51d78273a<span class="w">    </span><span class="m">2</span><span class="w"> </span>weeks<span class="w"> </span>ago<span class="w">    </span><span class="m">1</span>.236<span class="w"> </span>GB
+geotrek-0.28-empty<span class="w">            </span>latest<span class="w">     </span>3985183cd01a<span class="w">    </span><span class="m">4</span><span class="w"> </span>weeks<span class="w"> </span>ago<span class="w">    </span><span class="m">1</span>.208<span class="w"> </span>GB
+postgis-empty<span class="w">                 </span>latest<span class="w">     </span>24ec864dc058<span class="w">    </span><span class="m">4</span><span class="w"> </span>months<span class="w"> </span>ago<span class="w">   </span><span class="m">844</span>.4<span class="w"> </span>MB
+helmi03/docker-postgis<span class="w">        </span>latest<span class="w">     </span>f62d8f0fb8af<span class="w">    </span><span class="m">9</span><span class="w"> </span>months<span class="w"> </span>ago<span class="w">   </span><span class="m">746</span>.2<span class="w"> </span>MB
+</pre></div>
+</div>
+<div class="section" id="checkout">
+<h2>Checkout</h2>
+<p>Checkout a previous state is very simple, it's like the first time you started
+the image from Docker index, except that you now specify the name of your tag!</p>
+<p>First, stop the current instance:</p>
+<div class="highlight"><pre><span></span>$<span class="w"> </span>sudo<span class="w"> </span>docker<span class="w"> </span>ps
+CONTAINER<span class="w"> </span>ID<span class="w">        </span>IMAGE<span class="w">                      </span>COMMAND<span class="w">       </span>CREATED<span class="w">       </span>STATUS<span class="w">      </span>PORTS
+7e1e44ce36d8<span class="w">        </span>geotrek-0.28-demo:latest<span class="w">   </span><span class="s2">&quot;/start.sh&quot;</span><span class="w">   </span><span class="m">6</span><span class="w"> </span>hours<span class="w"> </span>ago<span class="w">   </span>Up<span class="w"> </span><span class="m">6</span><span class="w"> </span>hours<span class="w">  </span><span class="m">0</span>.0.0.0:5432-&gt;5432/tcp
+
+$<span class="w"> </span>sudo<span class="w"> </span>docker<span class="w"> </span>stop<span class="w"> </span>7e1e44ce36d8
+</pre></div>
+<p>Re-run at a previous state:</p>
+<div class="highlight"><pre><span></span>$<span class="w"> </span>sudo<span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span>-p<span class="w"> </span><span class="m">5432</span>:5432<span class="w"> </span>postgis-empty
+</pre></div>
+<p>You will quickly figure out that you can:</p>
+<ul class="simple">
+<li>Run different versions of your containers (or PostgreSQL servers) on different ports</li>
+<li>Restore the state of your database for your <em>master</em> branch at one fell swoop!</li>
+<li>Replay migrations scripts</li>
+<li>Run your application on customer database with no configuration change</li>
+<li>...</li>
+<li>Have the same approach with <em>CouchDB</em>, <em>Redis</em>, <em>ElasticSearch</em>, ...</li>
+</ul>
+<p>To be honest, it's like git, it changed my way of working and I can't go
+without it anymore...</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/git.html">#git</a>,         <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/docker.html">#docker</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/use-docker-to-ease-database-schema-migrations.html';
+      this.page.identifier = 'use-docker-to-ease-database-schema-migrations';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

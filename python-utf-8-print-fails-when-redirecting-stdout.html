@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Python UTF-8 print fails when redirecting stdout - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Python UTF-8 print fails when redirecting stdout</h1>
+<time datetime="2011-01-26T11:25:00+01:00">Wed 26 January 2011</time></header>
+<article>
+    <p>Consider the following piece of code:</p>
+<div class="highlight"><pre><span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="nb">print</span> <span class="sa">u</span><span class="s2">&quot;Վարդանաշեն&quot;</span>
+</pre></div>
+<p>Running this in a terminal works:</p>
+<div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>test.py
+Վարդանաշեն
+</pre></div>
+<p>Redirecting standard output to a file <strong>fails</strong>:</p>
+<div class="highlight"><pre><span></span>$<span class="w"> </span>python<span class="w"> </span>test.py<span class="w"> </span>&gt;<span class="w"> </span>file
+Traceback<span class="w"> </span><span class="o">(</span>most<span class="w"> </span>recent<span class="w"> </span>call<span class="w"> </span>last<span class="o">)</span>:
+<span class="w">  </span>File<span class="w"> </span><span class="s2">&quot;test.py&quot;</span>,<span class="w"> </span>line<span class="w"> </span><span class="m">2</span>,<span class="w"> </span><span class="k">in</span><span class="w"> </span>&lt;module&gt;
+<span class="w">    </span>print<span class="w"> </span>u<span class="s2">&quot;Վարդանաշեն&quot;</span>
+UnicodeEncodeError:<span class="w"> </span><span class="s1">&#39;ascii&#39;</span><span class="w"> </span>codec<span class="w"> </span>can<span class="err">&#39;</span>t<span class="w"> </span>encode<span class="w"> </span>characters<span class="w"> </span><span class="k">in</span><span class="w"> </span>position<span class="w"> </span><span class="m">0</span>-9:<span class="w"> </span>ordinal<span class="w"> </span>not<span class="w"> </span><span class="k">in</span><span class="w"> </span>range<span class="o">(</span><span class="m">128</span><span class="o">)</span>
+</pre></div>
+<p><a class="reference external" href="http://wiki.python.org/moin/PrintFails">Explanations are available on Python official wiki</a>: default encoding has to be forced.</p>
+<p>With an environment variable:</p>
+<div class="highlight"><pre><span></span>$<span class="w"> </span><span class="nv">PYTHONIOENCODING</span><span class="o">=</span><span class="s1">&#39;utf_8&#39;</span>
+$<span class="w"> </span><span class="nb">export</span><span class="w"> </span>PYTHONIOENCODING
+$<span class="w"> </span>python<span class="w"> </span>test.py<span class="w"> </span>&gt;<span class="w"> </span>file
+$
+</pre></div>
+<p>With source modification:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getwriter</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">())(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</pre></div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/encoding.html">#encoding</a>,         <a href="https://blog.mathieu-leplatre.info/tag/shell.html">#shell</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/python-utf-8-print-fails-when-redirecting-stdout.html';
+      this.page.identifier = 'python-utf-8-print-fails-when-redirecting-stdout';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

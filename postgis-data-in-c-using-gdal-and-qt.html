@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>PostGIS data in C++ using GDAL and Qt - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>PostGIS data in C++ using GDAL and Qt</h1>
+<time datetime="2011-08-23T10:25:00+02:00">Tue 23 August 2011</time></header>
+<article>
+    <p><em>Original post at</em> <a class="reference external" href="http://makina-corpus.org">Makina Corpus</a></p>
+<p>I did not find any ready-to-use snippets on the Web on this matter, so if
+you are lucky enough, you'll find this one.</p>
+<p>The objective is to read GIS geometries from a PostGIS database and manipulate
+them in C++. I use Qt here, but it is not really a prerequisite, it just
+helps a lot. Well, actually, it saves lives.</p>
+<div class="section" id="database-connection">
+<h2>Database Connection</h2>
+<div class="highlight"><pre><span></span><span class="n">m_db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">QSqlDatabase</span><span class="o">::</span><span class="n">addDatabase</span><span class="p">(</span><span class="s">&quot;QPSQL&quot;</span><span class="p">);</span>
+<span class="n">m_db</span><span class="p">.</span><span class="n">setHostName</span><span class="p">(</span><span class="s">&quot;host&quot;</span><span class="p">);</span>
+<span class="n">m_db</span><span class="p">.</span><span class="n">setDatabaseName</span><span class="p">(</span><span class="s">&quot;dbname&quot;</span><span class="p">);</span>
+<span class="n">m_db</span><span class="p">.</span><span class="n">setUserName</span><span class="p">(</span><span class="s">&quot;user&quot;</span><span class="p">);</span>
+<span class="n">m_db</span><span class="p">.</span><span class="n">setPassword</span><span class="p">(</span><span class="s">&quot;pass&quot;</span><span class="p">);</span>
+</pre></div>
+<p>Do not close the database at the end of each query.</p>
+<div class="highlight"><pre><span></span><span class="n">m_db</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+<span class="n">m_db</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">QSqlDatabase</span><span class="p">();</span><span class="w">  </span><span class="c1">// reinitialize for real</span>
+</pre></div>
+<p>Shut it down like this in your class' destructor or you may have errors like
+<em>QSqlDatabasePrivate::removeDatabase: connection 'qt_sql_default_connection' is still in use, all queries will cease to work</em></p>
+</div>
+<div class="section" id="records-reading">
+<h2>Records Reading</h2>
+<div class="highlight"><pre><span></span><span class="n">QSqlQueryModel</span><span class="o">*</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">QSqlQueryModel</span><span class="p">();</span>
+
+<span class="n">model</span><span class="o">-&gt;</span><span class="n">setQuery</span><span class="p">(</span><span class="s">&quot;SELECT id, ST_AsBinary(the_geom) AS the_geom &quot;</span>
+<span class="w">                </span><span class="s">&quot;FROM table&quot;</span><span class="p">);</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="n">numRows</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="o">-&gt;</span><span class="n">rowCount</span><span class="p">();</span>
+
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">numRows</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Read fields</span>
+<span class="w">    </span><span class="n">qlonglong</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">record</span><span class="p">(</span><span class="n">i</span><span class="p">).</span><span class="n">value</span><span class="p">(</span><span class="s">&quot;id&quot;</span><span class="p">).</span><span class="n">toLongLong</span><span class="p">();</span>
+<span class="w">    </span><span class="n">QByteArray</span><span class="w"> </span><span class="n">wkb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">record</span><span class="p">(</span><span class="n">i</span><span class="p">).</span><span class="n">value</span><span class="p">(</span><span class="s">&quot;the_geom&quot;</span><span class="p">).</span><span class="n">toByteArray</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Process !</span>
+<span class="w">    </span><span class="n">processRecord</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">wkb</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>QByteArray uses <a class="reference external" href="http://doc.qt.nokia.com/latest/implicit-sharing.html">implicit sharing</a>
+and can be passed as argument without being copied.</p>
+</div>
+<div class="section" id="geometries-parsing">
+<h2>Geometries Parsing</h2>
+<p>In this part, we rely on <a class="reference external" href="http://www.gdal.org">GDAL (Geospatial Data Abstraction Library)</a>
+<a class="reference external" href="http://www.gdal.org/ogr/osr_tutorial.html">OGRSpatialReference</a>.</p>
+<p>It provides an API to access geometries coordinates etc.</p>
+<div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;ogrsf_frmts.h&quot;</span><span class="c1"> // GDAL</span>
+<span class="p">...</span>
+<span class="p">...</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="n">Class</span><span class="o">::</span><span class="n">processRecord</span><span class="p">(</span><span class="n">qlonglong</span><span class="w"> </span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">QByteArray</span><span class="w"> </span><span class="n">wkb</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">OGRSpatialReference</span><span class="w"> </span><span class="n">osr</span><span class="p">;</span>
+<span class="w">    </span><span class="n">OGRGeometry</span><span class="w"> </span><span class="o">*</span><span class="n">geom</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">NULL</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Parse WKB</span>
+<span class="w">    </span><span class="n">OGRErr</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">OGRGeometryFactory</span><span class="o">::</span><span class="n">createFromWkb</span><span class="p">((</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="n">wkb</span><span class="p">.</span><span class="n">constData</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">osr</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">geom</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">OGRERR_NONE</span><span class="p">){</span>
+<span class="w">        </span><span class="c1">// process error, like emit signal</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Analyse geometry by type and process them as you wish</span>
+<span class="w">    </span><span class="n">OGRwkbGeometryType</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wkbFlatten</span><span class="p">(</span><span class="n">geom</span><span class="o">-&gt;</span><span class="n">getGeometryType</span><span class="p">());</span>
+<span class="w">    </span><span class="k">switch</span><span class="p">(</span><span class="n">type</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">wkbLineString</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">OGRLineString</span><span class="w"> </span><span class="o">*</span><span class="n">poRing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">OGRLineString</span><span class="o">*</span><span class="p">)</span><span class="n">geom</span><span class="p">;</span>
+
+<span class="w">            </span><span class="c1">// Access line string nodes for example :</span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">numNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poRing</span><span class="o">-&gt;</span><span class="n">getNumPoints</span><span class="p">();</span>
+<span class="w">            </span><span class="n">OGRPoint</span><span class="w"> </span><span class="n">p</span><span class="p">;</span>
+<span class="w">            </span><span class="k">for</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w">  </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">numNode</span><span class="p">;</span><span class="w">  </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">poRing</span><span class="o">-&gt;</span><span class="n">getPoint</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">p</span><span class="p">);</span>
+<span class="w">                </span><span class="n">qDebug</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getX</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">getY</span><span class="p">();</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="no">wkbMultiLineString</span><span class="p">:</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="n">OGRGeometryCollection</span><span class="w">  </span><span class="o">*</span><span class="n">poCol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">OGRGeometryCollection</span><span class="o">*</span><span class="p">)</span><span class="w"> </span><span class="n">geom</span><span class="p">;</span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">numCol</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">poCol</span><span class="o">-&gt;</span><span class="n">getNumGeometries</span><span class="p">();</span>
+<span class="w">            </span><span class="k">for</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">numCol</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// Access line length for example :</span>
+<span class="w">                </span><span class="n">qDebug</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">poCol</span><span class="o">-&gt;</span><span class="n">getGeometryRef</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">get_Length</span><span class="p">();</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">default</span><span class="o">:</span>
+<span class="w">            </span><span class="c1">// process error, like emit signal</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Clean-up</span>
+<span class="w">    </span><span class="n">OGRGeometryFactory</span><span class="o">::</span><span class="n">destroyGeometry</span><span class="p">(</span><span class="n">geom</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>In this snippet, I only process linestrings, but all <a class="reference external" href="http://www.gdal.org/ogr/ogr__core_8h.html#800236a0d460ef66e687b7b65610f12a">geometry types are available</a>.
+Consider writing a recursive function for geometry collections and so forth...</p>
+<p>Hope this helped !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/c.html">#c++</a>,         <a href="https://blog.mathieu-leplatre.info/tag/qt.html">#qt</a>,         <a href="https://blog.mathieu-leplatre.info/tag/postgis.html">#postgis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gdal.html">#gdal</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/postgis-data-in-c-using-gdal-and-qt.html';
+      this.page.identifier = 'postgis-data-in-c-using-gdal-and-qt';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

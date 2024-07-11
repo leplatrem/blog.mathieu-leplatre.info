@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Mes premiers pas avec Heroku - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Mes premiers pas avec Heroku</h1>
+<time datetime="2011-10-10T10:30:00+02:00">Mon 10 October 2011</time></header>
+<article>
+    <p>J'ai pris le temps de tester la plateforme <a class="reference external" href="http://www.heroku.com">Heroku</a>, qui fait pas mal de bruit
+en ce moment.</p>
+<p>L'idée est simple : le développeur pousse son code dans une branche Git
+pour déployer son application. Ils se chargent du reste.</p>
+<p>La <a class="reference external" href="http://devcenter.heroku.com/articles/python">documentation pour déployer du python</a> est bien faite.</p>
+<div class="section" id="heroku-et-virtualenv">
+<h2>heroku et virtualenv</h2>
+<p>Pour commencer, j'ai installé l'outil <tt class="docutils literal">heroku</tt> en ruby (sic), dans un <em>virtualenv</em></p>
+<pre class="literal-block">
+sudo aptitude install rubygems
+
+virtualenv --no-site-packages env
+source env/bin/activate
+</pre>
+<p>Merci à Bruno, qui nous a expliqué récemment <a class="reference external" href="http://bruno.im/2011/sep/29/streamline-your-django-workflow/">comment faire cohabiter les gems ruby et virtualenv</a></p>
+<pre class="literal-block">
+export GEM_HOME=&quot;$VIRTUAL_ENV/gems&quot;
+export GEM_PATH=&quot;&quot;
+export PATH=$PATH:$GEM_HOME/bin
+</pre>
+<p>(À ajouter au hook dans <tt class="docutils literal"><span class="pre">~/.virtualenvs/postactivate</span></tt> pour plus tard)</p>
+<p>Pour terminer, il suffit de poser le <em>gem</em></p>
+<pre class="literal-block">
+gem install heroku
+</pre>
+<p>Et j'ai bien <tt class="docutils literal">heroku</tt> cloisonné dans le <em>virtualenv</em>.</p>
+<div class="highlight"><pre><span></span><span class="o">(</span>env<span class="o">)</span>src$<span class="w"> </span>which<span class="w"> </span>heroku
+/home/mathieu/path/env/gems/bin/heroku
+
+<span class="o">(</span>env<span class="o">)</span>src$<span class="w"> </span>heroku<span class="w"> </span><span class="nb">help</span>
+Usage:<span class="w"> </span>heroku<span class="w"> </span>COMMAND<span class="w"> </span><span class="o">[</span>--app<span class="w"> </span>APP<span class="o">]</span><span class="w"> </span><span class="o">[</span>command-specific-options<span class="o">]</span>
+</pre></div>
+</div>
+<div class="section" id="heroku-et-la-configuration-de-l-application">
+<h2>heroku et la Configuration de l'Application</h2>
+<p>Pour apprivoiser la plateforme, j'ai utilisé le <em>micro</em>-framework <a class="reference external" href="http://flask.pocoo.org/">Flask</a>,
+suggéré dans le tutorial python. C'est ultra-simple, ultra-léger, ultra-tout.</p>
+<p>Afin de gérer ma configuration, j'ai créé une classe <tt class="docutils literal">Settings</tt> qui utilise les variables d'environment:</p>
+<div class="highlight"><pre><span></span><span class="c1"># settings.py</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">class</span> <span class="nc">Settings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">DEBUG</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">))</span>
+    <span class="n">TESTING</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;TESTING&quot;</span><span class="p">))</span>
+    <span class="n">PORT</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PORT&quot;</span><span class="p">,</span> <span class="mi">5000</span><span class="p">))</span>
+    <span class="n">HOST</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;HOST&quot;</span><span class="p">,</span> <span class="s1">&#39;0.0.0.0&#39;</span><span class="p">)</span>
+</pre></div>
+<p>Que je branche dans l'application :</p>
+<div class="highlight"><pre><span></span><span class="c1"># app.py</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+
+<span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">Settings</span>
+
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+
+<span class="c1">#...</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># ...</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">from_object</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+</pre></div>
+<p>Ensuite grâce au client <tt class="docutils literal">heroku</tt>, je peux contrôler à distance
+la configuration de mon application, qui est redémarrée à chaque changement :</p>
+<div class="highlight"><pre><span></span><span class="o">(</span>env<span class="o">)</span>src$<span class="w"> </span>heroku<span class="w"> </span>config
+<span class="nv">PATH</span><span class="w">              </span><span class="o">=</span>&gt;<span class="w"> </span>bin:/usr/local/bin:/usr/bin:/bin
+<span class="nv">PYTHONUNBUFFERED</span><span class="w">  </span><span class="o">=</span>&gt;<span class="w"> </span><span class="nb">true</span>
+
+<span class="o">(</span>env<span class="o">)</span>src$<span class="w"> </span>heroku<span class="w"> </span>config:add<span class="w"> </span><span class="nv">DEBUG</span><span class="o">=</span>True
+Adding<span class="w"> </span>config<span class="w"> </span>vars:
+<span class="w">  </span><span class="nv">DEBUG</span><span class="w"> </span><span class="o">=</span>&gt;<span class="w"> </span>True
+Restarting<span class="w"> </span>app...<span class="w"> </span><span class="k">done</span>,<span class="w"> </span>v19.
+
+<span class="o">(</span>env<span class="o">)</span>src$<span class="w"> </span>heroku<span class="w"> </span>config
+<span class="nv">DEBUG</span><span class="w">             </span><span class="o">=</span>&gt;<span class="w"> </span>True
+<span class="nv">PATH</span><span class="w">              </span><span class="o">=</span>&gt;<span class="w"> </span>bin:/usr/local/bin:/usr/bin:/bin
+<span class="nv">PYTHONUNBUFFERED</span><span class="w">  </span><span class="o">=</span>&gt;<span class="w"> </span><span class="nb">true</span>
+
+<span class="o">(</span>env<span class="o">)</span>src$<span class="w"> </span>heroku<span class="w"> </span>config:remove<span class="w"> </span>DEBUG
+Removing<span class="w"> </span>DEBUG<span class="w"> </span>and<span class="w"> </span>restarting<span class="w"> </span>app...<span class="w"> </span><span class="k">done</span>,<span class="w"> </span>v20.
+</pre></div>
+<p>Je peux revenir en arrière quand un changement de config a posé problème :</p>
+<div class="highlight"><pre><span></span><span class="o">(</span>env<span class="o">)</span>src$<span class="w"> </span>heroku<span class="w"> </span>releases
+Rel<span class="w">   </span>Change<span class="w">                          </span>By<span class="w">                    </span>When
+----<span class="w">  </span>----------------------<span class="w">          </span>----------<span class="w">            </span>----------
+v20<span class="w">   </span>Config<span class="w"> </span>remove<span class="w"> </span>DEBUG<span class="w">             </span>your@mail.com<span class="w">         </span><span class="m">25</span><span class="w"> </span>seconds<span class="w"> </span>ago
+v19<span class="w">   </span>Config<span class="w"> </span>add<span class="w"> </span>DEBUG<span class="w">                </span>your@mail.com<span class="w">         </span><span class="m">1</span><span class="w"> </span>minute<span class="w"> </span>ago
+
+
+<span class="o">(</span>env<span class="o">)</span>src$<span class="w"> </span>heroku<span class="w"> </span>rollback<span class="w"> </span>v19
+Rolled<span class="w"> </span>back<span class="w"> </span>to<span class="w"> </span>v19
+</pre></div>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>,         <a href="https://blog.mathieu-leplatre.info/tag/flask.html">#flask</a>,         <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/heroku.html">#heroku</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/mes-premiers-pas-avec-heroku-fr.html';
+      this.page.identifier = 'mes-premiers-pas-avec-heroku';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

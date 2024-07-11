@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Drape lines on a DEM with PostGIS - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Drape lines on a DEM with PostGIS</h1>
+<time datetime="2013-04-30T10:25:00+02:00">Tue 30 April 2013</time></header>
+<article>
+    <p>This article gives a few SQL commands to drape 2D geometries on a DEM (<em>Digital Elevation Model</em>), in order to obtain 3D geometries.
+We use PostGIS 2, and its rasters support especially.</p>
+<div class="section" id="load-your-dem">
+<h2>Load your DEM</h2>
+<p>Assuming you have a DEM compatible with GDAL, you can easily load the raster into the database using these commands.</p>
+<p><strong>Reprojects</strong> to specified SRID, <strong>crops</strong> to specified extent, and writes output in a file:</p>
+<div class="highlight"><pre><span></span>gdalwarp<span class="w"> </span>-t_srs<span class="w"> </span>EPSG:32632<span class="w"> </span>-te<span class="w"> </span><span class="m">289942</span><span class="w"> </span><span class="m">4845809</span><span class="w"> </span><span class="m">400671</span><span class="w"> </span><span class="m">4947295</span><span class="w"> </span>dem_file.geotif<span class="w"> </span>output.bin
+</pre></div>
+<p>Tiles into 100 pixels squares and <strong>converts to SQL</strong>:</p>
+<div class="highlight"><pre><span></span>raster2pgsql<span class="w"> </span>-c<span class="w"> </span>-C<span class="w"> </span>-I<span class="w"> </span>-M<span class="w"> </span>-t<span class="w"> </span>100x100<span class="w"> </span>output.bin<span class="w"> </span>mnt<span class="w"> </span>&gt;<span class="w"> </span>output.sql
+</pre></div>
+<p><strong>Load SQL</strong> into database:</p>
+<div class="highlight"><pre><span></span>psql<span class="w"> </span>-d<span class="w"> </span>yourdb<span class="w"> </span>&lt;<span class="w"> </span>output.sql
+</pre></div>
+<img alt="" class="align-center" src="/images/postgis_dem_qgis.jpg" />
+</div>
+<div class="section" id="drape-geometries">
+<h2>Drape geometries</h2>
+<p>There are at least 3 strategies to drape your geometries.</p>
+<div class="section" id="with-geometry-resolution">
+<h3>With geometry resolution</h3>
+<p>We obtain one elevation value per point on your line.</p>
+<p><strong>Pros</strong>: You keep your original geometry resolution (number of points)</p>
+<p><strong>Cons</strong>: You potentially loose a lot of 3D information (think of &quot;hops&quot;)</p>
+<img alt="" class="align-center" src="/images/postgis_dem_native.png" />
+<div class="highlight"><pre><span></span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="c1">-- From an arbitrary line</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="s1">&#39;SRID=32632;LINESTRING (348595 4889225,352577 4887465,354784 4883841)&#39;</span><span class="p">::</span><span class="n">geometry</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="p">),</span>
+<span class="w">  </span><span class="n">points2d</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="c1">-- Extract its points</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="p">(</span><span class="n">ST_DumpPoints</span><span class="p">(</span><span class="n">geom</span><span class="p">)).</span><span class="n">geom</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">line</span><span class="p">),</span>
+<span class="w">  </span><span class="n">cells</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="c1">-- Get DEM elevation for each</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Value</span><span class="p">(</span><span class="n">mnt</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">val</span>
+<span class="w">     </span><span class="k">FROM</span><span class="w"> </span><span class="n">mnt</span><span class="p">,</span><span class="w"> </span><span class="n">points2d</span><span class="w"> </span><span class="n">p</span>
+<span class="w">     </span><span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Intersects</span><span class="p">(</span><span class="n">mnt</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">geom</span><span class="p">)),</span>
+<span class="w">    </span><span class="c1">-- Instantiate 3D points</span>
+<span class="w">  </span><span class="n">points3d</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_MakePoint</span><span class="p">(</span><span class="n">ST_X</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">ST_Y</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">val</span><span class="p">),</span><span class="w"> </span><span class="mi">32632</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">cells</span><span class="p">)</span>
+<span class="c1">-- Build 3D line from 3D points</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MakeLine</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">points3d</span><span class="p">;</span>
+</pre></div>
+<p><strong>Note</strong> by Daniel Gerber: if the line goes outside your DEM, use a left join (<tt class="docutils literal">FROM points2d LEFT OUTER JOIN elevation ON <span class="pre">ST_Intersects(...)</span></tt>) and set default value to 0.0 with <tt class="docutils literal"><span class="pre">coalesce(ST_Value(..),</span> 0.0)</tt>.</p>
+</div>
+<div class="section" id="with-dem-resolution">
+<h3>With DEM resolution</h3>
+<p>We obtain one elevation value per cell of your raster.</p>
+<p><strong>Pros</strong>: You take full advantage of your DEM</p>
+<p><strong>Cons</strong>: You may increase tremendously the resolution of geometries</p>
+<img alt="" class="align-center" src="/images/postgis_dem_full.png" />
+<div class="highlight"><pre><span></span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="c1">-- From an arbitrary line</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="s1">&#39;SRID=32632;LINESTRING (348595 4889225,352577 4887465,354784 4883841)&#39;</span><span class="p">::</span><span class="n">geometry</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="p">),</span>
+<span class="w">  </span><span class="n">cells</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="c1">-- Get DEM elevation for each intersected cell</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_Centroid</span><span class="p">((</span><span class="n">ST_Intersection</span><span class="p">(</span><span class="n">mnt</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">line</span><span class="p">.</span><span class="n">geom</span><span class="p">)).</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="p">,</span>
+<span class="w">    </span><span class="p">(</span><span class="n">ST_Intersection</span><span class="p">(</span><span class="n">mnt</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">line</span><span class="p">.</span><span class="n">geom</span><span class="p">)).</span><span class="n">val</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">val</span>
+<span class="w">     </span><span class="k">FROM</span><span class="w"> </span><span class="n">mnt</span><span class="p">,</span><span class="w"> </span><span class="n">line</span>
+<span class="w">     </span><span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Intersects</span><span class="p">(</span><span class="n">mnt</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">line</span><span class="p">.</span><span class="n">geom</span><span class="p">)),</span>
+<span class="w">    </span><span class="c1">-- Instantiate 3D points, ordered on line</span>
+<span class="w">  </span><span class="n">points3d</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_MakePoint</span><span class="p">(</span><span class="n">ST_X</span><span class="p">(</span><span class="n">cells</span><span class="p">.</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">ST_Y</span><span class="p">(</span><span class="n">cells</span><span class="p">.</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">val</span><span class="p">),</span><span class="w"> </span><span class="mi">32632</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span>
+<span class="w">     </span><span class="k">FROM</span><span class="w"> </span><span class="n">cells</span><span class="p">,</span><span class="w"> </span><span class="n">line</span>
+<span class="w">     </span><span class="k">ORDER</span><span class="w"> </span><span class="k">BY</span><span class="w"> </span><span class="n">ST_Distance</span><span class="p">(</span><span class="n">ST_StartPoint</span><span class="p">(</span><span class="n">line</span><span class="p">.</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">cells</span><span class="p">.</span><span class="n">geom</span><span class="p">))</span>
+<span class="c1">-- Build 3D line from 3D points</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MakeLine</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">points3d</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="section" id="sampling">
+<h3>Sampling</h3>
+<p>We obtain one elevation value per step of X units (meters).</p>
+<p><strong>Pros</strong>: You control the resulting resolution</p>
+<p><strong>Cons</strong>: Sometimes hard to find a good balance depending on geometries extents</p>
+<img alt="" class="align-center" src="/images/postgis_dem_sampled.png" />
+<div class="highlight"><pre><span></span><span class="w"> </span><span class="k">WITH</span><span class="w"> </span><span class="n">line</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="c1">-- From an arbitrary line</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="s1">&#39;SRID=32632;LINESTRING (348595 4889225,352577 4887465,354784 4883841)&#39;</span><span class="p">::</span><span class="n">geometry</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="p">),</span>
+<span class="w">  </span><span class="n">linemesure</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="c1">-- Add a mesure dimension to extract steps</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_AddMeasure</span><span class="p">(</span><span class="n">line</span><span class="p">.</span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Length</span><span class="p">(</span><span class="n">line</span><span class="p">.</span><span class="n">geom</span><span class="p">))</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">linem</span><span class="p">,</span>
+<span class="w">            </span><span class="n">generate_series</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Length</span><span class="p">(</span><span class="n">line</span><span class="p">.</span><span class="n">geom</span><span class="p">)::</span><span class="nb">int</span><span class="p">,</span><span class="w"> </span><span class="mi">50</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">i</span>
+<span class="w">     </span><span class="k">FROM</span><span class="w"> </span><span class="n">line</span><span class="p">),</span>
+<span class="w">  </span><span class="n">points2d</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_GeometryN</span><span class="p">(</span><span class="n">ST_LocateAlong</span><span class="p">(</span><span class="n">linem</span><span class="p">,</span><span class="w"> </span><span class="n">i</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">linemesure</span><span class="p">),</span>
+<span class="w">  </span><span class="n">cells</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="c1">-- Get DEM elevation for each</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">geom</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Value</span><span class="p">(</span><span class="n">mnt</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">val</span>
+<span class="w">     </span><span class="k">FROM</span><span class="w"> </span><span class="n">mnt</span><span class="p">,</span><span class="w"> </span><span class="n">points2d</span><span class="w"> </span><span class="n">p</span>
+<span class="w">     </span><span class="k">WHERE</span><span class="w"> </span><span class="n">ST_Intersects</span><span class="p">(</span><span class="n">mnt</span><span class="p">.</span><span class="n">rast</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">geom</span><span class="p">)),</span>
+<span class="w">    </span><span class="c1">-- Instantiate 3D points</span>
+<span class="w">  </span><span class="n">points3d</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_SetSRID</span><span class="p">(</span><span class="n">ST_MakePoint</span><span class="p">(</span><span class="n">ST_X</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">ST_Y</span><span class="p">(</span><span class="n">geom</span><span class="p">),</span><span class="w"> </span><span class="n">val</span><span class="p">),</span><span class="w"> </span><span class="mi">32632</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">cells</span><span class="p">)</span>
+<span class="c1">-- Build 3D line from 3D points</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MakeLine</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">points3d</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="section" id="as-a-postgresql-function">
+<h3>As a PostgreSQL function</h3>
+<p>You can define a function:</p>
+<div class="highlight"><pre><span></span><span class="k">CREATE</span><span class="w"> </span><span class="k">OR</span><span class="w"> </span><span class="k">REPLACE</span><span class="w"> </span><span class="k">FUNCTION</span><span class="w"> </span><span class="n">drape</span><span class="p">(</span><span class="n">line</span><span class="w"> </span><span class="n">geometry</span><span class="p">)</span><span class="w"> </span><span class="k">RETURNS</span><span class="w"> </span><span class="n">geometry</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="err">$$</span>
+<span class="k">DECLARE</span>
+<span class="w">    </span><span class="n">line3d</span><span class="w"> </span><span class="n">geometry</span><span class="p">;</span>
+<span class="k">BEGIN</span>
+<span class="w">    </span><span class="k">WITH</span><span class="w"> </span><span class="p">...</span>
+<span class="w">         </span><span class="p">...</span>
+<span class="w">         </span><span class="p">...</span>
+<span class="w">         </span><span class="p">...</span>
+<span class="w">    </span><span class="k">SELECT</span><span class="w"> </span><span class="n">ST_MakeLine</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">INTO</span><span class="w"> </span><span class="n">geom3d</span><span class="w"> </span><span class="k">FROM</span><span class="w"> </span><span class="n">points3d</span><span class="p">;</span>
+<span class="w">    </span><span class="k">RETURN</span><span class="w"> </span><span class="n">geom3d</span><span class="p">;</span>
+<span class="k">END</span><span class="p">;</span>
+<span class="err">$$</span><span class="w"> </span><span class="k">LANGUAGE</span><span class="w"> </span><span class="n">plpgsql</span><span class="p">;</span>
+</pre></div>
+<p>And drape your geometries:</p>
+<div class="highlight"><pre><span></span><span class="c1">-- Add a column to your table</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">yourtable</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">COLUMN</span><span class="w"> </span><span class="n">geom_3d</span><span class="w"> </span><span class="n">geometry</span><span class="p">(</span><span class="n">LineStringZ</span><span class="p">,</span><span class="w"> </span><span class="mi">32632</span><span class="p">);</span>
+
+<span class="c1">-- Fill it</span>
+<span class="k">UPDATE</span><span class="w"> </span><span class="n">yourtable</span><span class="w"> </span><span class="k">SET</span><span class="w"> </span><span class="n">geom_3d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">drape</span><span class="p">(</span><span class="n">geom</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="altimetric-profiles">
+<h2>Altimetric profiles</h2>
+<p>We obtain a basic chart, where you have the distance in abscissa and altitude in ordinate. This SQL query returns 2 columns, <em>x</em> and <em>y</em> axis.</p>
+<div class="highlight"><pre><span></span><span class="k">WITH</span><span class="w"> </span><span class="n">points3d</span><span class="w"> </span><span class="k">AS</span>
+<span class="w">    </span><span class="p">(</span><span class="k">SELECT</span><span class="w"> </span><span class="p">(</span><span class="n">ST_DumpPoints</span><span class="p">(</span><span class="n">geom_3d</span><span class="p">)).</span><span class="n">geom</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">geom</span><span class="p">,</span>
+<span class="w">            </span><span class="n">ST_StartPoint</span><span class="p">(</span><span class="n">geom_3d</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">origin</span>
+<span class="w">     </span><span class="k">FROM</span><span class="w"> </span><span class="n">yourtable</span>
+<span class="w">     </span><span class="k">WHERE</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1234</span><span class="p">)</span>
+<span class="k">SELECT</span><span class="w"> </span><span class="n">ST_distance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span><span class="w"> </span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">ST_Z</span><span class="p">(</span><span class="n">geom</span><span class="p">)</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="n">y</span>
+<span class="k">FROM</span><span class="w"> </span><span class="n">points3d</span><span class="p">;</span>
+</pre></div>
+<p>Of course, you can apply a different strategy at this stage, and get full resolution or sampled altimetric profiles...</p>
+<p>Drop a comment if anything is not clear :)</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/postgis.html">#postgis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/sql.html">#sql</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/drape-lines-on-a-dem-with-postgis.html';
+      this.page.identifier = 'drape-lines-on-a-dem-with-postgis';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

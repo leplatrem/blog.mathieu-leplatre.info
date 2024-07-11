@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Subtivals, remote display ? - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Subtivals, remote display ?</h1>
+<time datetime="2015-03-26T00:00:00+01:00">Thu 26 March 2015</time></header>
+<article>
+    <p>Recently I was asked to think about a new feature for Subtivals : allowing
+spectators to read subtitles on their mobile or tablet.</p>
+<div class="section" id="usual-setup">
+<h2>Usual setup</h2>
+<p>In a typical installation, Subtivals overlays the subtitles on top of the
+main image coming from the cinema projector. It allows to add captioning on
+any movie, especially when the physical copy (35mm or DCP) does not carry them.
+That's why most of Subtivals users are international film festivals, cultural centers or
+film libraries.</p>
+<img alt="" class="align-center" src="/images/subtivals-remote-cinema.png" style="width: 500px;" />
+<p>Another common use-case is live captionning, where subtitles are projected on
+a small screen below the scene. It allows to add captioning to concerts, theater,
+operas, conference talks, live shows... Surprisingly there was no tool for that,
+and most people were using Poweroint slides before discovering Subtivals.</p>
+<img alt="" class="align-center" src="/images/subtivals-remote-opera.png" style="width: 500px;" />
+</div>
+<div class="section" id="use-case">
+<h2>Use-case</h2>
+<p>Overlaying subtitles requires a powerful projector (~4000 Lumens for white/yellow
+and ~5000 Lumens for the colors used in hard of hearing captioning).</p>
+<p>When the scene is very large or the atmosphere very bright, such as open air events,
+it can be hard to obtain sharp subtitles on a screen, even with a powerful longthrow projector.</p>
+<img alt="" class="align-center" src="/images/subtivals-remote-stadium.png" style="width: 300px;" />
+<p>Also, when the venue is very big, such as operas, subtitles have to be projected
+with a very big text size for the spectators seated in the last rows. And
+those in the front raws won't read easily either.</p>
+<img alt="" class="align-center" src="/images/subtivals-remote-theater.png" style="width: 300px;" />
+<p>Having remote display of subtitles for these situations makes sense. Subtitles
+should be shown synchronously on various screens.</p>
+</div>
+<div class="section" id="solution">
+<h2>Solution</h2>
+<p>We can imagine:</p>
+<ul class="simple">
+<li>Adding several small LCD screens in the venue (like every 20 meters) instead of
+one big projected image;</li>
+</ul>
+<img alt="" class="align-center" src="/images/subtivals-remote-backseat.png" style="width: 300px;" />
+<ul class="simple">
+<li>Showing subtitles on the spectator mobile or tablet;</li>
+</ul>
+<img alt="" class="align-center" src="/images/subtivals-remote-tablet.png" style="width: 300px;" />
+<ul class="simple">
+<li>Adding small screens (or tablets) on the backseat, like it is already done in
+some operas;</li>
+</ul>
+<img alt="" class="align-center" src="/images/subtivals-remote-backseat.jpg" style="width: 300px;" />
+</div>
+<div class="section" id="technology">
+<h2>Technology</h2>
+<p>I have of course no intention to implement native mobile applications, relying
+on a specific communication protocol and struggling with obscure restricted
+application stores.</p>
+<p>It has to be universal, fully open and follow well-known standards, it will
+thus be built on a Web stack.</p>
+<p>We now have WebSockets, and Qt provides everything to use them! The remote display
+will then be a simple JavaScript Web page, receiving subtitles in real-time from
+the WebSocket server.</p>
+<p>Funny hacks ahead :)</p>
+</div>
+<div class="section" id="prototype">
+<h2>Prototype</h2>
+<p>I could build a very simple prototype in a few hours, with a minimalist JavaScript
+code for the display page and some idiot code for the Node.js server. The code
+is <a class="reference external" href="https://github.com/Subtivals/live.subtivals.org">online</a>.</p>
+<p>The Qt code in Subtivals in charge of push the subtitles in real time is
+<a class="reference external" href="https://github.com/traxtech/subtivals/pull/252">also very small</a>.</p>
+<p>It looks already fun and promising :)</p>
+<video src="/images/subtivals-remote.webm" width="500" controls>
+    <p>Your browser does not support the video element </p>
+</video></div>
+<div class="section" id="strategy-1-global">
+<h2>Strategy #1: Global</h2>
+<p>We deploy a central server that is used by default in the application.</p>
+<img alt="" class="align-center" src="/images/subtivals-remote-server.png" style="width: 500px;" />
+<p><strong>Pros</strong></p>
+<ul class="simple">
+<li>Operators have no setup, it's just clic and play, like it always has
+been with Subtivals;</li>
+<li>Spectators have no setup either, they just open a Web page;</li>
+<li>An opportunity to generate some regular income if we choose to charge for the
+service;</li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul class="simple">
+<li>It relies on an Internet connection;</li>
+<li>The server has a regular cost, even if unused;</li>
+<li>The server should scale to support several thousands spectators and potentially
+several simultaneous projections in the world;</li>
+<li>Some minimal cryptography has to be introduced to prevent attackers from
+sending messages to the audience;</li>
+<li>It implies some stressful responsabilities 24/7 for events happening all over the
+globe;</li>
+</ul>
+</div>
+<div class="section" id="strategy-2-local-server">
+<h2>Strategy #2: local server</h2>
+<p>A variant of the first one, a server is deployed locally. A local wifi can
+be setup in case Internet is not available.</p>
+<img alt="" class="align-center" src="/images/subtivals-remote-localserver.png" style="width: 500px;" />
+<p><strong>Pros</strong></p>
+<ul class="simple">
+<li>It does not rely on Internet, and can be fully autonomous on site;</li>
+<li>The server and client code can be a lot simpler, since the pairing of Subtivals
+with the clients is done locally only;</li>
+<li>Operators are responsible for their installation, no alert email for us
+at 2AM in July;</li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul class="simple">
+<li>It will remain an obscure feature for most Subtivals users;</li>
+<li>It requires some networking skills to wire-up the whole installation;</li>
+<li>This may imply packaging of Web server stacks for Windows and Mac OS X,
+which is truely not one of my passions;</li>
+</ul>
+</div>
+<div class="section" id="strategy-3-subtivals-as-server">
+<h2>Strategy #3: Subtivals as server</h2>
+<p>We get rid of the local Web server, and the Subtivals software itself acts as
+a server, pushing subtitles itself to the audience.</p>
+<img alt="" class="align-center" src="/images/subtivals-remote-localwifi.png" style="width: 500px;" />
+<p><strong>Pros</strong></p>
+<ul class="simple">
+<li>Nothing extra to be installed, just networking/firewall setup;</li>
+<li>It paves the way to the implementation of a Subtivals <a class="reference external" href="https://github.com/traxtech/subtivals/issues/145">remote control</a>;</li>
+<li>The operator can track the number of spectators;</li>
+</ul>
+<p><strong>Cons</strong></p>
+<ul class="simple">
+<li>It could affect Subtivals stability;</li>
+<li>The code base would grow;</li>
+<li>I expect to receive emails complaining about the application not being
+reachable, all because of firewall setup etc.</li>
+</ul>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion</h2>
+<p>We might go for the second strategy at first. We will provide some assistance
+to the festival organizers for setting up the stack. It will allow us to get started
+with a very small effort on the code implementation.</p>
+<p>Later, we can undertake the first strategy. By the way, if someone is interested
+in implementing and running such a Web service 24/7, charging users or not,
+please contact me :)</p>
+<p>The third strategy scares me, but the remote control idea is awesome! It means
+that an operator could control the subtitles projection from her smartphone,
+seating among the audience instead of from the booth!</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/subtivals.html">#subtivals</a>,         <a href="https://blog.mathieu-leplatre.info/tag/subtitles.html">#subtitles</a>,         <a href="https://blog.mathieu-leplatre.info/tag/accessibility.html">#accessibility</a>,         <a href="https://blog.mathieu-leplatre.info/tag/qt.html">#qt</a>,         <a href="https://blog.mathieu-leplatre.info/tag/websockets.html">#websockets</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/subtivals-remote-display.html';
+      this.page.identifier = 'subtivals-remote-display';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

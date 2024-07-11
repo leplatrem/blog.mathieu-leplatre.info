@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Simple and funky Web map printing - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Simple and funky Web map printing</h1>
+<time datetime="2012-05-02T00:00:00+02:00">Wed 02 May 2012</time></header>
+<article>
+    <p>Strangely, users still insist in having Web page print capabilities, mostly to
+share, export or archive what they see. Even if relevant permalinks are
+often acceptable, we can't always dissuade them from printing :)</p>
+<p>And when it comes to Web maps, printing can be a nightmare ! Even though most of the time,
+the needs involve a nice landscape PDF file with the map, a legend and the company logo.
+For this, designing CSS print stylesheets and using the browser <em>print</em> shortcut is not always
+helpful.</p>
+<p>I present here a simple solution <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a> based on headless Webkit screenshots, permalinks,
+SVG templates (<em>WYSIWYG</em>), and PDF conversion.</p>
+<div class="section" id="what-you-see-is-what-you-print">
+<h2>What You See Is What You Print</h2>
+<p>In the following (short) video, we can see :</p>
+<ul class="simple">
+<li>a map with dynamic content (<em>GeoJSON</em>), bound to a form for attribute filtering and a legend
+refreshed upon data ranges modifications ;</li>
+<li>a <em>Print</em> button that delivers the current view as <em>PDF</em> ;</li>
+<li>a landscape printout in which the map view, the legend, the filter form values were nicely inserted.</li>
+</ul>
+<video id="webprint" width="560" controls="controls">
+  <source src="http://mathieu-leplatre.info/media/20120501-print.ogv" type="video/ogg" />
+  Your browser does not support the video tag.
+</video><p>(<em>BTW, small boo-boo﻿ in last screen: 'montain' instead of 'mountain'</em>)</p>
+</div>
+<div class="section" id="kids-you-can-do-this-at-home">
+<h2>Kids, you can do this at home</h2>
+<p>Here is how we did it :</p>
+<ul class="simple">
+<li>a Web page with a &quot;stateful&quot; permalink (<em>i.e. restore the map and page state using anchors, location hash, etc. ;</em>).
+Backbone.js &amp; co. are meant for this ;</li>
+<li>A color scale built client-side from the resulting dataset, using <a class="reference external" href="https://github.com/gka/chroma.js">Chroma.js</a>,
+to colorize the map items and populate the legend entries ;</li>
+<li><a class="reference external" href="https://github.com/makinacorpus/django-screamshot">django-screamshot</a>, a Web page
+screenshot application, relying on <a class="reference external" href="http://casperjs.org/">CasperJS</a>. Spooky! ;</li>
+<li>a SVG landscape A4 document, edited with <em>Inkscape</em>, as a Django template in which we placed simple tags (<tt class="docutils literal">{{ filter.age_min }}</tt>) for texts,
+the <tt class="docutils literal">{% base64capture %}</tt> tag for the map screenshot, and a couple of arithmetics tags to
+recreate a nice vectorial legend using the color scale entries;</li>
+<li>a Django view that receives the current page context (posted in <em>JS</em>), renders the SVG (<em>will thus perform the screenshot</em>),
+and converts it to PDF ;</li>
+</ul>
+<p>Quite straightforward, a couple of hours to put together, relatively easy
+to deploy, obviously meet most users needs... these hacks are our happiness !</p>
+<p>If you want to know more about some missing parts, feel free to ask ! I could release stuff or just post some snippets...</p>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>from now on, I shall precise : even if it can cover most needs, it won't be adequate in all situations.</td></tr>
+</tbody>
+</table>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/print.html">#print</a>,         <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/web.html">#web</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/django-screamshot.html">#django-screamshot</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/simple-and-funky-web-map-printing.html';
+      this.page.identifier = 'simple-and-funky-web-map-printing';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Another success story about Ruby On Rails working with Apache - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Another success story about Ruby On Rails working with Apache</h1>
+<time datetime="2008-08-01T09:12:00+02:00">Fri 01 August 2008</time></header>
+<article>
+    <p>This procedure does not guarantee anything and should be considered approximate. However this should be fairly enough for someone familiar with Apache environments.</p>
+<div class="section" id="ruby-environment">
+<h2>Ruby environment</h2>
+<p>We install Ruby via apt-get</p>
+<pre class="literal-block">
+sudo apt-get install ruby libzlib-ruby rdoc irb
+</pre>
+<p>At this point, you can run Ruby scripts like you did with Python or Perl.</p>
+</div>
+<div class="section" id="gems">
+<h2>Gems</h2>
+<p>Gems are like perl's CPAN or PHP's PEAR. We install it from source in order to enjoy the whole Gems repository (instead of being limited to packaged gems only).</p>
+<pre class="literal-block">
+wget &quot;http://rubyforge.org/frs/download.php/38646/rubygems-x.x.x.tgz&quot;
+tar -xvzf rubygems-x.x.x.tgz
+rm rubygems-x.x.x.tgz
+cd rubygems-x.x.x
+sudo ruby setup.rb
+cd ..
+rm -r rubygems-1.2.0
+sudo ln -s /usr/bin/gem1.8 /usr/bin/gem
+</pre>
+<p><em>(DO NOT use sudo ruby rubygemsx.x.x/setup.rb)</em></p>
+<pre class="literal-block">
+sudo gem update --system
+</pre>
+<p>We will install additionnal applications... those depend on your needs. The Gems are compiled on the fly, therefore development packages are usually required along.</p>
+</div>
+<div class="section" id="ruby-on-rails">
+<h2>Ruby on Rails</h2>
+<pre class="literal-block">
+sudo gem install rails --include-dependencies
+</pre>
+</div>
+<div class="section" id="mysql-support">
+<h2>Mysql support</h2>
+<pre class="literal-block">
+sudo apt-get install libmysql-ruby libmysqlclient15-dev
+sudo gem install mysql
+</pre>
+</div>
+<div class="section" id="imagemagick-support">
+<h2>ImageMagick support</h2>
+<pre class="literal-block">
+sudo apt-get install librmagick-ruby1.8 libmagick9-dev
+sudo gem install rmagick
+</pre>
+</div>
+<div class="section" id="integrate-with-apache">
+<h2>Integrate with Apache</h2>
+<pre class="literal-block">
+sudo apt-get install apache2-prefork-dev
+</pre>
+<p>Enable additionnal modules</p>
+<pre class="literal-block">
+a2enmod rewrite
+a2enmod suexec
+a2enmod include
+</pre>
+<p><em>I might have missed some.</em>. Some tutorials recommend Fast-CGI.</p>
+</div>
+<div class="section" id="install-phusion-passenger-mod-rails">
+<h2>Install Phusion Passenger (mod_rails)</h2>
+<p>Usually, RubyOnRails has its own web server (<a class="reference external" href="http://en.wikipedia.org/wiki/Mongrel_(web_server)">Mongrel</a>) on port 3000. It is also quite common to have a cluster of processes with load balancing and Apache proxy...</p>
+<p>But you may want to do something very simple that just integrates within Apache. Here comes Phusion Passenger!</p>
+<pre class="literal-block">
+sudo gem install passenger
+sudo passenger-install-apache2-module
+</pre>
+<p><em>(following the instructions, or look at the [[http://www.modrails.com/documentation/Users%20guide.html|user guide]]).</em></p>
+<p>At the end, the wizard tells you to add some lines in <cite>httpd.conf</cite>. I recommend the following method instead, which splits those lines into a module that you can enable / disable.</p>
+<p>Create two files :
+* /etc/apache2/mods-available/mod_rails.load</p>
+<pre class="literal-block">
+LoadModule passenger_module /usr/lib/ruby/gems/1.8/gems/passenger-2.0.2/ext/apache2/mod_passenger.so
+</pre>
+<ul>
+<li><p class="first">/etc/apache2/mods-available/mod_rails.conf</p>
+<pre class="literal-block">
+PassengerRoot /usr/lib/ruby/gems/1.8/gems/passenger-2.0.2
+PassengerRuby /usr/bin/ruby1.8
+</pre>
+</li>
+</ul>
+<p>Enable this new module</p>
+<pre class="literal-block">
+sudo a2enmod mod_rails
+</pre>
+</div>
+<div class="section" id="create-your-virtualhost">
+<h2>Create your VirtualHost</h2>
+<p>The DocumentRoot must point to the public folder of your Ruby On Rails application.</p>
+<ul>
+<li><p class="first">If your Ruby application is alone, your apache site will be something like this</p>
+<pre class="literal-block">
+&lt;virtualhost *:80&gt;
+    ServerName yourapp
+    DocumentRoot /var/rails/yourapp/public/
+    ErrorLog /var/rails/yourapp/log/apache.log
+
+    &lt;directory /var/rails/yourapp/public&gt;
+       Options ExecCGI FollowSymLinks
+       AddHandler cgi-script .cgi
+       AllowOverride all
+       Order allow,deny
+       Allow from all
+    &lt;/directory&gt;
+&lt;/virtualhost&gt;
+</pre>
+</li>
+<li><p class="first">If you want it a subfolder of your current DocumentRoot, look at this.</p>
+</li>
+<li><p class="first">The simplest for me was to setup a sub-domain. Don't forget to update your DNS information.</p>
+</li>
+</ul>
+<p>Relax ! Restart Apache and that's it !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/ruby.html">#ruby</a>,         <a href="https://blog.mathieu-leplatre.info/tag/howto.html">#howto</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/sys.html">Sys</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/another-success-story-about-ruby-on-rails-working-with-apache.html';
+      this.page.identifier = 'another-success-story-about-ruby-on-rails-working-with-apache';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

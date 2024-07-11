@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Cheap debugging of PostgreSQL triggers in Django - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Cheap debugging of PostgreSQL triggers in Django</h1>
+<time datetime="2012-10-22T12:25:00+02:00">Mon 22 October 2012</time></header>
+<article>
+    <p>Lately, we were hacking on PostgreSQL (PostGIS) triggers, and we quickly felt
+like debugging our code... Here is a cheap and quick way of printing out
+triggers variables and context through Django.</p>
+<div class="section" id="postgresql-server-configuration">
+<h2>PostgreSQL server configuration</h2>
+<p>In <em>postgresql.conf</em>, adjust the minimum level of notice sent to the client :</p>
+<pre class="literal-block">
+client_min_messages = log
+</pre>
+<p>Note that this does not affect logging verbosity on server.</p>
+</div>
+<div class="section" id="catch-messages-in-django">
+<h2>Catch messages in Django</h2>
+<p>For a specific model :</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">connection</span>
+
+<span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">before</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">connection</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">notices</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">notice</span> <span class="ow">in</span> <span class="n">connection</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">notices</span><span class="p">[</span><span class="n">before</span><span class="p">:]:</span>
+            <span class="nb">print</span> <span class="n">notice</span>
+</pre></div>
+<p>Or globally, using <tt class="docutils literal">post_save</tt> signals <em>(can be verbose)</em>:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">connection</span>
+<span class="kn">from</span> <span class="nn">django.db.models.signals</span> <span class="kn">import</span> <span class="n">post_save</span>
+
+<span class="k">def</span> <span class="nf">show_notices</span><span class="p">(</span><span class="n">sender</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">notice</span> <span class="ow">in</span> <span class="n">connection</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">notices</span><span class="p">:</span>
+        <span class="nb">print</span> <span class="n">notice</span>
+<span class="n">post_save</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">show_notices</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="let-your-trigger-be-talkative">
+<h2>Let your trigger be talkative</h2>
+<p>You can basically print out values, arrays, functions results, records...</p>
+<pre class="literal-block">
+RAISE LOG '% has geom %', NEW.id, ST_AsEWKT(NEW.geom);
+</pre>
+<p>Will output something like <tt class="docutils literal">LOG:&nbsp; 3 has geom SRID=4326;POINT(0 0)</tt>.</p>
+<pre class="literal-block">
+FOR record IN SELECT * FROM table
+LOOP
+    RAISE LOG 'Found %', record;
+END LOOP;
+</pre>
+<p>Will output something like <tt class="docutils literal">LOG:&nbsp; Found (a,b,c)</tt>.</p>
+<pre class="literal-block">
+intersections_on_new := ARRAY[]::float[];
+FOR pk IN SELECT ST_Line_Locate_Point(NEW.geom, (ST_Dump(ST_Intersection(other.geom, NEW.geom))).geom)
+LOOP
+    intersections_on_new := array_append(intersections_on_new, pk);
+END LOOP;
+RAISE LOG 'Intersects at %', intersections_on_new;
+</pre>
+<p>Will output something like <tt class="docutils literal">LOG:&nbsp; Intersects at {0.5,0.3}</tt>.</p>
+</div>
+<div class="section" id="one-more-thing">
+<h2>One more thing...</h2>
+<p>If you load your triggers source file through Django (like a <tt class="docutils literal">post_migrate</tt> signal or so),
+and thus with <em>psycopg2</em>, you might face that nasty internal quirck :</p>
+<pre class="literal-block">
+postgresql_psycopg2/base.py&quot;, line 52, in execute
+    return self.cursor.execute(query, args)
+IndexError: tuple index out of range
+</pre>
+<p>This is due to <tt class="docutils literal">%</tt> characters, that you have to escape, replacing them with <tt class="docutils literal">%%</tt>.</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/postgresql.html">#postgresql</a>,         <a href="https://blog.mathieu-leplatre.info/tag/postgis.html">#postgis</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/cheap-debugging-of-postgresql-triggers-in-django.html';
+      this.page.identifier = 'cheap-debugging-of-postgresql-triggers-in-django';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Test your Leaflet applications with Mocha - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Test your Leaflet applications with Mocha</h1>
+<time datetime="2013-03-29T00:00:00+01:00">Fri 29 March 2013</time></header>
+<article>
+    <p>Pretty much like <a class="reference external" href="https://nicolas.perriault.net/code/2013/why_javascript/">n1k0</a>, I feel like I had learned Javascript three or four times, from the <tt class="docutils literal">alert()</tt> back in 1997 to this article about automatic testing. I must admit that, lately, most of my progress in Javascript comes from using and hacking Leaflet <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a>, but I hadn't gone as far as unit testing until now !</p>
+<p>These are some notes about me getting started with using <a class="reference external" href="http://visionmedia.github.com/mocha/#browser-support">Mocha</a> and <a class="reference external" href="http://leafletjs.com">Leaflet</a>. If what you read is not clear or simply wrong, please let me know or <a class="reference external" href="https://github.com/leplatrem/blog.mathieu-leplatre.info">fork it directly</a> so that everybody can learn !</p>
+<div class="section" id="goals">
+<h2>Goals</h2>
+<ul class="simple">
+<li>Test your Javascript code to prevent regressions, just as you already do with Python ;</li>
+<li>Run test suites from command-line, especially for <a class="reference external" href="http://jenkins-ci.org">CI</a> ;</li>
+<li>Learn something new and practical !</li>
+</ul>
+<p>There are many ways to achieve this, you might have spotted <em>QUnit</em> or <em>Jasmine</em>. We also like <em>CasperJS</em>, coupled with <em>resurectio</em>, but this would be more adapted to navigation automation or functional tests.</p>
+<p>I chose <em>Mocha</em> since it seems to be well suited for unit tests and command-line usage. And since <a class="reference external" href="https://github.com/Leaflet/Leaflet/issues/1428">there is a pull-request</a> for switching from <em>Jasmine</em> to <em>Mocha</em> in Leaflet core... why not !</p>
+</div>
+<div class="section" id="first-run-the-suite">
+<h2>First, run the suite</h2>
+<p>Get your hand on the <tt class="docutils literal">npm</tt> command (comes with <tt class="docutils literal">nodejs</tt> package in Ubuntu)</p>
+<p>Create a <tt class="docutils literal">package.json</tt> file with your application description. There are plenty of examples, just make sure you require the right stuff :</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;yourapp&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;version&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;0.0.1&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;description&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your app&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;main&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;yourapp.js&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;scripts&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;test&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;make test&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="s2">&quot;dependencies&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;leaflet&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="s2">&quot;devDependencies&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="s2">&quot;mocha&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;*&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>And fetch !</p>
+<pre class="literal-block">
+npm install
+</pre>
+<p>Create <tt class="docutils literal">yourapp.js</tt> with simple and stupid stuff :</p>
+<div class="highlight"><pre><span></span><span class="nx">L</span><span class="p">.</span><span class="nx">YourApp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">compute</span><span class="o">:</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mf">2</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+<p>And create a test for it in <tt class="docutils literal">test/beginner.js</tt> :</p>
+<div class="highlight"><pre><span></span><span class="c1">// Use require only if available (ran from Node)</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">require</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">&#39;function&#39;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">assert</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s1">&#39;assert&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">L</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s1">&#39;leaflet/src/Leaflet&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">L</span><span class="p">.</span><span class="nx">YourApp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./../yourapp&#39;</span><span class="p">).</span><span class="nx">YourApp</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Test function call</span>
+<span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;compute&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should be ok&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">done</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">YourApp</span><span class="p">.</span><span class="nx">compute</span><span class="p">());</span>
+<span class="w">     </span><span class="nx">done</span><span class="p">();</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+<p>Admire the result !</p>
+<pre class="literal-block">
+&#64;./node_modules/.bin/mocha
+</pre>
+</div>
+<div class="section" id="make-it-run-in-the-browser-too">
+<h2>Make it run in the browser too</h2>
+<p>So far we do not rely too much on Leaflet :) But in a real application test, we will quickly need a <tt class="docutils literal">L.Map</tt> instance, along with a DOM most probably.</p>
+<p>By turning on the <em>Mocha</em> HTML runner, we can indeed run tests from a web browser. But since the console remains one of our goals, we add <a class="reference external" href="https://github.com/metaskills/mocha-phantomjs/#readme">mocha-phantomjs</a> in the scene !</p>
+<p>Install <tt class="docutils literal">phantomjs</tt> and add it to the <tt class="docutils literal">PATH</tt> (the Ubuntu package does that for you). Then modify your <tt class="docutils literal">package.json</tt> to add <tt class="docutils literal"><span class="pre">mocha-phantomjs</span></tt> as a <em>devDependency</em>. Re-run <tt class="docutils literal">npm install</tt> to fetch it.</p>
+<p>With <em>mocha-phantomjs</em>, we will be able to run tests from within a browser <strong>and</strong> from the command-line. The entry point will be the following <tt class="docutils literal">test/index.html</tt>:</p>
+<div class="highlight"><pre><span></span><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Mocha<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">http-equiv</span><span class="o">=</span><span class="s">&quot;Content-Type&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;text/html; charset=UTF-8&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;../node_modules/mocha/mocha.css&quot;</span> <span class="p">/&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;mocha&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;map&quot;</span> <span class="na">style</span><span class="o">=</span><span class="s">&quot;display: none; height: 300px&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;../node_modules/mocha/mocha.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;../node_modules/leaflet/debug/leaflet-include.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;../yourapp.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+
+    <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">        </span><span class="kd">var</span><span class="w"> </span><span class="nx">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="s1">&#39;map&#39;</span><span class="p">).</span><span class="nx">fitWorld</span><span class="p">();</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+
+    <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span><span class="nx">mocha</span><span class="p">.</span><span class="nx">setup</span><span class="p">(</span><span class="s1">&#39;bdd&#39;</span><span class="p">)&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;begginner.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">mochaPhantomJS</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">mocha</span><span class="p">).</span><span class="nx">run</span><span class="p">();</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+<p>Open the page locally or run in console with :</p>
+<pre class="literal-block">
+&#64;./node_modules/mocha-phantomjs/bin/mocha-phantomjs test/index.html
+</pre>
+<p><em>PhantomJS</em> is installed by default on Travis by the way :)</p>
+</div>
+<div class="section" id="spying-and-mocking">
+<h2>Spying and mocking</h2>
+<p>One of the popular tools in JS testing is <a class="reference external" href="http://sinonjs.org">Sinon.js</a>. There are many useful features allowing to spy and mock behaviour of your application components or dependencies (events, AJAX requests, errors, timers, etc.)</p>
+<p>For example, let's test that events are thrown as we expect :</p>
+<div class="highlight"><pre><span></span><span class="nx">L</span><span class="p">.</span><span class="nx">YourApp</span><span class="p">.</span><span class="nx">snap</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">marker</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">marker</span><span class="p">.</span><span class="nx">fire</span><span class="p">(</span><span class="s1">&#39;snap&#39;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+<p>Test event with a <em>spy</em> callback :</p>
+<div class="highlight"><pre><span></span><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;snap&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;event is thrown&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">done</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="kd">var</span><span class="w"> </span><span class="nx">marker</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">marker</span><span class="p">([</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="mf">0</span><span class="p">]),</span>
+<span class="w">         </span><span class="nx">callback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">sinon</span><span class="p">.</span><span class="nx">spy</span><span class="p">();</span>
+<span class="w">     </span><span class="nx">marker</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;snap&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">callback</span><span class="p">);</span>
+
+<span class="w">     </span><span class="nx">L</span><span class="p">.</span><span class="nx">YourApp</span><span class="p">.</span><span class="nx">snap</span><span class="p">(</span><span class="nx">marker</span><span class="p">);</span>
+
+<span class="w">     </span><span class="nx">assert</span><span class="p">.</span><span class="nx">isTrue</span><span class="p">(</span><span class="nx">callback</span><span class="p">.</span><span class="nx">called</span><span class="p">);</span>
+<span class="w">     </span><span class="nx">done</span><span class="p">();</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+<p>Faking user inputs is also possible using <a class="reference external" href="https://github.com/tmcw/happen#readme">happen</a> :</p>
+<div class="highlight"><pre><span></span><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;zoom&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;zooms-in with double click&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">done</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="nx">map</span><span class="p">.</span><span class="nx">getZoom</span><span class="p">());</span>
+
+<span class="w">     </span><span class="nx">map</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;zoomend&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">map</span><span class="p">.</span><span class="nx">getZoom</span><span class="p">());</span>
+<span class="w">        </span><span class="nx">map</span><span class="p">.</span><span class="nx">off</span><span class="p">(</span><span class="s1">&#39;zoomend&#39;</span><span class="p">);</span>
+<span class="w">        </span><span class="nx">done</span><span class="p">();</span>
+<span class="w">     </span><span class="p">});</span>
+
+<span class="w">     </span><span class="c1">// Simulate double-click</span>
+<span class="w">     </span><span class="nx">happen</span><span class="p">.</span><span class="nx">dblclick</span><span class="p">(</span><span class="nx">map</span><span class="p">.</span><span class="nx">_container</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+<div class="section" id="real-world-example">
+<h2>Real world example</h2>
+<p><a class="reference external" href="https://github.com/bbecquet">Benjamin Becquet</a> implemented <a class="reference external" href="https://github.com/bbecquet/Leaflet.PolylineDecorator">some linear referencing utilities</a> for Leaflet. So did we last year at <a class="reference external" href="http://makina-corpus.com">Makina Corpus</a> ! We thus decided to merge our code base in a proper way :)</p>
+<p>We both are making our first steps with <em>Mocha</em>, and didn't really started to build up the whole code, but you still can have a look at <a class="reference external" href="https://github.com/makinacorpus/Leaflet.GeometryUtil">the repository</a>, for its Makefile, Travis setup, usage of JSDocs or Chai.js...</p>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>By the way, <em>Secrets of the Javascript Ninja</em> by John Resig and Bear Bibeault is a wonderful book !</td></tr>
+</tbody>
+</table>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/leaflet.html">#leaflet</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/mocha.html">#mocha</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/test-your-leaflet-applications-with-mocha.html';
+      this.page.identifier = 'test-your-leaflet-applications-with-mocha';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

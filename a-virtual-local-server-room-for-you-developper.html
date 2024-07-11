@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>A Virtual Local Server Room for you Developper - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>A Virtual Local Server Room for you Developper</h1>
+<time datetime="2011-09-02T09:12:00+02:00">Fri 02 September 2011</time></header>
+<article>
+    <p>This how-to will help you setting-up a very powerful development environment
+on your workstation, using virtual machines all in a virtual local network.</p>
+<div class="section" id="but-why">
+<h2>But Why ?</h2>
+<p>You work on various projects, with specific requirements, with various
+technologies, diverse operating systems or cpu architectures, usually with
+a couple of services like databases or Web servers.</p>
+<p>You would prefer not taking this whole family with you each time you start your machine.</p>
+<p>Probably, you also want to upgrade your workstation to the last unstable eye-candy OS
+without compromising your projects dependencies and without reinstalling all this stuff,
+or you may want to restore the environment you had when you were working on this famous project a year ago.</p>
+<p>You want your colleague to give you a hand, and would like to give him your
+whole project environment and dependencies quickly and effortlessly ?
+Your sysadmin put KVM on servers and you would like to push your local instances on
+production in a blink ?</p>
+<p>The magic medicine exists, and is freely available :)</p>
+<p>At the end, you are promised to enjoy :</p>
+<ul class="simple">
+<li>a GUI to manage your Virtual Machines (VM)</li>
+<li>a local domain to access your VMs by their name</li>
+<li>a fully integrated set of machines, accessible from each others</li>
+<li>movable and shareable virtual machines with automatic network configuration</li>
+</ul>
+<p>We chose the Linux Kernel-based Virtualization System (KVM), since it is maintained
+along with the Linux kernel, and is thus fully integrated in the OS. However, this
+how-to is mainly networking oriented and would be useful for any virtualization system.</p>
+</div>
+<div class="section" id="a-strict-minimum">
+<h2>A Strict Minimum</h2>
+<p>A strict minimum is to install <tt class="docutils literal">kvm</tt> and a set of commands to control it : <tt class="docutils literal">libvirt</tt>.
+As a human being, you may want a GUI : <tt class="docutils literal"><span class="pre">virt-manager</span></tt>.</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>kvm<span class="w"> </span>libvirt-bin<span class="w"> </span>virt-manager
+</pre></div>
+<div class="section" id="virtual-machines-network">
+<h3>Virtual Machines Network</h3>
+<p>Make sure your VM networking is set to <em>NAT</em>. This will allow
+your VM to access your host network (LAN, Internet, etc.)</p>
+<p>During your VM operating system installation, or after login into it,
+setup your VM network interface as automatic DHCP.</p>
+<p>By default KVM creates a virtual network (<tt class="docutils literal">virnet</tt>). Inspect its setup
+using <tt class="docutils literal">ifconfig</tt> or <tt class="docutils literal"><span class="pre">virt-manager</span></tt> in <em>Connection Details</em> &gt; <em>Virtual Networks</em>.
+Your VM and your host are thus accessible within this virtual network (probably <tt class="docutils literal">172.16.23.0</tt>).</p>
+</div>
+</div>
+<div class="section" id="a-local-network-domain">
+<h2>A Local Network Domain</h2>
+<p>In order to access your VM by their name, we run a DNS daemon on main host. We chose <em>bind</em> :</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>aptitude<span class="w"> </span>install<span class="w"> </span>bind9
+</pre></div>
+<p>Add a new master zone, for example <tt class="docutils literal">sillywalk.loc</tt> in the file <tt class="docutils literal">/etc/bind/named.conf.local</tt> :</p>
+<pre class="literal-block">
+zone &quot;sillywalk.loc&quot; {
+    type master;
+    file &quot;/etc/bind/db.sillywalk.loc&quot;;
+};
+</pre>
+<p>Define your DNS entries :</p>
+<ul class="simple">
+<li>Set the name server authority (<em>SOA</em>) to <tt class="docutils literal">ns.sillywalk.loc</tt> (<em>nameserver</em>)</li>
+<li>Define a serial number like date+number (<tt class="docutils literal">YYYYmmdd##</tt>)</li>
+<li>Associate <tt class="docutils literal">ns.sillywalk.loc</tt> to the IP of your KVM virtual network (<em>see above paragraph</em>)</li>
+<li>Define an alias <cite>gw.sillywalk.loc</cite> so that you can refer to your host as <cite>gw</cite> (<em>gateway</em>) instead of <cite>ns</cite>.</li>
+<li>Define a couple of entries for your VM (e.g. <tt class="docutils literal">myvm1</tt>, <tt class="docutils literal">myvm2</tt>)</li>
+</ul>
+<p>For <em>bind</em>, it would look like this <em>(started from an existing file like ``/etc/bind/db.empty``)</em> :</p>
+<pre class="literal-block">
+;/etc/bind/db.sillywalk.loc
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+&#64;   IN  SOA ns.sillywalk.loc. root.ns.sillywalk.loc. (
+         2011080301     ; Serial
+             604800     ; Refresh
+              86400     ; Retry
+            2419200     ; Expire
+             604800 )   ; Negative Cache TTL
+;
+&#64;   IN  NS      ns.sillywalk.loc.
+&#64;   IN  A       172.16.23.1
+ns  IN  A       172.16.23.1
+gw  IN  CNAME   ns.sillywalk.loc.
+
+myvm1       IN  A   172.16.23.11
+myvm2       IN  A   172.16.23.12
+</pre>
+<div class="section" id="use-your-dns">
+<h3>Use your DNS</h3>
+<p>Use your Network Manager to set the search domain to <tt class="docutils literal">sillywalk.loc</tt> and
+to add your local DNS server (<tt class="docutils literal">127.0.0.1</tt>) in front of the other(s).</p>
+<p>Apply and your <tt class="docutils literal">/etc/resolv.conf</tt> could then look like this :</p>
+<pre class="literal-block">
+# Generated by NetworkManager
+search sillywalk.loc          # search domain
+nameserver 127.0.0.1          # your local DNS server
+nameserver 192.168.1.254      # your FAI/company DNS
+nameserver 8.8.8.8            # Google public DNS
+</pre>
+</div>
+<div class="section" id="test-it">
+<h3>Test it !</h3>
+<p>Even if your VM are not running, you can at least test the name resolving
+and the default search domain :</p>
+<div class="highlight"><pre><span></span>~$<span class="w"> </span>ping<span class="w"> </span>myvm1.sillywalk.loc
+PING<span class="w"> </span>myvm1.sillywalk.loc<span class="w"> </span><span class="o">(</span><span class="m">172</span>.16.23.11<span class="o">)</span><span class="w"> </span><span class="m">56</span><span class="o">(</span><span class="m">84</span><span class="o">)</span><span class="w"> </span>bytes<span class="w"> </span>of<span class="w"> </span>data.
+<span class="c1"># (Ctrl+C)</span>
+
+~$<span class="w"> </span>ping<span class="w"> </span>myvm2
+PING<span class="w"> </span>myvm2.sillywalk.loc<span class="w"> </span><span class="o">(</span><span class="m">172</span>.16.23.12<span class="o">)</span><span class="w"> </span><span class="m">56</span><span class="o">(</span><span class="m">84</span><span class="o">)</span><span class="w"> </span>bytes<span class="w"> </span>of<span class="w"> </span>data.
+<span class="c1"># (Ctrl+C)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dynamic-configuration">
+<h2>Dynamic Configuration</h2>
+<p>In order to make sure your VM always obtains the same IP adress when it
+boots, we setup a DHCP daemon on host.</p>
+<p>We chose <em>ISC DHCP server</em> :</p>
+<pre class="literal-block">
+sudo aptitude install isc-dhcp-server
+</pre>
+<p>In the configuration file <tt class="docutils literal">/etc/dhcp/dhcpd.conf</tt>, we specify :</p>
+<ul class="simple">
+<li>a domain name (<tt class="docutils literal">sillywalk.loc</tt>)</li>
+<li>the name server to be configured on clients (<tt class="docutils literal">ns.sillywalk.loc</tt>)</li>
+<li>the subnet and mask (<em>matching the KVM virtual network</em>)</li>
+<li>an IP range (e.g. from <tt class="docutils literal">172.16.23.10</tt> to <tt class="docutils literal">172.16.23.100</tt>)</li>
+<li>the default gateway to be configured on clients (<tt class="docutils literal">ns.sillywalk.loc</tt>)</li>
+<li>... and two entries for <tt class="docutils literal">myvm1</tt> and  <tt class="docutils literal">myvm2</tt> with their Mac addresses.</li>
+</ul>
+<pre class="literal-block">
+# /etc/dhcp/dhcpd.conf
+
+option domain-name &quot;sillywalk.loc&quot;;
+option domain-name-servers ns.sillywalk.loc;
+
+subnet 172.16.23.0 netmask 255.255.255.0 {
+  range 172.16.23.10 172.16.23.100;
+  option broadcast-address 172.16.23.255;
+  option routers gw.sillywalk.loc;
+}
+
+# Entries
+
+host myvm1 {
+  hardware ethernet 52:54:00:55:d1:80;
+  fixed-address myvm1.sillywalk.loc;
+}
+
+host myvm2 {
+  hardware ethernet 52:54:00:55:e1:66;
+  fixed-address myvm2.sillywalk.loc;
+}
+</pre>
+<div class="section" id="test-it-1">
+<h3>Test it !</h3>
+<p>Log you in on the VM.</p>
+<ul class="simple">
+<li>Configure its hostname (e.g. <tt class="docutils literal">myvm1</tt>, <tt class="docutils literal">myvm2</tt>)</li>
+</ul>
+<div class="highlight"><pre><span></span>root@myvm1:~#<span class="w"> </span>cat<span class="w"> </span>/etc/hostname
+myvm1
+root@myvm1:~#<span class="w"> </span>cat<span class="w"> </span>/etc/hosts
+<span class="m">127</span>.0.0.1<span class="w">   </span>localhost
+<span class="m">127</span>.0.1.1<span class="w">   </span>myvm1.sillywalk.loc<span class="w"> </span>myvm1
+</pre></div>
+<ul class="simple">
+<li>Make sure your VM network is set to DHCP automatic configuration</li>
+</ul>
+<div class="highlight"><pre><span></span>root@myvm1:~#<span class="w"> </span>cat<span class="w"> </span>/etc/network/interfaces
+...
+<span class="c1"># The primary network interface</span>
+allow-hotplug<span class="w"> </span>eth0
+iface<span class="w"> </span>eth0<span class="w"> </span>inet<span class="w"> </span>dhcp
+</pre></div>
+<ul class="simple">
+<li>Reboot it (or restart networking)</li>
+<li>Check that it caught the right network configuration (IP, domain, and nameserver)</li>
+</ul>
+<div class="highlight"><pre><span></span>root@myvm1:~#<span class="w"> </span>ifconfig
+eth0<span class="w">      </span>Link<span class="w"> </span>encap:Ethernet<span class="w">  </span>HWaddr<span class="w"> </span><span class="m">52</span>:54:00:55:d1:80
+<span class="w">          </span>inet<span class="w"> </span>addr:172.16.23.11<span class="w">  </span>Bcast:172.16.23.255<span class="w">  </span>Mask:255.255.255.0
+<span class="w">          </span>...
+</pre></div>
+<div class="highlight"><pre><span></span>root@myvm1:~#<span class="w"> </span>cat<span class="w"> </span>/etc/resolv.conf
+domain<span class="w"> </span>sillywalk.loc
+search<span class="w"> </span>sillywalk.loc
+nameserver<span class="w"> </span><span class="m">172</span>.16.23.1
+</pre></div>
+</div>
+<div class="section" id="note">
+<h3>Note</h3>
+<p>While your host is booting, the DHCP daemon usually starts before the KVM service, failing
+then at accessing the virtual network interface (<tt class="docutils literal">virbr1</tt>, <tt class="docutils literal">172.16.23.0</tt>), not yet mounted.</p>
+<p>A simple solution is to manually restart your DHCP daemon, once your machine's booted :</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>/etc/init.d/isc-dhcp-server<span class="w"> </span>restart
+</pre></div>
+</div>
+</div>
+<div class="section" id="checklist-to-add-a-new-vm">
+<h2>Checklist to add a new VM</h2>
+<ul class="simple">
+<li>Get its Mac address (with <tt class="docutils literal"><span class="pre">virt-manager</span></tt> : <em>Virtual machine details</em> &gt; <em>Virtual network interface</em> &gt; <em>Mac Address</em>)</li>
+<li>Add it to your DHCP configuration (<tt class="docutils literal">/etc/dhcp/dhcpd.conf</tt>)</li>
+<li>Add an IP for this entry in your DNS zone (<tt class="docutils literal">/etc/bind/db.sillywalk.loc</tt>) and increment the serial.</li>
+<li>Restart DHCP service and reload DNS configuration</li>
+</ul>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>/etc/init.d/isc-dhcp-server<span class="w"> </span>restart
+sudo<span class="w"> </span>/etc/init.d/bind9<span class="w"> </span>reload
+</pre></div>
+<p>If you do that all day, you'll quickly find it relevant to write a script...</p>
+<div class="section" id="note-on-cloning">
+<h3>Note on cloning</h3>
+<p>Cloning your VM with <tt class="docutils literal"><span class="pre">virt-manager</span></tt> is a piece-of-cake.</p>
+<p>However, during cloning, KVM assigns a new Mac address to the clone.
+For debian-based virtual machines (+Ubuntu), log you in on the clone, and reinitialize network interfaces names :</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>rm<span class="w"> </span>/etc/udev/rules.d/70-persistent-net.rules
+sudo<span class="w"> </span>reboot
+</pre></div>
+</div>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion</h2>
+<p>Your virtual machines can :</p>
+<ul class="simple">
+<li>access your network (LAN, Internet) and your host (at <tt class="docutils literal">ns.sillywalk.loc</tt>)</li>
+<li>be accessed at <tt class="docutils literal">user&#64;hostname</tt> (from host or from other VMs)</li>
+<li>be moved to any host set up likewise (since VM networking is fully automatic)</li>
+<li>be cloned easily</li>
+</ul>
+<p>Read again &quot;<a class="reference internal" href="#but-why">But Why ?</a>&quot; and enjoy your new life !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/network.html">#network</a>,         <a href="https://blog.mathieu-leplatre.info/tag/kvm.html">#kvm</a>,         <a href="https://blog.mathieu-leplatre.info/tag/virtualization.html">#virtualization</a>,         <a href="https://blog.mathieu-leplatre.info/tag/howto.html">#howto</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/sys.html">Sys</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/a-virtual-local-server-room-for-you-developper.html';
+      this.page.identifier = 'a-virtual-local-server-room-for-you-developper';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

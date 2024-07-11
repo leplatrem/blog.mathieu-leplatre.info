@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Degrees of Philosophy - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Degrees of Philosophy</h1>
+<time datetime="2018-03-24T20:25:00+01:00">Sat 24 March 2018</time></header>
+<article>
+    <p>A while ago, I was enjoying the <a class="reference external" href="http://www.hackernewsletter.com/">Hackernewsletter</a>, and I got amused by how two items of that edition caught my attention :)</p>
+<p>The first one was <a class="reference external" href="https://github.com/kennethreitz/requests-html">request-html</a>, which binds the <a class="reference external" href="https://github.com/kennethreitz/requests/">requests</a> Python library to a real browser. It can be pleasant for scraping websites, end-to-end testing of Web applications or turning websites into APIs. It reminded me <a class="reference external" href="https://github.com/makinacorpus/spynner/">Spynner</a>, that <a class="reference external" href="https://github.com/kiorky">Kiorky</a> wrote like 8 years ago. And obviously <a class="reference external" href="http://casperjs.org/">our esteemed CasperJS</a> &lt;3</p>
+<p>The second one was <a class="reference external" href="https://www.sixdegreesofwikipedia.com/">6 degrees of Wikipedia</a>, which builds a graph database of links between articles. It's absolutely fascinating! You can see how many «navigation paths» exist between two notions for example. By the way did you know that there are 2306 ways to navigate <a class="reference external" href="https://www.sixdegreesofwikipedia.com/?source=Erlang%20%28programming%20language%29&amp;target=Barbra%20Streisand">from Barbara Streisand to the Erlang programming language</a> in 4 steps? I'm sure you'll be able to make use of that at your next family dinner.</p>
+<p>It reminded me <a class="reference external" href="https://www.youtube.com/watch?v=mu4lJpFQUvU">a funny Youtube video</a> where the guys play some «Wikipedia navigation» games. Like both players open a random article, the winner is the first one to reach the opponent's article by only following links from one page to another. Or both players open a random article, and the first one to reach the «Philosophy» page wins.</p>
+<p>While being bored at the airport, I dediced to go for a <a class="reference external" href="filename}../Personal/joy_micro_hacks.rst">microhack</a>!
+I will write a small script to figure out how many hops it takes in average to go from any article to the Philosphy page. And following the <strong>first link</strong> of the article like in the Youtube video...</p>
+<pre class="code bash literal-block">
+pipenv<span class="w"> </span>install<span class="w"> </span>requests-html<span class="w"> </span>--python<span class="o">=</span>python3.6
+</pre>
+<p>Let's reach the body of a Wikipedia random page first:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">requests_html</span> <span class="kn">import</span> <span class="n">HTMLSession</span>
+
+<span class="n">root</span> <span class="o">=</span> <span class="s1">&#39;https://fr.wikipedia.org&#39;</span>
+<span class="n">random_page</span> <span class="o">=</span> <span class="s1">&#39;/wiki/Sp%C3%A9cial:Page_au_hasard&#39;</span>
+
+<span class="n">session</span> <span class="o">=</span> <span class="n">HTMLSession</span><span class="p">()</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="n">random_page</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</pre></div>
+<p>Ok, it works and the API seems to be made for humans ;) Let's find out what would be the right CSS selector to pick the first link of the article:</p>
+<img alt="Searching first link with Firefox Devtools" src="/images/wikipedia-first-link.png" />
+<p>Something like <cite>#mw-content-text a</cite>?</p>
+<p>But that sometimes picks the summary section on the right side. Be more hackish and precise:</p>
+<div class="highlight"><pre><span></span><span class="p">#</span><span class="nn">mw-content-text</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="p">.</span><span class="nc">mw-parser-output</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nt">p</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nt">a</span><span class="o">[</span><span class="nt">href</span><span class="o">^=</span><span class="s1">&#39;/wiki&#39;</span><span class="o">],</span>
+<span class="p">#</span><span class="nn">mw-content-text</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="p">.</span><span class="nc">mw-parser-output</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nt">ul</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nt">li</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nt">a</span><span class="o">[</span><span class="nt">href</span><span class="o">^=</span><span class="s1">&#39;/wiki&#39;</span><span class="o">]</span>
+</pre></div>
+<p>This code will be probably broken by the time you read that article, but I don't care! The joy of microhacks, not the joy of scraping, remember.</p>
+<p>Now let's iterate until the link points to the Philosophy page:</p>
+<div class="highlight"><pre><span></span><span class="n">SELECTOR</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;#mw-content-text &gt; .mw-parser-output &gt; p &gt; a[href^=&#39;/wiki&#39;],&quot;</span>
+            <span class="s2">&quot;#mw-content-text &gt; .mw-parser-output &gt; ul &gt; li &gt; a[href^=&#39;/wiki&#39;]&quot;</span><span class="p">)</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="n">random_page</span>
+<span class="k">while</span> <span class="s2">&quot;first link is not philosophy&quot;</span><span class="p">:</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="n">url</span><span class="p">)</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">SELECTOR</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;Philosophie&#39;</span><span class="p">:</span>
+        <span class="k">break</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
+</pre></div>
+<p>Cool it works!</p>
+<pre class="literal-block">
+$ pipenv run python dop.py
+Jeu vidéo
+Jeu électronique
+Jeu
+Psychisme
+Conscience
+Philosophie
+</pre>
+<p>Now let's repeat that for a hundred random pages, cache already visited links and compute average of degrees.</p>
+<div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+    <span class="n">degrees</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">random_page</span>
+    <span class="k">while</span> <span class="s2">&quot;first link is not philosophy&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">degrees</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">:</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="n">cache</span><span class="p">[</span><span class="n">url</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="n">url</span><span class="p">)</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">SELECTOR</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">link</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">break</span>  <span class="c1"># bad selector</span>
+            <span class="n">cache</span><span class="p">[</span><span class="n">url</span><span class="p">]</span> <span class="o">=</span> <span class="n">link</span>
+
+        <span class="n">title</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">in</span> <span class="n">degrees</span><span class="p">:</span>
+            <span class="k">break</span>  <span class="c1"># loops</span>
+        <span class="n">degrees</span> <span class="o">+=</span> <span class="p">[</span><span class="n">title</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="o">==</span> <span class="s1">&#39;Philosophie&#39;</span><span class="p">:</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">degrees</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">degrees</span><span class="p">),</span> <span class="s2">&quot; - &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">degrees</span><span class="p">))</span>
+            <span class="k">break</span>
+
+        <span class="n">url</span> <span class="o">=</span> <span class="n">link</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">results</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">results</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">results</span><span class="p">))</span>
+</pre></div>
+<p>I can now tell you that if you keep clicking on the <strong>first link</strong> of a random article you'll reach the <em>Philosophy</em> page with 13.45 steps in average. We could also have run a <a class="reference external" href="https://blog.mathieu-leplatre.info/some-python-3-asyncio-snippets.html">few workers in parallel</a>.</p>
+<p>Pretty useful huh!?</p>
+<p>It was that or hang around in gear shops where I'd never buy anything anyway...</p>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/microhack.html">#microhack</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/degrees-of-philosophy.html';
+      this.page.identifier = 'degrees-of-philosophy';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

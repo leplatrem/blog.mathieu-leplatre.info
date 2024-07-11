@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Django : Do not forget Do Not Track - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Django : Do not forget Do Not Track</h1>
+<time datetime="2013-03-01T00:00:00+01:00">Fri 01 March 2013</time></header>
+<article>
+    <p>If you (fooly) Sail© on the Web® without <a class="reference external" href="http://www.ghostery.com/">Ghostery™</a>,
+this website is currently tracking you. Sad news, but there are indeed 3 widgets
+(Disqus, Piwik and Twitter on the About page) that may collect data about your presence here.</p>
+<p>The <a class="reference external" href="http://www.mozilla.org/en-US/dnt/">Do-Not-Track</a> initiative consists in
+avoiding user tracking, using an HTTP header, sent by the browser.
+It is a voluntary process, and we should honour it when we can ! <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a>.</p>
+<p>Here is a quick way of respecting privacy in your Django websites.</p>
+<p>We use a context processor to spread the word accross all templates.</p>
+<div class="highlight"><pre><span></span><span class="c1"># context_processors.py</span>
+<span class="k">def</span> <span class="nf">donottrack</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;donottrack&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">META</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;HTTP_DNT&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span>
+    <span class="p">}</span>
+</pre></div>
+<p>You can then disable spying widgets and tools, such as Google Analytics...</p>
+<div class="highlight"><pre><span></span>{% load ganalytics %}
+
+{% if not donottrack %}
+  {% ganalytics %}
+{% endif %}
+</pre></div>
+<p>...or share buttons !</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">ul</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;social-buttons cf&quot;</span><span class="p">&gt;</span>
+  {% if donottrack %}
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;http://wikipedia.org/wiki/Do_Not_Track&quot;</span><span class="p">&gt;</span>{% trans &quot;Do-Not-Track is set.&quot; %}<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+  {% else %}
+    <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;//twitter.com/share&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;socialite twitter-share&quot;</span> <span class="na">data-text</span><span class="o">=</span><span class="s">&quot;{{ TITLE }} {{ URL }}&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">span</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;vhidden&quot;</span><span class="p">&gt;</span>{% trans &quot;Twitter&quot; %}<span class="p">&lt;/</span><span class="nt">span</span><span class="p">&gt;&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+  {% endif %}
+<span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+</pre></div>
+<p>We now need a middleware to add vary headers (for cache control), since content
+depends on this header.</p>
+<div class="highlight"><pre><span></span><span class="c1"># middleware.py</span>
+<span class="kn">from</span> <span class="nn">django.utils.cache</span> <span class="kn">import</span> <span class="n">patch_vary_headers</span>
+
+
+<span class="k">class</span> <span class="nc">DoNotTrackMiddleware</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">process_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+        <span class="n">patch_vary_headers</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;DNT&#39;</span><span class="p">,))</span>
+        <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+<p>Add those to your <tt class="docutils literal">TEMPLATE_CONTEXT_PROCESSORS</tt> and <tt class="docutils literal">MIDDLEWARE_CLASSES</tt> settings and you're done.</p>
+<p><strong>Update</strong> : There are reusable apps doing just that if you prefer : <a class="reference external" href="https://github.com/mozilla/django-dnt">django-dnt</a>,
+<a class="reference external" href="https://github.com/benspaulding/django-donottrack/">django-donottrack</a>.</p>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>I wonder how I could do that with a static blog. Using headers-based rewrite condition ?</td></tr>
+</tbody>
+</table>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/mozilla.html">#mozilla</a>,         <a href="https://blog.mathieu-leplatre.info/tag/privacy.html">#privacy</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/django-do-not-forget-do-not-track.html';
+      this.page.identifier = 'django-do-not-forget-do-not-track';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

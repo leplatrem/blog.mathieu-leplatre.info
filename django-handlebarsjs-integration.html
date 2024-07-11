@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Django Handlebars.js integration - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Django Handlebars.js integration</h1>
+<time datetime="2012-03-17T00:00:00+01:00">Sat 17 March 2012</time></header>
+<article>
+    <p>In order to write <a class="reference external" href="http://handlebarsjs.com/">Handlebars.js</a> templates
+in <a class="reference external" href="http://djangoproject.com">Django</a> templates, I was gonna copy and paste for the second time
+<a class="reference external" href="https://gist.github.com/893408">Miguel Araujo's verbatim snippet</a>.
+But since one of the <em>Django</em> weakness is the lack of reusable applications, I thought
+I would package one instead :)</p>
+<p>The two existing django applications <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a> that integrate <em>Handlebars.js</em> are somehow
+bloated, they both kind of compile or render javascript templates on server-side <em>(sic)</em>.</p>
+<p>Oppositely, my <a class="reference external" href="https://github.com/makinacorpus/django-templatetag-handlebars">django-templatetag-handlebars</a> is very simple, you
+write your <em>Handlebars</em> template inside your <em>django</em> template. <em>Django</em>
+will preserve nicely <tt class="docutils literal">{}</tt> tags, but still render <tt class="docutils literal">{% %}</tt> tags.</p>
+<p>For example, with this in your template :</p>
+<div class="highlight"><pre><span></span>{% tplhandlebars &quot;tpl-infos&quot; %}
+    {{total}} {% trans &quot;result(s).&quot; %}
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{% trans &quot;Min&quot; %}: {{min}}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>{% trans &quot;Max&quot; %}: {{max}}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+{% endtplhandlebars %}
+</pre></div>
+<p>The following block with end-up in your page :</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;tpl-infos&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/x-handlebars-template&quot;</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="p">{{</span><span class="nx">total</span><span class="p">}}</span><span class="w"> </span><span class="nx">result</span><span class="p">(</span><span class="nx">s</span><span class="p">).</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Min: {{min}}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Max: {{max}}<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+<p>Render it, client-side, as usual using <em>Handlebars</em> API :</p>
+<div class="highlight"><pre><span></span><span class="kd">var</span><span class="w"> </span><span class="nx">properties</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">total</span><span class="o">:</span><span class="w"> </span><span class="mf">10</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">min</span><span class="o">:</span><span class="w"> </span><span class="mf">4</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">max</span><span class="o">:</span><span class="w"> </span><span class="mf">5</span>
+<span class="p">};</span>
+
+<span class="kd">var</span><span class="w"> </span><span class="nx">template</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Handlebars</span><span class="p">.</span><span class="nx">compile</span><span class="p">(</span><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;#tpl-infos&#39;</span><span class="p">).</span><span class="nx">html</span><span class="p">()),</span>
+<span class="w">    </span><span class="nx">rendered</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">template</span><span class="p">(</span><span class="nx">properties</span><span class="p">);</span>
+</pre></div>
+<p>Your rendered string is ready, and waiting to be inserted in your DOM :)</p>
+<div class="highlight"><pre><span></span>10 result(s).
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Min: 4<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Max: 5<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</pre></div>
+<p><a class="reference external" href="https://github.com/makinacorpus/django-templatetag-handlebars">Download and more info</a>.</p>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>Both named <em>django-handlebars</em>, <a class="reference external" href="https://github.com/yavorskiy/django-handlebars">by Sergii Iavorskyi</a> and <a class="reference external" href="https://bitbucket.org/chrisv/django-handlebars">by Chris Vigelius</a>.</td></tr>
+</tbody>
+</table>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>,         <a href="https://blog.mathieu-leplatre.info/tag/handlebars.html">#handlebars</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/django-handlebarsjs-integration.html';
+      this.page.identifier = 'django-handlebarsjs-integration';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

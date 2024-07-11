@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Handling requests timeout in Python - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Handling requests timeout in Python</h1>
+<time datetime="2019-04-18T00:00:00+02:00">Thu 18 April 2019</time></header>
+<article>
+    <p>Being optimistic is sometimes a disadvantage. When we make calls to an API, we usually test it under ideal conditions. For example, we make sure the client behaves as expected against a real HTTP server that runs locally, in our CI or devbox.</p>
+<p>Let's be honest, we rarely test the consequences of a faulty server in our client code. Shit happens in production, when the service is overloaded or the network becomes unreliable and flaky. Within an architecture based on micro-services, this can lead to a chain reaction that can come tumbling down like a house of cards.</p>
+<p>In this article, I will show you the basics to handle HTTP requests timeout in Python, using:</p>
+<ul class="simple">
+<li>the popular <a class="reference external" href="https://python-requests.org">requests</a> library</li>
+<li><a class="reference external" href="https://github.com/litl/backoff/">backoff</a>, a handful retry library</li>
+<li><a class="reference external" href="https://github.com/shopify/toxiproxy">toxiproxy</a>, a proxy to simulate network chaos</li>
+</ul>
+<div class="section" id="timeouts-in-requests">
+<h2>Timeouts in <tt class="docutils literal">requests</tt></h2>
+<p>We all use <tt class="docutils literal">requests</tt>. But «<em>what is the default timeout for your HTTP calls?</em>» may ask your ops on duty.</p>
+<p>Don't feel bad, I didn't know either. <tt class="docutils literal">requests</tt> takes it from <tt class="docutils literal">urllib3</tt> which itself take it from the standard <tt class="docutils literal">socket</tt> module, which... does not define it, and <a class="reference external" href="https://github.com/python/cpython/blob/3eca28c61363a03b81b9fb12775490d6e42d8ecf/Modules/socketmodule.c#L6553-L6557">seems to be none</a>.</p>
+<p>Best way to make sure you know: make it configurable.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests.adapters</span> <span class="kn">import</span> <span class="n">TimeoutSauce</span>
+
+
+<span class="n">REQUESTS_TIMEOUT_SECONDS</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;REQUESTS_TIMEOUT_SECONDS&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">CustomTimeout</span><span class="p">(</span><span class="n">TimeoutSauce</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;connect&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;connect&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">REQUESTS_TIMEOUT_SECONDS</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">REQUESTS_TIMEOUT_SECONDS</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="c1"># Set it globally, instead of specifying ``timeout=..`` kwarg on each call.</span>
+<span class="n">requests</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">TimeoutSauce</span> <span class="o">=</span> <span class="n">CustomTimeout</span>
+</pre></div>
+<p>Now, any request failing to connect or read data after <tt class="docutils literal">REQUESTS_TIMEOUT_SECONDS</tt> will raise <tt class="docutils literal">requests.exceptions.ConnectTimeout</tt> and <tt class="docutils literal">requests.exceptions.ReadTimeout</tt> errors. These two can be caught under <tt class="docutils literal">requests.exceptions.Timeout</tt>.</p>
+</div>
+<div class="section" id="retry-failing-requests">
+<h2>Retry failing requests</h2>
+<p>The same way we urge on hiting the refresh button but some page does not load, you may want your program to retry some failing requests before crashing completely.</p>
+<p>By default, <tt class="docutils literal">requests</tt> will retry 0 times. You can specify it using <tt class="docutils literal">max_retries</tt>:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="n">REQUESTS_MAX_RETRIES</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;REQUESTS_MAX_RETRIES&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+
+<span class="n">session</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+<span class="n">adapter</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">adapters</span><span class="o">.</span><span class="n">HTTPAdapter</span><span class="p">(</span><span class="n">max_retries</span><span class="o">=</span><span class="n">REQUESTS_MAX_RETRIES</span><span class="p">)</span>
+<span class="n">session</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s1">&#39;https://&#39;</span><span class="p">,</span> <span class="n">adapter</span><span class="p">)</span>
+</pre></div>
+<p>This approach has some limitations: it will only retry failing connections or data read. If the requests made it to the server but got 503 in return (from a reverse proxy, load balancer, or whatever) then it won't retry it.</p>
+<p>That's why I truely recommend the <a class="reference external" href="https://github.com/litl/backoff/">backoff</a> library, which makes it super easy to retry any failing block of code using decorators. It has many cool features, it has several strategies to introduce delays betweens retries, can introduce <a class="reference external" href="https://en.wikipedia.org/wiki/Jitter">jitter</a>, execute callbacks on success or errors etc.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">backoff</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+
+<span class="n">REQUESTS_MAX_RETRIES</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;REQUESTS_MAX_RETRIES&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">ServerError</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">HTTPError</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="c1"># Re-usable decorator with exponential wait.</span>
+<span class="n">retry_timeout</span> <span class="o">=</span> <span class="n">backoff</span><span class="o">.</span><span class="n">on_exception</span><span class="p">(</span>
+    <span class="n">wait_gen</span><span class="o">=</span><span class="n">backoff</span><span class="o">.</span><span class="n">expo</span><span class="p">,</span>
+    <span class="n">exception</span><span class="o">=</span><span class="p">(</span>
+        <span class="n">ServerError</span><span class="p">,</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">Timeout</span><span class="p">,</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ConnectionError</span>
+    <span class="p">),</span>
+    <span class="n">max_tries</span><span class="o">=</span><span class="n">REQUESTS_MAX_RETRIES</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="nd">@retry_timeout</span>
+<span class="k">def</span> <span class="nf">fetch_server_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SERVER_URL</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">&gt;=</span> <span class="mi">500</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ServerError</span><span class="p">(</span><span class="s2">&quot;Boom!&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">resp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="section" id="simulate-bad-network-conditions">
+<h2>Simulate Bad Network Conditions</h2>
+<p>They are several solutions out there to simulate faulty connections and timeouts. I remember that Tarek was working on <a class="reference external" href="https://github.com/community-libs/vaurien">Vaurien</a> a few years back, Netflix has <a class="reference external" href="https://github.com/Netflix/chaosmonkey#readme">Chaos Monkey</a>, and Shopify offers <a class="reference external" href="https://github.com/shopify/toxiproxy">toxiproxy</a>.</p>
+<p>I found the latter convenient enough to get started and do what I had in mind. They all sit between your server and your client, and can receive commands to start or stop manipulating the pipe between the client and the upstream server.</p>
+<p>On a recent Ubuntu, <tt class="docutils literal">toxiproxy</tt> is available out of the box:</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>toxiproxy<span class="w"> </span>toxiproxy-cli
+</pre></div>
+<p>The service runs in the background, and its configuration is done using the CLI tool. For example, we'll run a proxy to our local API that is running on <a class="reference external" href="http://localhost:8888">http://localhost:8888</a>:</p>
+<div class="highlight"><pre><span></span>toxiproxy-cli<span class="w"> </span>create<span class="w"> </span>fantastic_api_dev<span class="w"> </span>-l<span class="w"> </span>localhost:22222<span class="w"> </span>-u<span class="w"> </span>localhost:8888
+</pre></div>
+<p>Then we'll add a 5 seconds latency:</p>
+<div class="highlight"><pre><span></span>toxiproxy-cli<span class="w"> </span>toxic<span class="w"> </span>add<span class="w"> </span>fantastic_api_dev<span class="w"> </span>--toxicName<span class="w"> </span>latency_downstream<span class="w"> </span>-t<span class="w"> </span>latency<span class="w"> </span>-a<span class="w"> </span><span class="nv">latency</span><span class="o">=</span><span class="m">5000</span>
+</pre></div>
+<p>Accessing our service at <a class="reference external" href="http://localhost:22222">http://localhost:22222</a> will now take a lot longer than usual. Check out the list of available <a class="reference external" href="https://github.com/shopify/toxiproxy#toxics">toxics</a> for more fun :)</p>
+<p>To remove an existing one, just do:</p>
+<div class="highlight"><pre><span></span>toxiproxy-cli<span class="w"> </span>toxic<span class="w"> </span>delete<span class="w"> </span>fantastic_api_dev<span class="w"> </span>--toxicName<span class="w"> </span>latency_downstream
+</pre></div>
+<p>The whole idea of such a service is to be able to introduce some network hazards in your integration tests. Basically, it consists in using the <a class="reference external" href="https://github.com/douglas/toxiproxy-python">Python client library of toxiproxy</a>:</p>
+<div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>toxiproxy-python
+</pre></div>
+<p>And setup the toxics in your tests setup:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="kn">from</span> <span class="nn">toxiproxy</span> <span class="kn">import</span> <span class="n">Toxiproxy</span>
+
+<span class="n">toxiserver</span> <span class="o">=</span> <span class="n">Toxiproxy</span><span class="p">()</span>
+<span class="n">toxiserver</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;fantastic_api_dev&quot;</span><span class="p">,</span> <span class="n">upstream</span><span class="o">=</span><span class="s2">&quot;localhost:8888&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">LatencyTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">setUpClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">toxiserver</span><span class="o">.</span><span class="n">get_proxy</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;fantastic_api_dev&quot;</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">add_toxic</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;latency_downstream&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;latency&quot;</span><span class="p">,</span> <span class="n">attributes</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;latency&quot;</span><span class="p">:</span> <span class="mi">500</span><span class="p">})</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">proxy_url</span> <span class="o">=</span> <span class="s2">&quot;http://&quot;</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">listen</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">tearDownClass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">proxy</span><span class="o">.</span><span class="n">destroy_toxic</span><span class="p">(</span><span class="s2">&quot;latency_downstream&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_client_raises_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">client</span> <span class="o">=</span> <span class="n">APIClient</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">():</span>
+            <span class="n">client</span><span class="o">.</span><span class="n">fetch_user_info</span><span class="p">()</span>
+</pre></div>
+<div class="figure align-center">
+<img alt="" src="/images/quiet-monkey.gif" />
+</div>
+<p>See also:</p>
+<ul class="simple">
+<li>Peter's <a class="reference external" href="https://www.peterbe.com/plog/best-practice-with-retries-with-requests">Best practice with retries with requests</a></li>
+<li>In <a class="reference external" href="https://github.com/kennethreitz/requests3#feature-support">requests 3</a> timeouts are required</li>
+</ul>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/handling-requests-timeout-in-python.html';
+      this.page.identifier = 'handling-requests-timeout-in-python';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

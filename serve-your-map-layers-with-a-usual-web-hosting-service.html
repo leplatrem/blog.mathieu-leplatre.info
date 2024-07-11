@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Serve your map layers with a usual Web hosting service - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Serve your map layers with a usual Web hosting service</h1>
+<time datetime="2012-05-05T00:00:00+02:00">Sat 05 May 2012</time></header>
+<article>
+    <p>Someone asked me about serving map tiles from a basic Web host. I agreed
+to reply with a blog post, since it completes the stories I've been telling
+in my last <a class="reference external" href="http://www.slideshare.net/makinacorpus/solutions-alternatives-google-maps-11501753">two</a>
+<a class="reference external" href="/des-cartes-dun-autre-monde-la-suite-fr.html">talks</a>.</p>
+<p>How to serve your map layers (<em>tiles</em>) with the simplest Apache or nginx ?</p>
+<div class="section" id="get-the-mbtiles-file">
+<h2>Get the MBTiles file</h2>
+<p>We start from a tiles package (<em>MBTiles</em>). Depending on where your layers come
+from, you can either choose :</p>
+<div class="section" id="to-publish-your-tilemill-map">
+<h3>To publish your Tilemill map</h3>
+<p>Design your map in Tilemill, even <a class="reference external" href="http://mapbox.com/tilemill/docs/guides/osm-bright-ubuntu-quickstart/">your own OpenStreetMap style customization</a>,
+and export it as MBTiles !
+<a class="reference external" href="http://mapbox.com/">MapBox hosting</a> is the prefered solution, but you can still host and
+serve your exported MBTiles file yourself !</p>
+</div>
+<div class="section" id="to-mirror-a-wms-server">
+<h3>To mirror a WMS server</h3>
+<p>Again, using <a class="reference external" href="/landez-introducing-new-features-of-our-tiles-toolbox.html">landez</a>, you can build a MBTiles
+file from a WMS source (<em>orthophoto</em>...), and then serve those layers yourself as tiles (at the speed of light !).</p>
+</div>
+<div class="section" id="to-mirror-tiles-services">
+<h3>To mirror tiles services</h3>
+<p>Using <a class="reference external" href="/landez-introducing-new-features-of-our-tiles-toolbox.html">landez</a>, you
+can gather tiles from a tiles service, and package them in a <tt class="docutils literal">.mbtiles</tt>
+file locally.</p>
+<p>If you plan on mirroring public tile services, do not forget to add attributions
+and <strong>make sure it respects the terms of service</strong>. Most services restrict bulk downloads <a class="footnote-reference" href="#footnote-1" id="footnote-reference-1">[1]</a>.</p>
+</div>
+</div>
+<div class="section" id="extract-files-on-disk">
+<h2>Extract files on disk</h2>
+<p>Using <a class="reference external" href="https://github.com/mapbox/mbutil">mbutil</a>, we can extract the <tt class="docutils literal">.mbtiles</tt>
+file into a destination folder.</p>
+<p>Unfortunately, the <em>pypi</em> mirror is quite old, we'll install the last development version.</p>
+<div class="highlight"><pre><span></span>wget<span class="w"> </span>https://github.com/mapbox/mbutil/zipball/master<span class="w"> </span>-O<span class="w"> </span>mbutil.zip
+unzip<span class="w"> </span>mbutil
+<span class="nb">cd</span><span class="w"> </span>mapbox-mbutil*
+sudo<span class="w"> </span>python<span class="w"> </span>setup.py<span class="w"> </span>install
+</pre></div>
+<p>Done. Now extract. (<em>Note that the ``DEST`` folder must not exist</em>) :</p>
+<div class="highlight"><pre><span></span>mb-util<span class="w"> </span>--scheme<span class="o">=</span>osm<span class="w"> </span>FILE.mbtiles<span class="w"> </span>/path/to/DEST/
+</pre></div>
+<p>If your MBTiles has an interaction layer (<em>UTFGrid</em>), both <tt class="docutils literal">.png</tt> and <tt class="docutils literal">.json</tt>
+files will be expanded in folders.</p>
+<p>Just push the folder to your hosting, and you're done !</p>
+<div class="section" id="cache-headers">
+<h3>Cache headers</h3>
+<p>If you the master on board, tweak the cache headers :</p>
+<p>With <em>Apache</em> :</p>
+<pre class="literal-block">
+ExpiresActive On
+ExpiresDefault &quot;access plus 7 days&quot;
+Alias /DEST /path/to/DEST/;
+</pre>
+<p>With <em>nginx</em> :</p>
+<pre class="literal-block">
+server {
+    location /DEST {
+        expires 7d;
+        alias /path/to/DEST/;
+    }
+}
+</pre>
+</div>
+<div class="section" id="boost-with-subdomains">
+<h3>Boost with subdomains</h3>
+<p>Browsers limit parallel downloads on the same domain. If you can declare
+subdomains (<em>a.yourserver.org</em>, <em>b.yourserver.org</em>, ...), it will speed-up
+tiles download.</p>
+</div>
+</div>
+<div class="section" id="use-it-in-your-mapping-library">
+<h2>Use it in your mapping library</h2>
+<p>With <a class="reference external" href="http://leaflet.cloudmade.com">Leaflet</a> for example :</p>
+<div class="highlight"><pre><span></span><span class="kd">var</span><span class="w"> </span><span class="nx">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nb">Map</span><span class="p">(</span><span class="s1">&#39;map&#39;</span><span class="p">);</span>
+<span class="nx">map</span><span class="p">.</span><span class="nx">addLayer</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">TileLayer</span><span class="p">(</span><span class="s1">&#39;http://{s}.yourserver.org/DEST/{z}/{x}/{y}.png&#39;</span><span class="p">));</span>
+<span class="nx">map</span><span class="p">.</span><span class="nx">setView</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">LatLng</span><span class="p">(</span><span class="mf">43.60</span><span class="p">,</span><span class="w"> </span><span class="mf">1.45</span><span class="p">),</span><span class="w"> </span><span class="mf">14</span><span class="p">)</span>
+</pre></div>
+<p>Or <a class="reference external" href="http://modestmaps.com">Modestmaps</a> :</p>
+<div class="highlight"><pre><span></span><span class="kd">var</span><span class="w"> </span><span class="nx">provider</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">MM</span><span class="p">.</span><span class="nx">TemplatedLayer</span><span class="p">(</span><span class="s1">&#39;http://{s}.yourserver.org/DEST/{z}/{x}/{y}.png&#39;</span><span class="p">);</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">MM</span><span class="p">.</span><span class="nb">Map</span><span class="p">(</span><span class="s1">&#39;map&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">provider</span><span class="p">);</span>
+<span class="nx">map</span><span class="p">.</span><span class="nx">setCenter</span><span class="p">({</span><span class="nx">lat</span><span class="o">:</span><span class="w"> </span><span class="mf">43.60</span><span class="p">,</span><span class="w"> </span><span class="nx">lon</span><span class="o">:</span><span class="w"> </span><span class="mf">1.45</span><span class="p">}).</span><span class="nx">setZoom</span><span class="p">(</span><span class="mf">14</span><span class="p">);</span>
+</pre></div>
+<p>It will also work with interaction layers if you use <a class="reference external" href="http://mapbox.com/wax/">Wax</a> :)</p>
+<table class="docutils footnote" frame="void" id="footnote-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#footnote-reference-1">[1]</a></td><td>MapBox <a class="reference external" href="http://mapbox.com/tos/">strictly forbids</a> proxying and further distribution of their tiles.
+Bulk downloading from OpenStreetMap.org <a class="reference external" href="http://wiki.openstreetmap.org/wiki/Tile_usage_policy#Bulk_Downloading">is strongly discouraged too</a>.
+And mass downloads <a class="reference external" href="http://support.cloudmade.com/answers/offline-maps">cost money on Cloudmade</a>.</td></tr>
+</tbody>
+</table>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tilemill.html">#tilemill</a>,         <a href="https://blog.mathieu-leplatre.info/tag/landez.html">#landez</a>,         <a href="https://blog.mathieu-leplatre.info/tag/mbutil.html">#mbutil</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/sys.html">Sys</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/serve-your-map-layers-with-a-usual-web-hosting-service.html';
+      this.page.identifier = 'serve-your-map-layers-with-a-usual-web-hosting-service';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

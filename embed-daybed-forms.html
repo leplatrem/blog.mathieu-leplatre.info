@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Embed Daybed forms - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Embed Daybed forms</h1>
+<time datetime="2013-07-23T14:25:00+02:00">Tue 23 July 2013</time></header>
+<article>
+    <p>A brief article to introduce <a class="reference external" href="https://github.com/spiral-project/backbone-daybed">backbone-daybed</a>, a few
+helpers to render Web forms for Daybed models.</p>
+<img alt="Antikes Sofa Diwan furniert Laden daybed" src="http://upload.wikimedia.org/wikipedia/commons/7/70/Antikes_Sofa_Diwan_furniert_Laden_daybed.jpg" style="width: 512px;" />
+<div class="section" id="daybed-lay-down-and-rest">
+<h2>Daybed, lay down and REST</h2>
+<p><a class="reference external" href="https://github.com/spiral-project/daybed">Daybed</a> is a data validation and storage API, written in Python,
+using Pyramid and the fantastic <a class="reference external" href="https://cornice.readthedocs.org/">Cornice</a> addon.</p>
+<p>It's a minimalist Web API where you :</p>
+<ul class="simple">
+<li>define models (schemas)</li>
+<li>validate data and store data</li>
+<li>retrieve and update records</li>
+</ul>
+<p>Key features are:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a> built-in support</li>
+<li>pluggable datastore engines (default is <em>CouchDB</em>)</li>
+<li>Geometry fields (maps!)</li>
+<li><a class="reference external" href="https://github.com/SPORE/specifications">Spore</a></li>
+<li>Access Control (<em>under development</em>)</li>
+</ul>
+<p>It's a side-project we've been hacking on for a while, and we envision <a class="reference external" href="https://github.com/spiral-project/daybed/wiki/Use-cases">many
+applications</a> !
+One of them is, since the beginning, a Web forms service !</p>
+</div>
+<div class="section" id="models-are-yours">
+<h2>Models are yours</h2>
+<p>In order to create your own models, you can either use the
+crude GUI of <a class="reference external" href="http://leplatrem.github.io/daybed-map/">daybed-maps</a>
+<strong>or</strong> post a JSON manually on the <a class="reference external" href="http://daybed.lolnet.org">Daybed instance</a> we run for you.</p>
+<p>In both cases you will reference your model definition using
+the <tt class="docutils literal">ìd</tt> you chose.</p>
+<p>Below, we define <tt class="docutils literal"><span class="pre">demo-poll-conf</span></tt> using cUrl in the command-line.</p>
+<p>The model will be a stupid poll to ask how many conferences you attended
+in the past year.</p>
+<div class="highlight"><pre><span></span><span class="c1"># in a terminal...</span>
+<span class="nv">definition</span><span class="o">=</span><span class="s1">&#39;{</span>
+<span class="s1">&quot;title&quot;: &quot;Conferences Poll&quot;,</span>
+<span class="s1">&quot;description&quot;: &quot;How many conferences attended last year ?&quot;,</span>
+<span class="s1">&quot;fields&quot;: [</span>
+<span class="s1">  {</span>
+<span class="s1">    &quot;name&quot;: &quot;total&quot;,</span>
+<span class="s1">    &quot;type&quot;: &quot;int&quot;,</span>
+<span class="s1">    &quot;description&quot;: &quot;How many times ?&quot;</span>
+<span class="s1">  }, {</span>
+<span class="s1">    &quot;name&quot;: &quot;category&quot;,</span>
+<span class="s1">    &quot;type&quot;: &quot;enum&quot;,</span>
+<span class="s1">    &quot;choices&quot;: [&quot;Web&quot;, &quot;Strategy&quot;, &quot;Technology&quot;],</span>
+<span class="s1">    &quot;description&quot;: &quot;Mostly in...&quot;</span>
+<span class="s1">  }</span>
+<span class="s1">]}&#39;</span>
+
+curl<span class="w"> </span>-XPUT<span class="w"> </span>http://daybed.lolnet.org/definitions/demo-poll-conf<span class="w"> </span>-d<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">definition</span><span class="si">}</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<div class="section" id="backbone-daybed-simple-and-stupid">
+<h2>backbone-daybed, simple and stupid</h2>
+<p>Backbone.js is not the <em>next</em> big thing :) <em>#ooold, it's sooo 2011</em> !</p>
+<p>But frankly, it has remained simple, very easy to learn and yet quite efficient!
+That's why I chose it to demo the power of having storage-as-a-service with Daybed.
+Plus, <a class="reference external" href="https://github.com/powmedia/backbone-forms">backbone-forms</a> provided
+the right level of abstraction I needed !</p>
+<p>For example, here we embed a form in the page for the model we just created,
+and start polling the audience !</p>
+<p>The few lines of Javascript below render the form and reacts on submission !</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;http://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.0/mustache.min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;http://cdnjs.cloudflare.com/ajax/libs/backbone-forms/0.12.0/backbone-forms.min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://rawgithub.com/spiral-project/backbone-daybed/1e410a85/backbone-daybed.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/javascript&quot;</span><span class="p">&gt;</span>
+
+<span class="w">    </span><span class="kd">var</span><span class="w"> </span><span class="nx">form</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">Daybed</span><span class="p">.</span><span class="nx">renderForm</span><span class="p">(</span><span class="s1">&#39;#demo-form-container&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;demo-poll-conf&#39;</span><span class="p">});</span>
+
+<span class="w">    </span><span class="nx">form</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;created&#39;</span><span class="p">,</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="p">(</span><span class="nx">record</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// plot chart !</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.2/underscore-min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/mustache.js/0.7.0/mustache.min.js"></script>
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/backbone-forms/0.12.0/backbone-forms.min.js"></script>
+<script type="text/javascript" src="https://rawgithub.com/spiral-project/backbone-daybed/1e410a85/backbone-daybed.js"></script>
+<script type="text/javascript" src="https://rawgithub.com/nnnick/Chart.js/master/Chart.min.js"></script>
+<style>
+    #demo-form-container {
+        border: 1px solid #6C0AAB;
+        margin-bottom: 30px;
+        display: inline-block;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    #demo-form-container .field-error {
+        color: red;
+    }
+    #demo-form-container label {
+        font-weight: bold;
+    }
+    #demo-form-container ul {
+        margin: 0px;
+        list-style-type: none;
+    }
+    #demo-form-container a.btn {
+        float: right;
+        text-decoration: none;
+        background-color: #6C0AAB;
+        color: white;
+        border-radius: 3px;
+        font-size: 16px;
+    }
+</style>
+<div id="demo-form-container"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        Daybed.SETTINGS.SERVER = "http://daybed.lolnet.org";  // no trailing slash
+
+        var form = Daybed.renderForm('#demo-form-container',
+                                     {id: 'demo-poll-conf',
+                                      title: 'Conferences poll :',
+                                      save: 'Submit',
+                                      cancel: null});
+
+        // Fetch all the records
+        var records = new Daybed.ItemList(form.definition);
+        records.fetch();
+
+        // On submission, plot the chart
+        form.on('created', function (record) {
+            records.add(record);
+
+            // Prepare plot data
+            var data = {
+                labels : [],
+                datasets : [{
+                    fillColor : "#E0E4CC",
+                    strokeColor : "#6C0AAB",
+                    data : []
+                }]
+            };
+            var byCat = {};
+            records.each(function (r) {
+                var cat = r.attributes.category;
+                if (!byCat[cat]) byCat[cat] = [];
+                byCat[cat].push(r.attributes.total);
+            });
+            for(var cat in byCat) {
+                var sum = _.reduce(byCat[cat], function(memo, num){ return memo + num; }, 0),
+                    val = sum / byCat[cat].length;
+                data.labels.push(cat);
+                data.datasets[0].data.push(val);
+            }
+
+            // Render the bar chart
+            var ctx =  $('#demo-form-container').html('<p>Avg. per category</p>'+
+                                                      '<canvas height="200"/>')
+                                                .find('canvas')[0].getContext("2d"),
+                chart = new Chart(ctx).Bar(data);
+        });
+    });
+</script><p>The helper downloads the definition JSON, renders fields within an HTML form with
+<em>backbone-forms</em>. And in this example specifically, on submission, we fetch all the records,
+compute average values by category in order to plot some naive chart using <a class="reference external" href="http://chartjs.org">Chart.js</a>.</p>
+<img alt="" src="/images/backbone-daybed-preview.png" style="width: 700px;" />
+<p>You can also have a look at the very few lines of the backbone-daybed demo, it's dead easy !
+It features a CRUD application : Create, edit and delete records for the model of your choice ! <a class="reference external" href="http://spiral-project.github.io/backbone-daybed/#demo-poll-conf">http://spiral-project.github.io/backbone-daybed/#demo-poll-conf</a> (<em>See URL hash</em>)</p>
+</div>
+<div class="section" id="shortly">
+<h2>Shortly</h2>
+<ul class="simple">
+<li>Daybed is a generic backend where you define models, validate and post data ;</li>
+<li>There are already <a class="reference external" href="https://github.com/spiral-project/daybed/wiki/Use-cases">various working applications</a> built with this storage-as-a-service ;</li>
+<li>Most Javascript frameworks will play well natively with Daybed REST API ;</li>
+<li>backbone-daybed is just a helper to render Daybed models as forms, .... <a class="reference external" href="https://github.com/spiral-project/backbone-daybed/#readme">and a little bit more</a> !</li>
+</ul>
+<p>So far, Daybed data is not protected (like a wiki), but access control is currently being implemented :)</p>
+<p>Stay tuned !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/daybed.html">#daybed</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>,         <a href="https://blog.mathieu-leplatre.info/tag/backbone.html">#backbone</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/embed-daybed-forms.html';
+      this.page.identifier = 'embed-daybed-forms';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Leaflet Tiles in Lambert 93 projection (2154) - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Leaflet Tiles in Lambert 93 projection (2154)</h1>
+<time datetime="2012-08-05T00:00:00+02:00">Sun 05 August 2012</time></header>
+<article>
+    <div class="section" id="what-purpose">
+<h2>What purpose ?</h2>
+<p>Ideally, unless living in Lapland, we should not be bothered that much about maps projections !
+Unfortunately, in practice, there are a few contexts in which you simply
+can't avoid braving them. For example, if you must show a raster layer with texts, and don't control its production.</p>
+<p>Reprojected pictures loose sharpness ! Your map may have to support the original
+local projection.</p>
+<p>Let's see what Leaflet offers on this matter...</p>
+</div>
+<div class="section" id="configuring-the-map">
+<h2>Configuring the map</h2>
+<p>My knowledge about local projections machinery is (very) light !</p>
+<p>I could demystify a couple of concepts with, among others, Tom Mac Wright's <a class="reference external" href="http://macwright.org/2012/01/27/projections-understanding.html">educational</a>
+<a class="reference external" href="http://macwright.org/2012/05/15/how-web-maps-work.html">articles</a> and <a class="reference external" href="http://macwright.org/2012/03/12/project-it-yourself.html">tools</a>, or <a class="reference external" href="http://blog.kartena.se/local-projections-in-a-world-of-spherical-mercator/">Kartena's article on Leaflet</a>.</p>
+<p>Nevertheless, the whole thing is pretty straightforward to setup, especially when
+you look at <a class="reference external" href="http://blog.thematicmapping.org/2012/07/using-custom-projections-with-tilecache.html">Bjorn Sandvik's working example</a> !</p>
+<p>Download Leaflet, Proj4js and Proj4Leaflet, and fasten your seat belt !</p>
+<div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;leaflet.css&quot;</span> <span class="p">/&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;js/leaflet.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;js/proj4js-compressed.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;js/proj4leaflet.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+<p>Your layer characterics :</p>
+<div class="highlight"><pre><span></span><span class="c1">// Your source tile layer extent, expressed in local projection</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">bbox</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="mf">700000</span><span class="p">,</span><span class="w"> </span><span class="mf">6325197</span><span class="p">,</span><span class="w"> </span><span class="mf">1060000</span><span class="p">,</span><span class="w"> </span><span class="mf">6617738</span><span class="p">];</span>
+
+<span class="c1">// Maximum resolution in meters per pixel (largest area side / tile size).</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">maxResolution</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1406.25</span><span class="p">;</span>
+
+<span class="c1">// Scale for each level</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">scale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">zoom</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mf">1</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="nx">maxResolution</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mf">2</span><span class="p">,</span><span class="w"> </span><span class="nx">zoom</span><span class="p">));</span>
+<span class="p">};</span>
+
+<span class="c1">// Coordinate to grid transformation matrix</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">transformation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">Transformation</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="nx">bbox</span><span class="p">[</span><span class="mf">0</span><span class="p">],</span><span class="w"> </span><span class="o">-</span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">bbox</span><span class="p">[</span><span class="mf">3</span><span class="p">]);</span>
+</pre></div>
+<p>Assemble in Leaflet :</p>
+<div class="highlight"><pre><span></span><span class="c1">// Official Spatial Reference from http://www.spatialreference.org/ref/epsg/2154/</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">crs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">CRS</span><span class="p">.</span><span class="nx">proj4js</span><span class="p">(</span><span class="s1">&#39;EPSG:2154&#39;</span><span class="p">,</span>
+<span class="w">                        </span><span class="s1">&#39;+proj=lcc +lat_1=49 +lat_2=44 +lat_0=46.5 +lon_0=3 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs&#39;</span><span class="p">,</span>
+<span class="w">                        </span><span class="nx">transformation</span><span class="p">);</span>
+<span class="nx">crs</span><span class="p">.</span><span class="nx">scale</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">scale</span><span class="p">;</span><span class="w"> </span><span class="c1">// required by Leaflet 0.4</span>
+
+<span class="c1">// Location of tiles (see next paragraph)</span>
+<span class="kd">var</span><span class="w"> </span><span class="nx">ignLayer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">TileLayer</span><span class="p">(</span><span class="s1">&#39;http://localhost:8080/1.0.0/ign/{z}/{x}/{y}.png&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">continuousWorld</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="c1">// very important</span>
+<span class="p">});</span>
+
+<span class="nx">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nb">Map</span><span class="p">(</span><span class="s1">&#39;map&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">crs</span><span class="o">:</span><span class="w"> </span><span class="nx">crs</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">scale</span><span class="o">:</span><span class="w"> </span><span class="nx">scale</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">continuousWorld</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">  </span><span class="c1">// very important</span>
+<span class="w">    </span><span class="nx">layers</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">ignLayer</span><span class="p">,]</span>
+<span class="w">    </span><span class="c1">// Initial view</span>
+<span class="w">    </span><span class="nx">center</span><span class="o">:</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">LatLng</span><span class="p">(</span><span class="mf">44.65</span><span class="p">,</span><span class="w"> </span><span class="mf">6.12</span><span class="p">),</span><span class="w"> </span><span class="c1">// Universal Lat/Lng</span>
+<span class="w">    </span><span class="nx">zoom</span><span class="o">:</span><span class="w"> </span><span class="mf">5</span><span class="p">,</span>
+<span class="p">});</span>
+</pre></div>
+<img alt="" class="align-center" src="/images/leaflet-l93.png" />
+<p><a class="reference external" href="https://github.com/kartena/Proj4Leaflet/issues/8">kokoni</a> suggests to use
+an overlay layer to debug tile numbering :</p>
+<div class="highlight"><pre><span></span><span class="kd">var</span><span class="w"> </span><span class="nx">canvasTiles</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">L</span><span class="p">.</span><span class="nx">tileLayer</span><span class="p">.</span><span class="nx">canvas</span><span class="p">();</span>
+<span class="w"> </span><span class="nx">canvasTiles</span><span class="p">.</span><span class="nx">drawTile</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kd">function</span><span class="p">(</span><span class="nx">canvas</span><span class="p">,</span><span class="w"> </span><span class="nx">tilePoint</span><span class="p">,</span><span class="w"> </span><span class="nx">zoom</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">     </span><span class="kd">var</span><span class="w"> </span><span class="nx">ctx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">canvas</span><span class="p">.</span><span class="nx">getContext</span><span class="p">(</span><span class="s1">&#39;2d&#39;</span><span class="p">);</span>
+<span class="w">     </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">strokeStyle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">fillStyle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;red&quot;</span><span class="p">;</span>
+<span class="w">     </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">rect</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="mf">256</span><span class="p">,</span><span class="mf">256</span><span class="p">);</span>
+<span class="w">     </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">stroke</span><span class="p">();</span>
+<span class="w">     </span><span class="nx">ctx</span><span class="p">.</span><span class="nx">fillText</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">tilePoint</span><span class="p">.</span><span class="nx">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;, &#39;</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">tilePoint</span><span class="p">.</span><span class="nx">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">&#39;)&#39;</span><span class="p">,</span><span class="mf">5</span><span class="p">,</span><span class="mf">10</span><span class="p">);</span>
+<span class="w"> </span><span class="p">});</span>
+<span class="w"> </span><span class="nx">map</span><span class="p">.</span><span class="nx">addLayer</span><span class="p">(</span><span class="nx">canvasTiles</span><span class="p">);</span>
+</pre></div>
+<img alt="" class="align-center" src="/images/leaflet-tiles-overlay.png" />
+</div>
+<div class="section" id="serve-the-tiles-from-a-wms">
+<h2>Serve the tiles from a WMS</h2>
+<p>Adapt with the <tt class="docutils literal">bbox</tt> and <tt class="docutils literal">maxesolution</tt>, as in the map, and save this configuration to <em>tilecache.cfg</em>.
+It also assumes to match the <tt class="docutils literal">scale</tt> we chose above (divided by 2 at each level) :</p>
+<pre class="literal-block">
+[ign]
+type=WMSLayer
+layers=scan100,scan25
+url=http://server.carto.fr/wms?
+extension=jpg
+tms_type=google
+srs=EPSG:2154
+bbox=700000,6325197,1060000,6617738
+maxResolution=1142.7383
+
+[cache]
+type=GoogleDisk
+base=/tmp/
+</pre>
+<p>In order to run this configuration, just install :</p>
+<pre class="literal-block">
+virtualenv .
+source bin/activate
+pip install TileCache
+pip install Paste
+</pre>
+<p>And either run it locally with <tt class="docutils literal">tilecache_http_server.py</tt> or tile the pyramid once
+with <tt class="docutils literal">tilecache_seed.py ign 0 10</tt>.</p>
+<p>Finally, adjust the tile url in your map config !</p>
+</div>
+<div class="section" id="first-impressions">
+<h2>First impressions...</h2>
+<p>It works !</p>
+<p>A couple of things seem implicit, and Leaflet feels a bit fragile with this. Changing
+a value somewhere might break an hidden assumption somewhere else.</p>
+<p>Also, the documentation can be misleading : it says to set <tt class="docutils literal">continuousWorld</tt> to <em>true</em> for
+things that don't represent the world :)</p>
+<p>We'll try to push Leaflet limits in the next days at <a class="reference external" href="http://makina-corpus.com">Makina Corpus</a>, especially 0.4 branch,
+we'll keep posting if we face anything worth sharing :)</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/leaflet.html">#leaflet</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/javascript.html">#javascript</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/leaflet-tiles-in-lambert-93-projection-2154.html';
+      this.page.identifier = 'leaflet-tiles-in-lambert-93-projection-2154';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

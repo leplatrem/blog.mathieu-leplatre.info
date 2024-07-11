@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Des cartes collaboratives avec Livetitude - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Des cartes collaboratives avec Livetitude</h1>
+<time datetime="2011-11-23T14:00:00+01:00">Wed 23 November 2011</time></header>
+<article>
+    <p><em>Article original publié chez</em> <a class="reference external" href="http://makina-corpus.org">Makina Corpus</a></p>
+<p>Cela fait plusieurs semaines que je voulais présenter ma petite application
+de partage de cartes, dont je me sers déjà comme alternative aux marqueurs de Google Maps.</p>
+<div class="section" id="en-bref">
+<h2>En bref</h2>
+<p><a class="reference external" href="https://github.com/makinacorpus/livetitude">Livetitude</a> est un outil Web pour créer des cartes de manière collaborative
+<strong>en temps réel</strong> (à la manière d'un <a class="reference external" href="http://fr.wikipedia.org/wiki/EtherPad">pad</a>).</p>
+<p>Fonctionnant sur des terminaux mobiles, Livetitude permet également de partager la position des collaborateurs de la carte,
+d'exporter les données au format GeoJSON ou de publier la carte sur une page Web.</p>
+</div>
+<div class="section" id="sous-le-capot">
+<h2>Sous le capot</h2>
+<p>J'ai pris du plaisir à hacker cette application, elle tire profit
+d'outils très simples mais très efficaces :</p>
+<ul class="simple">
+<li><a class="reference external" href="http://http://leaflet.cloudmade.com">Leaflet</a> pour afficher les cartes ;</li>
+<li><a class="reference external" href="http://pusher.com">Pusher</a> (Websockets) pour la collaboration en temps réel ;</li>
+<li><a class="reference external" href="http://couchdb.apache.org/">CouchDB</a> pour stocker les données ;</li>
+<li><a class="reference external" href="http://flask.pocoo.org">Flask</a> pour servir les pages ;</li>
+<li><a class="reference external" href="http://www.heroku.com">Heroku</a> pour héberger l'application.</li>
+</ul>
+<p>Bien entendu, le code source est libre et disponible sur <a class="reference external" href="https://github.com/makinacorpus/livetitude">le GitHub de Makina Corpus</a>.</p>
+</div>
+<div class="section" id="utilisation">
+<h2>Utilisation</h2>
+<p>Une instance est <a class="reference external" href="http://vivid-warrior-6693.herokuapp.com/">déployée en ligne</a>, dans le cloud d'Heroku,
+dont vous pouvez vous servir, <em>pour une utilisation en bon père de famille</em> :)</p>
+<p>Les marqueurs peuvent contenir du texte ou de l'HTML, et aucune donnée de localisation des visiteurs n'est stockée.</p>
+<img alt="" src="/images/livetitude-poc.png" />
+<div class="section" id="comment-publier-vos-donnees-existantes">
+<h3>Comment publier vos données existantes ?</h3>
+<p>Si vous souhaitez publier et visualiser vos marqueurs sur une carte de Livetitude,
+il suffit de poster (<tt class="docutils literal">POST</tt>) les coordonnées de vos points sur l'URL <tt class="docutils literal"><span class="pre">http://server/&lt;CARTE&gt;/add</span></tt>.</p>
+<p>Par exemple, avec une petite fonction python :</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">httplib</span><span class="o">,</span> <span class="nn">urllib</span>
+
+<span class="n">SERVER</span> <span class="o">=</span> <span class="s2">&quot;server&quot;</span>  <span class="c1"># e.g. vivid-warrior-6693.herokuapp.com</span>
+
+<span class="k">def</span> <span class="nf">publish</span><span class="p">(</span><span class="n">mapname</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;/</span><span class="si">%s</span><span class="s2">/add&quot;</span> <span class="o">%</span> <span class="n">mapname</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="p">{</span>
+       <span class="s1">&#39;coords&#39;</span><span class="p">:</span> <span class="n">coords</span><span class="p">,</span>
+       <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
+       <span class="s1">&#39;classid&#39;</span><span class="p">:</span> <span class="mi">5</span>  <span class="c1"># (=color)</span>
+    <span class="p">}</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">urlencode</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-www-form-urlencoded&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;Accept&quot;</span><span class="p">:</span> <span class="s2">&quot;text/plain&quot;</span><span class="p">}</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">httplib</span><span class="o">.</span><span class="n">HTTPConnection</span><span class="p">(</span><span class="n">SERVER</span><span class="p">)</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">getresponse</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="n">publish</span><span class="p">(</span><span class="s2">&quot;PasLoin&quot;</span><span class="p">,</span> <span class="s2">&quot;10.1,54.9&quot;</span><span class="p">,</span> <span class="s2">&quot;Super resto!&quot;</span><span class="p">)</span>
+<span class="n">publish</span><span class="p">(</span><span class="s2">&quot;PasLoin&quot;</span><span class="p">,</span> <span class="s2">&quot;19.4,65.1&quot;</span><span class="p">,</span> <span class="s2">&quot;Bon mojito&quot;</span><span class="p">)</span>
+</pre></div>
+<p>Les points sont alors visibles en ligne sur <tt class="docutils literal"><span class="pre">http://server/PasLoin</span></tt> ou
+disponible en GeoJSON sur <tt class="docutils literal"><span class="pre">http://server/PasLoin/points</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="contribuer">
+<h2>Contribuer</h2>
+<p>Livetitude est une application très simple, à l'état de preuve de concept. Mais
+le code source est très réduit et donc très rapide à prendre en main !</p>
+<p>Toutes vos <a class="reference external" href="https://github.com/makinacorpus/livetitude/issues">suggestions ou contributions</a> sont les bienvenues !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/maps.html">#maps</a>,         <a href="https://blog.mathieu-leplatre.info/tag/gis.html">#gis</a>,         <a href="https://blog.mathieu-leplatre.info/tag/websockets.html">#websockets</a>,         <a href="https://blog.mathieu-leplatre.info/tag/leaflet.html">#leaflet</a>,         <a href="https://blog.mathieu-leplatre.info/tag/heroku.html">#heroku</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/des-cartes-collaboratives-avec-livetitude-fr.html';
+      this.page.identifier = 'des-cartes-collaboratives-avec-livetitude';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Python lazy hasattr() - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Python lazy hasattr()</h1>
+<time datetime="2010-09-30T10:20:00+02:00">Thu 30 September 2010</time></header>
+<article>
+    <p>Python <cite>hasattr()</cite> evaluates the specified attribute, which may not be desired !</p>
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Attr</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obs</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;evaluated&quot;</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">class</span> <span class="nc">ClassA</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">Attr</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;evaluated&quot;</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">ClassA</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">c</span><span class="o">.</span><span class="n">a</span>
+<span class="n">evaluated</span>
+<span class="mi">0</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">c</span><span class="o">.</span><span class="n">b</span>
+<span class="n">evaluated</span>
+<span class="mi">0</span>
+</pre></div>
+<p>Now note that <cite>hasattr()</cite> evaluates the lazy attribute !</p>
+<div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">evaluated</span>
+<span class="kc">True</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
+<span class="n">evaluated</span>
+<span class="kc">True</span>
+</pre></div>
+<p>Let us fix that !</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">lazyhasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">,</span>
+                                   <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">))</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">ClassA</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">lazyhasattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="kc">True</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">lazyhasattr</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span>
+<span class="kc">True</span>
+</pre></div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tips.html">#tips</a>,         <a href="https://blog.mathieu-leplatre.info/tag/python.html">#python</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/python-lazy-hasattr.html';
+      this.page.identifier = 'python-lazy-hasattr';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

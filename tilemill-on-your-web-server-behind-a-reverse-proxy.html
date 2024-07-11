@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>TileMill on your Web server behind a reverse proxy - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>TileMill on your Web server behind a reverse proxy</h1>
+<time datetime="2012-01-31T11:12:00+01:00">Tue 31 January 2012</time></header>
+<article>
+    <p>In the last version (0.9), <a class="reference external" href="http://mapbox.com/tilemill/">TileMill</a> has an additional dedicated process to
+serve the tiles. We had to change some bits of our server configuration.</p>
+<p>Instead of documenting the new configuration in our internal Wiki,
+I prefered to share here a few technical lines (quite rough though).</p>
+<p>We run TileMill inside a <a class="reference external" href="/a-virtual-local-server-room-for-you-developper.html">virtual machine</a> on a server with reverse proxy rules.</p>
+<div class="section" id="reverse-proxy-configuration">
+<h2>Reverse Proxy configuration</h2>
+<p>Assuming your reach your TileMill virtual machine at <tt class="docutils literal">tilemill.sillywalk.loc</tt>,
+with its two processes running (ports <tt class="docutils literal">20008</tt> for tiles, <tt class="docutils literal">20009</tt> for the application),
+your Apache reverse proxy configuration will be :</p>
+<div class="highlight"><pre><span></span><span class="nt">&lt;VirtualHost</span><span class="w"> </span><span class="err">*:80</span><span class="nt">&gt;</span>
+<span class="w">    </span>ServerName<span class="w"> </span>tilemill.yourdomain.com
+
+<span class="w">    </span>ProxyPreserveHost<span class="w"> </span>On
+<span class="w">    </span>RewriteEngine<span class="w"> </span>on
+
+<span class="w">    </span>#<span class="w"> </span>Serve<span class="w"> </span>the<span class="w"> </span>tiles<span class="w"> </span>as<span class="w"> </span>/tiles/
+<span class="w">    </span>RewriteCond<span class="w"> </span>%{REQUEST_URI}<span class="w"> </span>^(/tiles.*)$
+<span class="w">    </span>RewriteRule<span class="w"> </span>^/tiles(.*)<span class="w"> </span>http://tilemill.sillywalk.loc:20008$1<span class="w"> </span>[L,P]
+<span class="w">    </span>ProxyPassReverse<span class="w"> </span>/tiles<span class="w"> </span>http://tilemill.sillywalk.loc:20008/
+
+<span class="w">    </span>#<span class="w"> </span>Serve<span class="w"> </span>the<span class="w"> </span>application<span class="w"> </span>on<span class="w"> </span>/
+<span class="w">    </span>ProxyPass<span class="w"> </span>/<span class="w"> </span>http://tilemill.sillywalk.loc:20009/
+<span class="w">    </span>ProxyPassReverse<span class="w"> </span>/<span class="w"> </span>http://tilemill.sillywalk.loc:20009
+<span class="nt">&lt;/VirtualHost&gt;</span>
+</pre></div>
+</div>
+<div class="section" id="tilemill-configuration">
+<h2>TileMill configuration</h2>
+<p>Now that tiles and application ports are reachable respectively on <tt class="docutils literal"><span class="pre">http://tilemill.yourdomain.com/tiles</span></tt>
+and <tt class="docutils literal"><span class="pre">http://tilemill.yourdomain.com/</span></tt>, just tell TileMill to serve its pages accordingly in its configuration, <tt class="docutils literal">/etc/tilemill/tilemill.config</tt> :</p>
+<div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;files&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/usr/share/mapbox&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;server&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;coreUrl&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;tilemill.yourdomain.com:80&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;tileUrl&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;tilemill.yourdomain.com:80/tiles&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;port&quot;</span><span class="o">:</span><span class="w"> </span><span class="mf">20009</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;listenHost&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;0.0.0.0&quot;</span>
+<span class="p">}</span>
+</pre></div>
+<p>Restart it...</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>service<span class="w"> </span>tilemill<span class="w"> </span>restart
+</pre></div>
+<p>Done !</p>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/tilemill.html">#tilemill</a>,         <a href="https://blog.mathieu-leplatre.info/tag/apache.html">#apache</a>,         <a href="https://blog.mathieu-leplatre.info/tag/howto.html">#howto</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/sys.html">Sys</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/tilemill-on-your-web-server-behind-a-reverse-proxy.html';
+      this.page.identifier = 'tilemill-on-your-web-server-behind-a-reverse-proxy';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>

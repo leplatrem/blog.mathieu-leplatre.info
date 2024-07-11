@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Generate office documents with Django - Mathieu Leplatre</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://blog.mathieu-leplatre.info/theme/css/main.css" type="text/css" />
+        <link href="https://blog.mathieu-leplatre.info/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Mathieu Leplatre ATOM Feed" />
+</head>
+<body>
+        <section id="links">
+            <li>
+                <a class="" href="https://blog.mathieu-leplatre.info/" id="site-title">Blog</a>
+            </li>
+                <li><a class="" href="https://blog.mathieu-leplatre.info/pages/about.html">About</a></li>
+        </section>
+<header>
+    <h1>Generate office documents with Django</h1>
+<time datetime="2013-09-13T00:00:00+02:00">Fri 13 September 2013</time></header>
+<article>
+    <p>In our recent Django projects, we had to create documents (Libre/OpenOffice, Microsoft Office, PDF...),
+and therefore created two components :</p>
+<ul class="simple">
+<li><a class="reference external" href="https://github.com/makinacorpus/django-appypod">django-appypod</a>, providing document templates views, built on top of <a class="reference external" href="http://appyframework.org/pod.html">Appy.pod</a> ;</li>
+<li><a class="reference external" href="https://github.com/makinacorpus/convertit">convertit</a>, a generic format conversion Web API.</li>
+</ul>
+<div class="section" id="django-appypod-1">
+<h2>django-appypod</h2>
+<p><em>Appy</em> is a set of python tools (e.g. framework) by <a class="reference external" href="https://launchpad.net/~gaetan-delannay">Gaetan Delannay</a>, which provides, among other stuff,
+a templating engine for OpenDocument files.</p>
+<p>One the great advantage is that you edit your templates in LibreOffice, <a class="reference external" href="http://en.wikipedia.org/wiki/WYSIWYG">WYSIWYG</a> !</p>
+<img alt="" class="align-center" src="/images/appypod-template.png" style="width: 70%;" />
+<p><em>django-appypod</em> is a template view that renders a OpenDocument template for a context.
+The exact same way you already do for HTML.</p>
+<p>Using class-based generic views :</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.view.generic.detail</span> <span class="kn">import</span> <span class="n">TemplateView</span>
+
+<span class="kn">from</span> <span class="nn">djappypod.response</span> <span class="kn">import</span> <span class="n">OdtTemplateResponse</span>
+
+
+<span class="k">class</span> <span class="nc">YourDocument</span><span class="p">(</span><span class="n">TemplateView</span><span class="p">):</span>
+    <span class="n">response_class</span> <span class="o">=</span> <span class="n">OdtTemplateResponse</span>
+    <span class="n">template_name</span> <span class="o">=</span> <span class="s2">&quot;your/template.odt&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_context_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Simple as hello ;)&#39;</span>
+        <span class="k">return</span> <span class="n">kwargs</span>
+</pre></div>
+<p>Using classic functions-based views :</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">your_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Simple as hello ;)&#39;</span>
+    <span class="p">}</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">OdtTemplateResponse</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s2">&quot;your/template.odt&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+    <span class="n">response</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+<img alt="" class="align-center" src="/images/appypod-rendered.png" style="width: 70%;" />
+</div>
+<div class="section" id="convertit-1">
+<h2>ConvertIt</h2>
+<p>We often need to serve those document as PDF files, and some users can't
+be satisfied with <em>OpenDocument</em> files.</p>
+<p><em>Appy</em> can rely on OpenOffice to convert documents to PDF and MS-Word, but we didn't like
+the idea of having to install the bunch of binaries along every Django project.
+Therefore we created <em>ConvertIt</em>, a Web API that will just be in charge of
+format conversion. It can live on a dedicated server, and thus isolate binaries, and
+potentially convert from and to any exotic formats, relying on any exotic system binaries.</p>
+<p>So far we implemented most office documents conversions (.pdf, .doc, .xls), as well as SVG to PDF and PNG.</p>
+<div class="section" id="docker-image">
+<h3>Docker image</h3>
+<p>If you use Docker, you can get a ConvertIt instance running in one command :</p>
+<pre class="literal-block">
+sudo docker run -p :6543 makinacorpus/convertit
+</pre>
+</div>
+<div class="section" id="manual-installation">
+<h3>Manual installation</h3>
+<p>It is a Pyramid project, pretty straightforward :</p>
+<div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>convertit
+</pre></div>
+<p>Plus some conversion binaries (each one is optional):</p>
+<div class="highlight"><pre><span></span>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>libreoffice<span class="w"> </span>unoconv<span class="w"> </span>inkscape
+</pre></div>
+<p>To run a development instance :</p>
+<div class="highlight"><pre><span></span>pserve<span class="w"> </span>development.ini<span class="w"> </span>--reload
+</pre></div>
+<p>To run a production instance :</p>
+<div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>gunicorn
+gunicorn<span class="w"> </span>--paste<span class="w"> </span>production.ini
+</pre></div>
+</div>
+<div class="section" id="usage">
+<h3>Usage</h3>
+<p>Using GET requests :</p>
+<pre class="literal-block">
+curl http://convertit/?url=http://server/document.odt&amp;to=application/pdf
+HTTP/1.1 302 Found
+Content-Disposition: attachement; filename=document.pdf
+...
+</pre>
+<p>Uploading file with POST :</p>
+<pre class="literal-block">
+curl -F &quot;file=&#64;tiger.svg&quot; http://convertit/?to=image/png
+HTTP/1.1 302 Found
+Content-Disposition: attachement; filename=tiger.png
+...
+</pre>
+</div>
+<div class="section" id="integration-with-django">
+<h3>Integration with Django</h3>
+<p>If your documents do not require login, a simple and stupid template tag can do it :</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django</span> <span class="kn">import</span> <span class="n">template</span>
+<span class="kn">from</span> <span class="nn">django.core.urlresolvers</span> <span class="kn">import</span> <span class="n">reverse</span><span class="p">,</span> <span class="n">NoReverseMatch</span>
+
+
+<span class="n">register</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">Library</span><span class="p">()</span>
+
+
+<span class="nd">@register</span><span class="o">.</span><span class="n">simple_tag</span>
+<span class="k">def</span> <span class="nf">convert_url</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">sourceurl</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="nb">format</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="s1">&#39;application/pdf&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">sourceurl</span> <span class="o">=</span> <span class="n">reverse</span><span class="p">(</span><span class="n">sourceurl</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">NoReverseMatch</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="n">fullurl</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">build_absolute_uri</span><span class="p">(</span><span class="n">sourceurl</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">?url=</span><span class="si">%s</span><span class="s2">&amp;to=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CONVERSION_SERVER</span><span class="p">,</span>
+                                <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="n">fullurl</span><span class="p">),</span>
+                                <span class="n">urllib</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">format</span><span class="p">))</span>
+</pre></div>
+<p>Which you then use in templates:</p>
+<pre class="literal-block">
+&lt;a href=&quot;{% convert_url &quot;app:document&quot; object.pk %}&quot;&gt;Download PDF version&lt;/a&gt;
+</pre>
+<p>However, if your view requires authentication, there are several strategies:</p>
+<ul class="simple">
+<li>Auto-login requests coming from ConvertIt server ;</li>
+<li>Add a login required proxy view that download the file and perform a POST query to ConvertIt ;</li>
+<li>Setup SSO or any other token mechanism ;</li>
+<li>Contribute to ConvertIt to add HTTP authentication (<tt class="docutils literal"><span class="pre">url=http://user:pass&#64;host</span></tt>) ;</li>
+</ul>
+<p><a class="reference external" href="https://gist.github.com/leplatrem/6552003">I made a snippet</a> for the first option</p>
+</div>
+</div>
+<div class="section" id="in-short">
+<h2>In short...</h2>
+<ul class="simple">
+<li><em>django-appypod</em> is great because templates are WYSIWYG ;</li>
+<li><em>ConvertIt</em> is great because it's generic and pluggable ;</li>
+<li>There are great together because their deliver both office and PDF formats ;</li>
+</ul>
+<p>There are alternatives though if PDF is enough for you :</p>
+<ul class="simple">
+<li><a class="reference external" href="http://weasyprint.org">WeasyPrint</a></li>
+<li><a class="reference external" href="http://www.xhtml2pdf.com/">xhtml2pdf</a></li>
+</ul>
+</div>
+
+	<p>
+        <a href="https://blog.mathieu-leplatre.info/tag/django.html">#django</a>,         <a href="https://blog.mathieu-leplatre.info/tag/openoffice.html">#openoffice</a>,         <a href="https://blog.mathieu-leplatre.info/tag/convertit.html">#convertit</a>,         <a href="https://blog.mathieu-leplatre.info/tag/appypod.html">#appypod</a>	  - Posted in the <a href="https://blog.mathieu-leplatre.info/category/dev.html">Dev</a> category
+	</p>
+  <hr>
+  <div id="disqus_thread"></div>
+  <script>
+    var disqus_config = function() {
+      this.page.url = 'https://blog.mathieu-leplatre.info/generate-office-documents-with-django.html';
+      this.page.identifier = 'generate-office-documents-with-django';
+    };
+    (function() {
+      var d = document;
+      var s = d.createElement('script');
+      s.src = '//mathieuleplatre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+  <noscript class="text-muted">
+    Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a>
+  </noscript>
+</article>
+
+        <footer>
+            <p>
+                © Copyright 2020 by Mathieu Leplatre. <a href="http://mathieu.agopian.info/mnmlist/theme.html">mnmlist Theme</a>
+            </p>
+            <p>Content licensed under the Creative Commons attribution-noncommercial-sharealike License. </p>
+        </footer>
+</body>
+</html>
